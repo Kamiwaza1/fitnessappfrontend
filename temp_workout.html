@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DARK LIFT | Active Workout Logger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df259",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        /* Custom scrollbar for library */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(13, 242, 89, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(13, 242, 89, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex overflow-hidden">
+<!-- Navigation Rail -->
+<aside class="w-20 flex flex-col items-center py-8 border-r border-primary/10 bg-background-light dark:bg-background-dark/50">
+<div class="mb-12">
+<div class="w-12 h-12 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
+<span class="material-icons text-background-dark font-bold">fitness_center</span>
+</div>
+</div>
+<nav class="flex flex-col gap-8">
+<button class="p-3 text-primary bg-primary/10 rounded-xl">
+<span class="material-icons">timer</span>
+</button>
+<button class="p-3 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">bar_chart</span>
+</button>
+<button class="p-3 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">restaurant</span>
+</button>
+<button class="p-3 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">calendar_today</span>
+</button>
+</nav>
+<div class="mt-auto">
+<button class="p-3 text-slate-400 hover:text-red-400 transition-colors">
+<span class="material-icons">settings</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- Top Header & Timer Bar -->
+<header class="flex items-center justify-between px-8 py-6 border-b border-primary/10 bg-background-dark/30 backdrop-blur-md">
+<div>
+<h1 class="text-2xl font-bold tracking-tight">Push Day <span class="text-primary ml-2 text-sm font-medium px-2 py-0.5 bg-primary/10 rounded">ACTIVE</span></h1>
+<p class="text-slate-400 text-sm mt-1">Monday Morning • Session Time: 00:42:15</p>
+</div>
+<!-- Rest Timer Widget -->
+<div class="flex items-center gap-6 bg-slate-900/50 border border-primary/20 p-2 pl-6 rounded-full">
+<div class="flex flex-col items-end">
+<span class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Rest Timer</span>
+<span class="text-2xl font-bold text-primary leading-tight">00:45</span>
+</div>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-700" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-primary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="62.8" stroke-width="3"></circle>
+</svg>
+<span class="material-icons absolute text-xs text-primary">pause</span>
+</div>
+<button class="h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary rounded-full flex items-center justify-center transition-all">
+<span class="material-icons">replay</span>
+</button>
+</div>
+</header>
+<!-- Workout Logging Scrollable Area -->
+<section class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="max-w-4xl mx-auto space-y-8">
+<!-- Exercise 1: Bench Press -->
+<div class="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden">
+<div class="p-5 flex justify-between items-center border-b border-slate-800">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center">
+<span class="material-icons text-primary">layers</span>
+</div>
+<div>
+<h3 class="text-lg font-semibold">Bench Press (Barbell)</h3>
+<p class="text-xs text-slate-500">Last session: 100kg x 8</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">history</span></button>
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">swap_horiz</span></button>
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">more_vert</span></button>
+</div>
+</div>
+<div class="p-5">
+<div class="grid grid-cols-12 gap-4 mb-2 text-xs font-bold text-slate-500 uppercase tracking-widest px-2">
+<div class="col-span-1 text-center">Set</div>
+<div class="col-span-3">Previous</div>
+<div class="col-span-3">Weight (kg)</div>
+<div class="col-span-3">Reps</div>
+<div class="col-span-2 text-center">Status</div>
+</div>
+<!-- Completed Set -->
+<div class="grid grid-cols-12 gap-4 items-center py-2 px-2 bg-primary/5 rounded-lg border border-primary/10 mb-2">
+<div class="col-span-1 text-center font-bold text-primary">1</div>
+<div class="col-span-3 text-slate-500 text-sm">100kg x 8</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-900 border-slate-700 rounded-lg text-primary text-center font-bold focus:ring-primary focus:border-primary" type="number" value="100"/>
+</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-900 border-slate-700 rounded-lg text-primary text-center font-bold focus:ring-primary focus:border-primary" type="number" value="10"/>
+</div>
+<div class="col-span-2 flex justify-center">
+<button class="w-8 h-8 rounded-full bg-primary text-background-dark flex items-center justify-center">
+<span class="material-icons text-base font-bold">check</span>
+</button>
+</div>
+</div>
+<!-- Active Set -->
+<div class="grid grid-cols-12 gap-4 items-center py-2 px-2 mb-2">
+<div class="col-span-1 text-center font-bold text-slate-400">2</div>
+<div class="col-span-3 text-slate-500 text-sm">100kg x 8</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-800 border-slate-700 rounded-lg text-center font-bold focus:ring-primary focus:border-primary" placeholder="100" type="number"/>
+</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-800 border-slate-700 rounded-lg text-center font-bold focus:ring-primary focus:border-primary" placeholder="8" type="number"/>
+</div>
+<div class="col-span-2 flex justify-center">
+<button class="w-8 h-8 rounded-full border-2 border-slate-700 hover:border-primary transition-colors flex items-center justify-center"></button>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-4">
+<button class="text-sm flex items-center gap-2 text-primary hover:text-primary/80 font-medium">
+<span class="material-icons text-base">add_circle</span> Add Set
+                            </button>
+<div class="h-4 w-[1px] bg-slate-800"></div>
+<div class="flex-1 flex items-center gap-2 bg-slate-800/50 rounded-lg px-3 py-1 text-slate-400">
+<span class="material-icons text-sm">notes</span>
+<input class="bg-transparent border-none text-xs w-full focus:ring-0 placeholder:text-slate-600" placeholder="Add cue or note..." type="text"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Exercise 2: Overhead Press -->
+<div class="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden opacity-90">
+<div class="p-5 flex justify-between items-center border-b border-slate-800">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+<span class="material-icons text-slate-400">fitness_center</span>
+</div>
+<div>
+<h3 class="text-lg font-semibold">Overhead Press (Dumbbell)</h3>
+<p class="text-xs text-slate-500">Last session: 24kg x 10</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">history</span></button>
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">swap_horiz</span></button>
+<button class="p-2 hover:bg-slate-800 rounded text-slate-400 transition-colors"><span class="material-icons text-sm">more_vert</span></button>
+</div>
+</div>
+<div class="p-5">
+<div class="grid grid-cols-12 gap-4 mb-2 text-xs font-bold text-slate-500 uppercase tracking-widest px-2">
+<div class="col-span-1 text-center">Set</div>
+<div class="col-span-3">Previous</div>
+<div class="col-span-3">Weight (kg)</div>
+<div class="col-span-3">Reps</div>
+<div class="col-span-2 text-center">Status</div>
+</div>
+<!-- Future Set -->
+<div class="grid grid-cols-12 gap-4 items-center py-2 px-2 mb-2">
+<div class="col-span-1 text-center font-bold text-slate-400">1</div>
+<div class="col-span-3 text-slate-500 text-sm">24kg x 10</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-800/50 border-slate-700 rounded-lg text-center font-bold focus:ring-primary focus:border-primary opacity-50" placeholder="24" type="number"/>
+</div>
+<div class="col-span-3">
+<input class="w-full bg-slate-800/50 border-slate-700 rounded-lg text-center font-bold focus:ring-primary focus:border-primary opacity-50" placeholder="10" type="number"/>
+</div>
+<div class="col-span-2 flex justify-center">
+<button class="w-8 h-8 rounded-full border-2 border-slate-800 flex items-center justify-center opacity-50"></button>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-4">
+<button class="text-sm flex items-center gap-2 text-slate-400 hover:text-primary font-medium transition-colors">
+<span class="material-icons text-base">add_circle</span> Add Set
+                            </button>
+<div class="h-4 w-[1px] bg-slate-800"></div>
+<button class="text-sm flex items-center gap-2 text-slate-400 hover:text-primary font-medium transition-colors">
+<span class="material-icons text-sm">notes</span> Add Note
+                            </button>
+</div>
+</div>
+</div>
+<!-- Add More Button -->
+<button class="w-full py-6 border-2 border-dashed border-slate-800 rounded-xl text-slate-500 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col items-center gap-2">
+<span class="material-icons text-3xl">add_circle_outline</span>
+<span class="font-medium tracking-wide">ADD EXERCISE FROM LIBRARY</span>
+</button>
+<div class="h-32"></div> <!-- Spacer for footer -->
+</div>
+</section>
+<!-- Fixed Bottom Action Bar -->
+<footer class="absolute bottom-0 left-20 right-[320px] bg-background-dark/80 backdrop-blur-xl border-t border-primary/10 p-6 flex justify-between items-center z-20">
+<div class="flex gap-4">
+<button class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-all">Cancel Workout</button>
+<button class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-all">Save as Template</button>
+</div>
+<button class="px-10 py-3 bg-primary text-background-dark font-bold rounded-xl shadow-lg shadow-primary/30 hover:scale-[1.02] transition-transform flex items-center gap-2">
+                FINISH WORKOUT <span class="material-icons">flag</span>
+</button>
+</footer>
+</main>
+<!-- Right Sidebar: Exercise Library -->
+<aside class="w-80 bg-slate-900 border-l border-primary/10 flex flex-col h-screen">
+<div class="p-6 border-b border-slate-800">
+<h2 class="text-lg font-bold mb-4">Exercise Library</h2>
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+<input class="w-full bg-slate-800 border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-primary focus:border-primary" placeholder="Search exercises..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+<div class="mb-6">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Chest</p>
+<div class="space-y-1">
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Incline DB Press</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Chest Fly (Cable)</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Pushups</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Shoulders</p>
+<div class="space-y-1">
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Lateral Raise (DB)</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Front Raise (Plate)</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium text-primary">Military Press (Barbell)</span>
+<span class="material-icons text-primary">add</span>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Triceps</p>
+<div class="space-y-1">
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Triceps Pushdown</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 group cursor-pointer transition-colors border border-transparent hover:border-primary/20">
+<span class="text-sm font-medium">Skull Crushers</span>
+<span class="material-icons text-slate-600 group-hover:text-primary transition-colors">add</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-background-dark border-t border-slate-800">
+<div class="bg-primary/5 rounded-xl p-4 border border-primary/20">
+<div class="flex items-center gap-3 mb-2">
+<img alt="Quick Form Tip" class="w-10 h-10 rounded-lg object-cover" data-alt="Muscular person performing a proper barbell bench press" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp6PLm1tB-6gmIEdJC5xYFHTDNo7CetAXXjSwzPS4R_z-lbcVqTd3EoVAByiZMZBvU6LIuXTir5a_oRn5XZSYe5d6PpZpLpIOIKnvbNkm3SDd8yE7mPfhVFAxWn-eb8fTwlE4SokR3q5HVw0LaMnOh1e50ZqqyYuRtZ9IJuH-BkEiPVFsoc2DwK2Kd4c4Sb7UDQ86g73wEQFSdTj1TwSatScuFoax1HdxSM2OF9ax9Foi2k8Xa0AtlWWHpGjFJWtT7RtwyC6F4b2Oe"/>
+<span class="text-xs font-bold text-primary">PRO TIP</span>
+</div>
+<p class="text-xs text-slate-400 leading-relaxed italic">"Keep your shoulder blades retracted and feet planted firmly for maximum bench stability."</p>
+</div>
+</div>
+</aside>
+</body></html>
