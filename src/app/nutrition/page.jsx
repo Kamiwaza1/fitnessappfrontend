@@ -143,6 +143,31 @@ export default function NutritionDiary() {
                             </div>
                         </section>
                     </div>
+                    {/* Supplement Section */}
+                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+                            <div className="p-5 flex items-center justify-between border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/20 text-primary rounded-lg">
+                                        <span className="material-icons text-sm">pill</span>
+                                    </div>
+                                    <h2 className="text-lg font-bold">Supplement</h2>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right">
+                                        <div className="text-sm font-bold">0 kcal</div>
+                                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">P: 0g | C: 0g | F: 0g</div>
+                                    </div>
+                                    <button className="p-1.5 bg-primary text-background-dark rounded hover:scale-105 transition-transform">
+                                        <span className="material-icons text-base leading-none">add</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="divide-y divide-slate-100 dark:divide-white/5">
+                                <div className="p-8 text-center text-slate-500 text-sm">
+                                    No food logged for lunch.
+                                </div>
+                            </div>
+                        </section>
                     {/* Right: Sidebar */}
                     <div className="col-span-12 lg:col-span-4 space-y-6">
                         {/* Quick Add / Search */}

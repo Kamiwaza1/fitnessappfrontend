@@ -11,18 +11,30 @@ export default function LoginPage() {
     const handleLogin = async () => {
         setError("");
         try {
+            console.log("Sending login request", { username, password });
             const res = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                
             });
+            console.log("Login response status:", res.status);
             if (!res.ok) {
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    console.log("Failed to parse error response as JSON", jsonErr);
+                    data = {};
+                }
+                console.log("Login error response:", data);
                 setError(data.message || "Login failed");
                 return;
             }
+            console.log("Login successful, redirecting...");
             router.push("/dashboard");
         } catch (err) {
+            console.log("Network error during login:", err);
             setError("Network error");
         }
     };
