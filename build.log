@@ -1,0 +1,62 @@
+
+> next_temp@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./src/app/login/page.jsx:5:1
+Module not found: Can't resolve '../context/AuthContext'
+  3 | import { c as _c } from "react/compiler-runtime";
+  4 | import { useRouter } from 'next/navigation';
+> 5 | import { useAuth } from '../context/AuthContext';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | export default function LoginPage() {
+  7 |   const $ = _c(15);
+  8 |   const router = useRouter();
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/login/page.jsx [Client Component Browser]
+    ./src/app/login/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/login/page.jsx [Client Component SSR]
+    ./src/app/login/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./src/app/login/page.jsx:3:1
+Module not found: Can't resolve '../context/AuthContext'
+  1 | "use client";
+  2 | import { useRouter } from 'next/navigation';
+> 3 | import { useAuth } from '../context/AuthContext';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 |
+  5 |
+  6 | export default function LoginPage() {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/login/page.jsx [Client Component Browser]
+    ./src/app/login/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/login/page.jsx [Client Component SSR]
+    ./src/app/login/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./src/app/login/page.jsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/app/login/page.jsx:3:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

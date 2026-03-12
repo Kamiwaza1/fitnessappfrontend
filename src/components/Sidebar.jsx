@@ -1,5 +1,7 @@
+"use client";
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
 export default function Sidebar() {
@@ -9,8 +11,9 @@ export default function Sidebar() {
         { name: 'Nutrition', icon: 'restaurant', path: '/nutrition' },
         { name: 'Progress', icon: 'insights', path: '/progress' },
         { name: 'Settings', icon: 'settings', path: '/settings' },
-        { name: 'Logout', icon: 'logout', path: '/src/pages/LoginPage.jsx' },
+        { name: 'Logout', icon: 'logout', path: '/login' },
     ];
+    const pathname = usePathname();
 
     return (
         <aside className="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 hidden lg:flex flex-col sticky top-0 h-screen">
@@ -18,23 +21,24 @@ export default function Sidebar() {
                 <h1 className="text-2xl font-extrabold tracking-tighter text-primary italic">DARK LIFT</h1>
             </div>
             <nav className="flex-1 px-4 space-y-2">
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.name}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            clsx(
+                {navItems.map((item) => {
+                    const isActive = pathname === item.path;
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.path}
+                            className={clsx(
                                 "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
                                 isActive
                                     ? "bg-primary/10 text-primary border border-primary/20"
                                     : "text-slate-400 hover:text-primary hover:bg-primary/5"
-                            )
-                        }
-                    >
-                        <span className="material-icons">{item.icon}</span>
-                        <span className="font-medium">{item.name}</span>
-                    </NavLink>
-                ))}
+                            )}
+                        >
+                            <span className="material-icons">{item.icon}</span>
+                            <span className="font-medium">{item.name}</span>
+                        </Link>
+                    );
+                })}
             </nav>
             <div className="p-6 border-t border-primary/10">
                 <div className="flex items-center space-x-3">
@@ -49,7 +53,6 @@ export default function Sidebar() {
                         <p className="text-sm font-bold">Alex Thorne</p>
                         <p className="text-xs text-slate-400">Pro Member</p>
                     </div>
-                   
                 </div>
             </div>
         </aside>

@@ -1,5 +1,6 @@
+"use client";
 import React from 'react';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 
 export default function NutritionDiary() {
     return (
@@ -138,6 +139,38 @@ export default function NutritionDiary() {
                             <div className="divide-y divide-slate-100 dark:divide-white/5">
                                 <div className="p-8 text-center text-slate-500 text-sm">
                                     No food logged for snacks.
+                                </div>
+                            </div>
+                        </section>
+                        {/* Supplement Section below Snacks, 2x2 grid */}
+                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden mt-4">
+                            <div className="p-5 flex items-center gap-3 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+                                <div className="p-2 bg-primary/20 text-primary rounded-lg">
+                                    <span className="material-icons text-sm">pill</span>
+                                </div>
+                                <h2 className="text-lg font-bold">Supplements</h2>
+                            </div>
+                            <div className="p-4 grid grid-cols-2 gap-4">
+                                {/* Example supplement cards, replace with dynamic data as needed */}
+                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
+                                    <span className="material-icons text-primary text-base mb-1">pill</span>
+                                    <span className="font-bold">Creatine</span>
+                                    <span className="text-[10px] text-slate-500">5g</span>
+                                </div>
+                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
+                                    <span className="material-icons text-primary text-base mb-1">pill</span>
+                                    <span className="font-bold">Multivitamin</span>
+                                    <span className="text-[10px] text-slate-500">1 tab</span>
+                                </div>
+                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
+                                    <span className="material-icons text-primary text-base mb-1">pill</span>
+                                    <span className="font-bold">Omega-3</span>
+                                    <span className="text-[10px] text-slate-500">2 caps</span>
+                                </div>
+                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
+                                    <span className="material-icons text-primary text-base mb-1">pill</span>
+                                    <span className="font-bold">Vitamin D</span>
+                                    <span className="text-[10px] text-slate-500">1000 IU</span>
                                 </div>
                             </div>
                         </section>
