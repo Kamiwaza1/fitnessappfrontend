@@ -3,6 +3,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
     const navItems = [
@@ -14,6 +16,7 @@ export default function Sidebar() {
         { name: 'Logout', icon: 'logout', path: '/login' },
     ];
     const pathname = usePathname();
+    const { user } = useAuth();
 
     return (
         <aside className="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 hidden lg:flex flex-col sticky top-0 h-screen">
@@ -50,8 +53,7 @@ export default function Sidebar() {
                         />
                     </div>
                     <div>
-                        <p className="text-sm font-bold">Alex Thorne</p>
-                        <p className="text-xs text-slate-400">Pro Member</p>
+                        <p className="text-sm font-bold">{user?.fullName || user?.email || user?.username}</p>
                     </div>
                 </div>
             </div>

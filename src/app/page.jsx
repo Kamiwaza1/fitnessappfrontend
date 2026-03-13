@@ -1,8 +1,10 @@
 "use client";
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Dashboard() {
+    const { user } = useAuth();
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen flex font-display">
             <Sidebar />
@@ -11,7 +13,7 @@ export default function Dashboard() {
                 {/* Header */}
                 <header className="p-8 flex items-center justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold">Welcome back, <span className="text-primary">User</span></h2>
+                        <h2 className="text-3xl font-bold">Welcome back, <span className="text-primary">{user?.fullName}</span></h2>
                         <p className="text-slate-400 mt-1">Ready to crush your session today?</p>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -63,7 +65,7 @@ export default function Dashboard() {
                                 <span className="material-icons text-9xl">fitness_center</span>
                             </div>
                             <div>
-                                <span className="bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded">Today's Goal</span>
+                                <span className="bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded">Today&apos;s Goal</span>
                                 <h3 className="text-3xl font-extrabold mt-4 italic">REST DAY</h3>
                                 <p className="text-slate-400 mt-2">No active workout scheduled.</p>
                                 <div className="flex items-center space-x-4 mt-4 text-sm font-medium">
@@ -154,19 +156,14 @@ export default function Dashboard() {
             </main>
             {/* Right Quick Actions (Optional Sidebar for Desktop) */}
             <aside className="w-80 border-l border-primary/10 bg-background-light dark:bg-background-dark/30 hidden xl:flex flex-col p-8 space-y-8">
-                <div>
-                    <h3 className="font-bold uppercase tracking-widest text-sm mb-6">Upcoming Plan</h3>
-                    <div className="p-8 text-center text-slate-500 text-sm border border-dashed border-slate-700 rounded-lg">
-                        No upcoming workouts scheduled.
-                    </div>
-                </div>
-                <div>
+                
                     <h3 className="font-bold uppercase tracking-widest text-sm mb-6">Motivational Insight</h3>
                     <div className="bg-primary/5 p-6 rounded-xl border border-primary/10 italic text-sm text-slate-300">
-                        "Your journey begins with a single step. Start logging today!"
+                        &quot;Your journey begins with a single step. Start logging today!&quot;
                         <p className="mt-4 font-bold text-primary not-italic">— AI Coach</p>
                     </div>
-                </div>
+                
+                
             </aside>
         </div>
     );

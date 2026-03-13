@@ -1,9 +1,11 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { login } = useAuth();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -23,7 +25,15 @@ export default function RegisterPage() {
                 setError(data.message || "Registration failed");
                 return;
             }
-            router.push("/dashboard");
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (err) {
+                console.log('Failed to parse register response', err);
+            }
+            // Set user in context (if API returns user object) or fallback to provided values
+            login(data.user || { fullName, email });
+            router.push("/");
         } catch (err) {
             setError("Network error");
         }

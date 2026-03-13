@@ -12,6 +12,8 @@ export default function WorkoutRail() {
         { name: 'Calendar', icon: 'calendar_today', path: '/calendar' },
     ];
 
+    const pathname = usePathname();
+
     return (
         <aside className="w-20 flex flex-col items-center py-8 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 z-20">
             <div className="mb-12">
@@ -21,7 +23,7 @@ export default function WorkoutRail() {
             </div>
             <nav className="flex flex-col gap-8">
                 {navItems.map((item) => {
-                    const isActive = usePathname() === item.path;
+                    const isActive = pathname === item.path;
                     return (
                     <Link
                         key={item.name}

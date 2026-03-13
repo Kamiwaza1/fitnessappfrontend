@@ -14,7 +14,7 @@ export default function NutritionDiary() {
                             <span className="material-icons">chevron_left</span>
                         </button>
                         <div className="text-center md:text-left">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white leading-none">Today's Diary</h1>
+                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white leading-none">Todays Diary</h1>
                             <p className="text-slate-500 dark:text-primary/60 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                         <button className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 text-primary transition-colors">
@@ -66,114 +66,42 @@ export default function NutritionDiary() {
                 </div>
                 <div className="grid grid-cols-12 gap-8">
                     {/* Left: Meal Logs */}
-                    <div className="col-span-12 lg:col-span-8 space-y-6">
-                        {/* Breakfast Section */}
-                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden group">
-                            <div className="p-5 flex items-center justify-between border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/20 text-primary rounded-lg">
-                                        <span className="material-icons text-sm">wb_twilight</span>
+                    <div className="col-span-12 lg:col-span-8">
+                        <div className="grid grid-cols-2 gap-6">
+                            {/* Render all nutrition sections in a 2x2 grid */}
+                            {[
+                                {
+                                    
+                                    title: "Breakfast",
+                                    
+                                },
+                                {
+                                
+                                    title: "Lunch",
+                                    
+                                },
+                                {
+                                    
+                                    title: "Snacks",
+                                    
+                                },
+                                {
+                                    
+                                    title: "Supplements",
+                                    
+                                },
+                            ].map((section, idx) => (
+                                <section key={section.title} className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+                                    <div className="p-5 flex items-center gap-3 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+
+                                        <h2 className="text-lg font-bold">{section.title}</h2>
                                     </div>
-                                    <h2 className="text-lg font-bold">Breakfast</h2>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <div className="text-sm font-bold">0 kcal</div>
-                                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">P: 0g | C: 0g | F: 0g</div>
+                                    <div className="p-8 text-center text-slate-500 text-sm">
+                                        {section.content}
                                     </div>
-                                    <button className="p-1.5 bg-primary text-background-dark rounded hover:scale-105 transition-transform">
-                                        <span className="material-icons text-base leading-none">add</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="divide-y divide-slate-100 dark:divide-white/5">
-                                <div className="p-8 text-center text-slate-500 text-sm">
-                                    No food logged for breakfast.
-                                </div>
-                            </div>
-                        </section>
-                        {/* Lunch Section */}
-                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
-                            <div className="p-5 flex items-center justify-between border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/20 text-primary rounded-lg">
-                                        <span className="material-icons text-sm">light_mode</span>
-                                    </div>
-                                    <h2 className="text-lg font-bold">Lunch</h2>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <div className="text-sm font-bold">0 kcal</div>
-                                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">P: 0g | C: 0g | F: 0g</div>
-                                    </div>
-                                    <button className="p-1.5 bg-primary text-background-dark rounded hover:scale-105 transition-transform">
-                                        <span className="material-icons text-base leading-none">add</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="divide-y divide-slate-100 dark:divide-white/5">
-                                <div className="p-8 text-center text-slate-500 text-sm">
-                                    No food logged for lunch.
-                                </div>
-                            </div>
-                        </section>
-                        {/* Snacks Section */}
-                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
-                            <div className="p-5 flex items-center justify-between border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/20 text-primary rounded-lg">
-                                        <span className="material-icons text-sm">cookie</span>
-                                    </div>
-                                    <h2 className="text-lg font-bold">Snacks</h2>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <div className="text-sm font-bold">0 kcal</div>
-                                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">P: 0g | C: 0g | F: 0g</div>
-                                    </div>
-                                    <button className="p-1.5 bg-primary text-background-dark rounded hover:scale-105 transition-transform">
-                                        <span className="material-icons text-base leading-none">add</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="divide-y divide-slate-100 dark:divide-white/5">
-                                <div className="p-8 text-center text-slate-500 text-sm">
-                                    No food logged for snacks.
-                                </div>
-                            </div>
-                        </section>
-                        {/* Supplement Section below Snacks, 2x2 grid */}
-                        <section className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden mt-4">
-                            <div className="p-5 flex items-center gap-3 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5">
-                                <div className="p-2 bg-primary/20 text-primary rounded-lg">
-                                    <span className="material-icons text-sm">pill</span>
-                                </div>
-                                <h2 className="text-lg font-bold">Supplements</h2>
-                            </div>
-                            <div className="p-4 grid grid-cols-2 gap-4">
-                                {/* Example supplement cards, replace with dynamic data as needed */}
-                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
-                                    <span className="material-icons text-primary text-base mb-1">pill</span>
-                                    <span className="font-bold">Creatine</span>
-                                    <span className="text-[10px] text-slate-500">5g</span>
-                                </div>
-                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
-                                    <span className="material-icons text-primary text-base mb-1">pill</span>
-                                    <span className="font-bold">Multivitamin</span>
-                                    <span className="text-[10px] text-slate-500">1 tab</span>
-                                </div>
-                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
-                                    <span className="material-icons text-primary text-base mb-1">pill</span>
-                                    <span className="font-bold">Omega-3</span>
-                                    <span className="text-[10px] text-slate-500">2 caps</span>
-                                </div>
-                                <div className="bg-primary/10 rounded-lg p-3 flex flex-col items-center text-xs">
-                                    <span className="material-icons text-primary text-base mb-1">pill</span>
-                                    <span className="font-bold">Vitamin D</span>
-                                    <span className="text-[10px] text-slate-500">1000 IU</span>
-                                </div>
-                            </div>
-                        </section>
+                                </section>
+                            ))}
+                        </div>
                     </div>
                     {/* Right: Sidebar */}
                     <div className="col-span-12 lg:col-span-4 space-y-6">
@@ -195,20 +123,7 @@ export default function NutritionDiary() {
                                 </div>
                             </div>
                         </div>
-                        {/* Water Tracker */}
-                        <div className="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/5 p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="material-icons text-sky-400">water_drop</span>
-                                    <span className="text-sm font-bold">Water Intake</span>
-                                </div>
-                                <span className="text-sm font-bold text-sky-400">0 / 3L</span>
-                            </div>
-                            <div className="flex gap-2">
-                                {[1, 2, 3].map(i => <div key={i} className="flex-1 h-3 bg-sky-400/20 rounded-full"></div>)}
-                                {[1, 2].map(i => <div key={i} className="flex-1 h-3 bg-sky-400/20 rounded-full"></div>)}
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </main>

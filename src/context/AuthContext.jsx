@@ -5,8 +5,14 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = (username) => {
-    setUser({ username });
+  // Accept either a user object or a username string for backward compatibility
+  const login = (userOrUsername) => {
+    if (!userOrUsername) return;
+    if (typeof userOrUsername === 'string') {
+      setUser({ username: userOrUsername });
+    } else {
+      setUser(userOrUsername);
+    }
   };
 
   const logout = () => {

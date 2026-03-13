@@ -1,22 +1,24 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
-    const [username, setUsername] = useState("");
+    const { login } = useAuth();
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleLogin = async () => {
         setError("");
         try {
-            console.log("Sending login request", { username, password });
+            console.log("Sending login request", { email, password });
             const res = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-                
+                body: JSON.stringify({ email, password }),
+
             });
             console.log("Login response status:", res.status);
             if (!res.ok) {
@@ -31,8 +33,16 @@ export default function LoginPage() {
                 setError(data.message || "Login failed");
                 return;
             }
-            console.log("Login successful, redirecting...");
-            router.push("/dashboard");
+            console.log("Login successful, parsing user...");
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (err) {
+                console.log('Failed to parse login response JSON', err);
+            }
+            // If API returns user object, set it in context; otherwise fallback to email
+            login(data.user || { email });
+            router.push("/");
         } catch (err) {
             console.log("Network error during login:", err);
             setError("Network error");
@@ -47,10 +57,10 @@ export default function LoginPage() {
                 <form className="w-full flex flex-col gap-4" onSubmit={e => { e.preventDefault(); handleLogin(); }}>
                     <input
                         className="w-full px-4 py-2 rounded-lg border border-primary/20 bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary"
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
                         required
                     />
                     <input
