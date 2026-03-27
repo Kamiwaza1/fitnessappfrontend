@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function Sidebar() {
     const router = useRouter();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navItems = [
         { name: 'Dashboard', icon: 'dashboard', path: '/' },
         { name: 'Workouts', icon: 'fitness_center', path: '/workouts' },
@@ -21,6 +21,8 @@ export default function Sidebar() {
         logout();
         router.replace('/login');
     };
+
+    const displayName = user?.fullName;
 
     return (
         <aside className="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 hidden lg:flex flex-col sticky top-0 h-screen">
@@ -65,8 +67,8 @@ export default function Sidebar() {
                         />
                     </div>
                     <div>
-                        <p className="text-sm font-bold">Alex Thorne</p>
-                        <p className="text-xs text-slate-400">Pro Member</p>
+                        <p className="text-sm font-bold">{displayName}</p>
+                        
                     </div>
                 </div>
             </div>

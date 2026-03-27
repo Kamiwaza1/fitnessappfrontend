@@ -12,7 +12,17 @@ const AuthContext = createContext();
 
 function getUserFromToken(token) {
   const payload = decodeJwtPayload(token);
-  return { username: payload?.sub || payload?.email || payload?.username || 'User' };
+  const fullName =
+    payload?.fullName ||
+    payload?.name ||
+    payload?.full_name ||
+    [payload?.given_name, payload?.family_name].filter(Boolean).join(" ").trim() ||
+    null;
+
+  return {
+    username: payload?.sub || payload?.email || payload?.username || "User",
+    fullName,
+  };
 }
 
 function getInitialAuthState() {
@@ -52,12 +62,16 @@ export function AuthProvider({ children }) {
         setToken(null);
         return;
       }
+      const parsedUser = getUserFromToken(newToken);
       setToken(newToken);
-      setUser({ username: username || getUserFromToken(newToken).username });
+      setUser({
+        username: username || parsedUser.username,
+        fullName: parsedUser.fullName || null,
+      });
       return;
     }
 
-    setUser({ username: username || 'User' });
+    setUser({ username: username || "User", fullName: null });
   };
 
   useEffect(() => {

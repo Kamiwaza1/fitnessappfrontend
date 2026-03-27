@@ -15,6 +15,85 @@ const EXERCISE_LIBRARY = [
     { id: 'plank-hold', name: 'Plank Hold', focus: 'Core', equipment: 'Bodyweight' },
     { id: 'hanging-knee-raise', name: 'Hanging Knee Raise', focus: 'Core', equipment: 'Pull-up Bar' },
     { id: 'triceps-pushdown', name: 'Triceps Pushdown', focus: 'Arms', equipment: 'Cable' },
+    { id: 'biceps-curl', name: 'Biceps Curl', focus: 'Arms', equipment: 'Dumbbells' },
+    { id: 'face-pull', name: 'Face Pull', focus: 'Shoulders', equipment: 'Cable' },
+    { id: 'leg-press', name: 'Leg Press', focus: 'Legs', equipment: 'Machine' },
+    { id: 'calf-raise', name: 'Standing Calf Raise', focus: 'Calves', equipment: 'Machine' },
+    { id: 'glute-bridge', name: 'Glute Bridge', focus: 'Glutes', equipment: 'Bodyweight' },
+    { id: 'ab-wheel-rollout', name: 'Ab Wheel Rollout', focus: 'Core', equipment: 'Ab Wheel' },
+    { id: 'dips', name: 'Dips', focus: 'Chest/Triceps', equipment: 'Dip Station' },
+    { id: 'pull-ups', name: 'Pull-Ups', focus: 'Back/Biceps', equipment: 'Pull-up Bar' },
+    { id: 'push-ups', name: 'Push-Ups', focus: 'Chest/Triceps', equipment: 'Bodyweight' },
+    { id: 'burpees', name: 'Burpees', focus: 'Full Body', equipment: 'Bodyweight' },
+    { id: 'kettlebell-swing', name: 'Kettlebell Swing', focus: 'Full Body', equipment: 'Kettlebell' },
+    { id: 'box-jumps', name: 'Box Jumps', focus: 'Legs/Explosiveness', equipment: 'Box' },
+    { id: 'medicine-ball-slam', name: 'Medicine Ball Slam', focus: 'Full Body', equipment: 'Medicine Ball' },
+    { id: 'jump-rope', name: 'Jump Rope', focus: 'Cardio', equipment: 'Jump Rope' },
+    { id: 'farmer-carry', name: 'Farmer Carry', focus: 'Full Body', equipment: 'Dumbbells/Kettlebells' },
+    { id: 'sprint-intervals', name: 'Sprint Intervals', focus: 'Cardio/Legs', equipment: 'Track/Treadmill' },
+    { id: 'yoga-flow', name: 'Yoga Flow', focus: 'Flexibility/Recovery', equipment: 'Yoga Mat' },
+    { id: 'foam-rolling', name: 'Foam Rolling', focus: 'Recovery', equipment: 'Foam Roller' },
+    { id: 'stretching', name: 'Stretching Routine', focus: 'Flexibility', equipment: 'Bodyweight' },
+    { id: 'swimming', name: 'Swimming Laps', focus: 'Cardio/Full Body', equipment: 'Pool' },
+    { id: 'cycling', name: 'Cycling', focus: 'Cardio/Legs', equipment: 'Bicycle/Stationary Bike' },
+    { id: 'rowing', name: 'Rowing Machine', focus: 'Cardio/Full Body', equipment: 'Rowing Machine' },
+    { id: 'pilates', name: 'Pilates Session', focus: 'Core/Full Body', equipment: 'Mat/Small Equipment' },
+    { id: 'tai-chi', name: 'Tai Chi', focus: 'Balance/Recovery', equipment: 'Bodyweight' },
+    { id: 'jumping-jacks', name: 'Jumping Jacks', focus: 'Cardio', equipment: 'Bodyweight' },
+    { id: 'mountain-climbers', name: 'Mountain Climbers', focus: 'Cardio/Core', equipment: 'Bodyweight' },
+    { id: 'side-plank', name: 'Side Plank', focus: 'Core', equipment: 'Bodyweight' },
+    { id: 'reverse-fly', name: 'Reverse Fly', focus: 'Shoulders/Upper Back', equipment: 'Dumbbells' },
+    { id: 'skater-hops', name: 'Skater Hops', focus: 'Cardio/Legs', equipment: 'Bodyweight' },
+    { id: 'l-sit', name: 'L-Sit Hold', focus: 'Core/Arms', equipment: 'Parallettes' },
+    { id: 'wall-sit', name: 'Wall Sit', focus: 'Legs', equipment: 'Bodyweight' },
+    { id: 'pistol-squat', name: 'Pistol Squat', focus: 'Legs/Balance', equipment: 'Bodyweight' },
+    { id: 'handstand-hold', name: 'Handstand Hold', focus: 'Shoulders/Core', equipment: 'Bodyweight' },
+    { id: 'turkish-getup', name: 'Turkish Get-Up', focus: 'Full Body', equipment: 'Kettlebell/Dumbbell' },
+    { id: 'sled-push', name: 'Sled Push', focus: 'Full Body/Legs', equipment: 'Sled' },
+    { id: 'battle-ropes', name: 'Battle Ropes', focus: 'Cardio/Full Body', equipment: 'Battle Ropes' },
+    { id: 'sled-drag', name: 'Sled Drag', focus: 'Full Body/Legs', equipment: 'Sled' },
+    { id: 'box-squat', name: 'Box Squat', focus: 'Legs', equipment: 'Barbell/Box' },
+    { id: 'glute-ham-raise', name: 'Glute-Ham Raise', focus: 'Hamstrings/Glutes', equipment: 'Glute-Ham Developer' },
+    { id: 'ab-crunches', name: 'Ab Crunches', focus: 'Core', equipment: 'Bodyweight' },
+    { id: 'cable-woodchopper', name: 'Cable Woodchopper', focus: 'Core', equipment: 'Cable' },
+    { id: 'reverse-lunge', name: 'Reverse Lunge', focus: 'Legs', equipment: 'Dumbbells' },
+    { id: 'sumo-deadlift', name: 'Sumo Deadlift', focus: 'Full Body/Legs', equipment: 'Barbell' },
+    { id: 'arnold-press', name: 'Arnold Press', focus: 'Shoulders', equipment: 'Dumbbells' },
+    { id: 'renegade-row', name: 'Renegade Row', focus: 'Back/Core', equipment: 'Dumbbells' },
+    { id: 'knee-tuck-jumps', name: 'Knee Tuck Jumps', focus: 'Cardio/Legs', equipment: 'Bodyweight' },
+    { id: 'medicine-ball-throw', name: 'Medicine Ball Throw', focus: 'Full Body/Power', equipment: 'Medicine Ball' },
+    { id: 'squat-thrusts', name: 'Squat Thrusts', focus: 'Cardio/Full Body', equipment: 'Bodyweight' },
+    { id: 'lateral-hops', name: 'Lateral Hops', focus: 'Cardio/Legs', equipment: 'Bodyweight' },
+    { id: 'single-arm-row', name: 'Single-Arm Row', focus: 'Back', equipment: 'Dumbbell/Barbell' },
+    { id: 'overhead-squat', name: 'Overhead Squat', focus: 'Full Body/Mobility', equipment: 'Barbell' },
+    { id: 'clamshells', name: 'Clamshells', focus: 'Glute Medius', equipment: 'Resistance Band' },
+    { id: 'box-jump-overs', name: 'Box Jump Overs', focus: 'Cardio/Legs', equipment: 'Box' },
+    { id: 'sprint-drills', name: 'Sprint Drills', focus: 'Speed/Agility', equipment: 'Track/Open Space' },
+    { id: 'jump-squats', name: 'Jump Squats', focus: 'Cardio/Legs', equipment: 'Bodyweight' },
+    { id: 'medicine-ball-squat', name: 'Medicine Ball Squat', focus: 'Legs/Full Body', equipment: 'Medicine Ball' },
+    { id: 'tire-flip', name: 'Tire Flip', focus: 'Full Body/Power', equipment: 'Tire' },
+    { id: 'sled-sprint', name: 'Sled Sprint', focus: 'Cardio/Legs', equipment: 'Sled' },
+    { id: 'jump-lunges', name: 'Jump Lunges', focus: 'Cardio/Legs', equipment: 'Bodyweight' },
+    { id: 'kettlebell-clean-and-press', name: 'Kettlebell Clean and Press', focus: 'Full Body', equipment: 'Kettlebell' },
+    { id: 'box-jump-burpees', name: 'Box Jump Burpees', focus: 'Cardio/Full Body', equipment: 'Box' },
+    { id: 'medicine-ball-push-up', name: 'Medicine Ball Push-Up', focus: 'Chest/Triceps', equipment: 'Medicine Ball' },
+    { id: 'sprint-resistance', name: 'Sprint with Resistance', focus: 'Cardio/Legs', equipment: 'Resistance Band/Sled' },
+    { id: 'kettlebell-deadlift', name: 'Kettlebell Deadlift', focus: 'Full Body/Legs', equipment: 'Kettlebell' },
+    { id: 'box-jump-plyo-push-up', name: 'Box Jump to Plyo Push-Up', focus: 'Cardio/Full Body', equipment: 'Box' },
+    { id: 'medicine-ball-overhead-throw', name: 'Medicine Ball Overhead Throw', focus: 'Full Body/Power', equipment: 'Medicine Ball' },
+    { id: 'sprint-hill', name: 'Hill Sprints', focus: 'Cardio/Legs', equipment: 'Hill/Incline' },
+    { id: 'kettlebell-snatch', name: 'Kettlebell Snatch', focus: 'Full Body/Power', equipment: 'Kettlebell' },
+    { id: 'box-jump-tuck-jump', name: 'Box Jump to Tuck Jump', focus: 'Cardio/Full Body', equipment: 'Box' },
+    { id: 'medicine-ball-slams', name: 'Medicine Ball Slams', focus: 'Full Body/Power', equipment: 'Medicine Ball' },
+    { id: 'sprint-fartlek', name: 'Fartlek Sprints', focus: 'Cardio/Legs', equipment: 'Track/Open Space' },
+    { id: 'kettlebell-turkish-getup', name: 'Kettlebell Turkish Get-Up', focus: 'Full Body/Functional', equipment: 'Kettlebell' },
+    { id: 'box-jump-lateral-hop', name: 'Box Jump to Lateral Hop', focus: 'Cardio/Legs', equipment: 'Box' },
+    { id: 'medicine-ball-chest-pass', name: 'Medicine Ball Chest Pass', focus: 'Chest/Power', equipment: 'Medicine Ball' },
+    { id: 'sprint-intervals-hill', name: 'Hill Sprint Intervals', focus: 'Cardio/Legs', equipment: 'Hill/Incline' },
+    { id: 'kettlebell-windmill', name: 'Kettlebell Windmill', focus: 'Full Body/Functional', equipment: 'Kettlebell' },
+    { id: 'box-jump-broad-jump', name: 'Box Jump to Broad Jump', focus: 'Cardio/Full Body', equipment: 'Box' },
+    { id: 'medicine-ball-rotational-throw', name: 'Medicine Ball Rotational Throw', focus: 'Core/Power', equipment: 'Medicine Ball' },
+    { id: 'sprint-intervals-resistance', name: 'Sprint Intervals with Resistance', focus: 'Cardio/Legs', equipment: 'Resistance Band/Sled' },
 ];
 
 const WORKOUTS_API_ENDPOINT = '/api/user/workouts';
@@ -490,15 +569,7 @@ export default function WorkoutLogger() {
                         <p className="text-xs uppercase tracking-widest text-slate-500">Planner Status</p>
                         <p className="text-sm text-slate-300">{selectedExerciseIds.length} exercises selected</p>
                     </div>
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            className="px-4 py-2 border border-primary/20 rounded-lg text-primary hover:bg-primary/10"
-                            onClick={() => setIsComposerOpen(true)}
-                        >
-                            Continue Editing
-                        </button>
-                    </div>
+                    
                 </footer>
             </main>
 

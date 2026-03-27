@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { isTokenExpired } from './src/lib/authToken';
 
 function clearAuthCookies(response) {
   response.cookies.delete('authToken');
@@ -18,11 +17,10 @@ export function middleware(request) {
   const hasToken = Boolean(authToken);
   const hasValidToken = hasToken && !isTokenExpired(authToken);
 
-  // Allow unauthenticated access to /login and /register
-  if (pathname === '/login' || pathname === '/register') {
-    // If already authenticated, redirect to dashboard
+  // Allow unauthenticated access to /, /login, and /register
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') {
     if (hasValidToken) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     if (hasToken) {
       return clearAuthCookies(NextResponse.next());
