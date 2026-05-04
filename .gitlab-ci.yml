@@ -77,3 +77,5 @@ deploy_docker:
     - docker push "$CI_REGISTRY_IMAGE:latest"
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "Development"'
+    - if: '$CI_COMMIT_BRANCH == "Refactor"'
