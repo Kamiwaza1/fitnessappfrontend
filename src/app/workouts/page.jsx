@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 "use client";
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
@@ -73,3 +74,8 @@ export default function WorkoutLogger() {
         </div>
     );
 }
+=======
+import WorkoutsPage from "@/features/workouts/pages/WorkoutsPage";
+
+export default WorkoutsPage;
+>>>>>>> Stashed changes

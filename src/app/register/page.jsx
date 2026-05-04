@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 "use client";
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -83,3 +84,8 @@ export default function RegisterPage() {
         </div>
     );
 }
+=======
+import RegisterPage from "@/features/auth/pages/RegisterPage";
+
+export default RegisterPage;
+>>>>>>> Stashed changes

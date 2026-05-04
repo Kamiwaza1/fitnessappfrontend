@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 "use client";
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
@@ -168,3 +169,8 @@ export default function Dashboard() {
         </div>
     );
 }
+=======
+import LandingPage from "@/features/auth/pages/LandingPage";
+
+export default LandingPage;
+>>>>>>> Stashed changes

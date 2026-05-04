@@ -1,7 +1,6 @@
-"use client";
-import React from 'react';
-import Sidebar from '@/components/Sidebar';
+import NutritionPage from "@/features/nutrition/pages/NutritionPage";
 
+<<<<<<< Updated upstream
 export default function NutritionDiary() {
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 min-h-screen flex">
@@ -130,3 +129,6 @@ export default function NutritionDiary() {
         </div>
     );
 }
+=======
+export default NutritionPage;
+>>>>>>> Stashed changes
