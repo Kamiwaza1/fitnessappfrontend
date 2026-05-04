@@ -1,9 +1,9 @@
+
+const backendBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-<<<<<<< Updated upstream
-  /* config options here */
   reactCompiler: true,
-=======
   images: {
     remotePatterns: [
       {
@@ -15,12 +15,11 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         destination: `${backendBaseUrl}/api/:path*`,
       },
     ];
   },
->>>>>>> Stashed changes
 };
 
 export default nextConfig;

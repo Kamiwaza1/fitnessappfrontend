@@ -2,7 +2,11 @@
 
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { clearStoredAuthToken, isTokenExpired, readStoredAuthToken } from "@/lib/authToken";
+import {
+  clearStoredAuthToken,
+  isTokenExpired,
+  readStoredAuthToken,
+} from "@/shared/utils/authTokenStorage";
 
 export default function AuthGate({ children }) {
   const { token: contextToken } = useAuth();

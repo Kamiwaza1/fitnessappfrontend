@@ -1,32 +1,28 @@
-import { NextResponse } from 'next/server';
-import { isTokenExpired } from '@/lib/authToken';
+import { NextResponse } from "next/server";
+import { isTokenExpired } from "@/shared/utils/authTokenStorage";
+
+function clearAuthCookies(response) {
+  response.cookies.set("authToken", "", { maxAge: 0, path: "/" });
+  response.cookies.set("token", "", { maxAge: 0, path: "/" });
+  response.cookies.set("jwt", "", { maxAge: 0, path: "/" });
+  response.cookies.set("accessToken", "", { maxAge: 0, path: "/" });
+  return response;
+}
 
 export function middleware(request) {
-<<<<<<< Updated upstream
-  // If the user is not on the /login or /register page, redirect to /login
-  const { pathname } = request.nextUrl;
-  if (pathname === '/' || pathname === '/page' || pathname === '/page.js' || pathname === '/page.jsx') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-=======
   const authToken =
-    request.cookies.get('authToken')?.value ||
-    request.cookies.get('token')?.value ||
-    request.cookies.get('jwt')?.value;
+    request.cookies.get("authToken")?.value ||
+    request.cookies.get("token")?.value ||
+    request.cookies.get("jwt")?.value ||
+    request.cookies.get("accessToken")?.value;
 
-  const hasToken = Boolean(authToken);
-  const hasValidToken = hasToken && !isTokenExpired(authToken);
-
- 
-  if (hasToken && !hasValidToken) {
+  if (authToken && isTokenExpired(authToken)) {
     return clearAuthCookies(NextResponse.next());
   }
 
->>>>>>> Stashed changes
   return NextResponse.next();
 }
 
-// Run middleware only on the root route
 export const config = {
-  matcher: ['/'],
+  matcher: ["/"],
 };
