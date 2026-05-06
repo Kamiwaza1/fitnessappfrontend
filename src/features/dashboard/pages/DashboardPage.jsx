@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import AppPageShell from "@/shared/components/AppPageShell";
 import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import { useAuth } from "@/context/AuthContext";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -19,6 +21,26 @@ export default function DashboardPage() {
       : todayWorkout
         ? `Today: ${todayWorkout.name}`
         : "No active workout scheduled.";
+  const weeklyDurationData = useMemo(() => {
+    const now = new Date();
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(now);
+      date.setDate(now.getDate() - (6 - index));
+      return {
+        key: date.toISOString().slice(0, 10),
+        day: date.toLocaleDateString("en-US", { weekday: "short" }),
+        minutes: 0,
+      };
+    });
+
+    workouts.forEach((workout) => {
+      const workoutDate = String(workout?.workoutDate || workout?.date || "").slice(0, 10);
+      const target = days.find((item) => item.key === workoutDate);
+      if (target) target.minutes += Number(workout?.durationMinutes || workout?.duration || 0);
+    });
+
+    return days;
+  }, [workouts]);
 
   return (
     <AppPageShell mainClassName="h-screen overflow-hidden">
@@ -161,8 +183,20 @@ export default function DashboardPage() {
               </h3>
               <span className="material-icons cursor-pointer text-primary">bar_chart</span>
             </div>
-            <div className="flex h-40 items-center justify-center text-sm text-slate-500">
-              No data available
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyDurationData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
+                  <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={28} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(13,242,89,0.25)", borderRadius: 8 }}
+                    labelStyle={{ color: "#e2e8f0" }}
+                    itemStyle={{ color: "#0df259" }}
+                  />
+                  <Bar dataKey="minutes" fill="#0df259" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
@@ -175,18 +209,22 @@ export default function DashboardPage() {
                 <span className="text-xs font-bold text-primary">Avg: --</span>
               </div>
             </div>
-            <div className="flex h-40 items-center justify-center text-sm text-slate-500">
-              No data available
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weeklyDurationData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
+                  <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={28} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(13,242,89,0.25)", borderRadius: 8 }}
+                    labelStyle={{ color: "#e2e8f0" }}
+                    itemStyle={{ color: "#0df259" }}
+                  />
+                  <Line type="monotone" dataKey="minutes" stroke="#0df259" strokeWidth={2} dot={{ r: 3, fill: "#0df259" }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-primary/10 bg-background-light dark:bg-white/5">
-          <div className="flex items-center justify-between border-b border-primary/10 p-3.5">
-            <h3 className="text-sm font-bold uppercase tracking-widest">Recent Activity Log</h3>
-            <button className="text-xs font-bold text-primary hover:underline">VIEW ALL</button>
-          </div>
-          <div className="p-4 text-center text-sm text-slate-500">No recent activity found.</div>
         </div>
       </div>
     </AppPageShell>
