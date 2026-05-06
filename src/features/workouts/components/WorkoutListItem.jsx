@@ -1,4 +1,4 @@
-export default function WorkoutListItem({ workout, onDelete }) {
+export default function WorkoutListItem({ workout, onDelete, onEdit }) {
   return (
     <article className="rounded-xl border border-primary/15 bg-slate-950/40 p-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -7,6 +7,14 @@ export default function WorkoutListItem({ workout, onDelete }) {
           <span className="rounded bg-primary/15 px-2 py-1 text-[11px] uppercase tracking-widest text-primary">
             {workout.status}
           </span>
+          <button
+            type="button"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/30 text-primary transition-colors hover:bg-primary/10"
+            onClick={() => onEdit(workout)}
+            aria-label="Edit workout"
+          >
+            <span className="material-icons text-sm">edit</span>
+          </button>
           <button
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/30 text-red-400 transition-colors hover:bg-red-500/10"

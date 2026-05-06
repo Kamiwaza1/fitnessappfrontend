@@ -1,13 +1,21 @@
 import WorkoutListItem from "@/features/workouts/components/WorkoutListItem";
 import StatusMessage from "@/shared/components/StatusMessage";
 
-export default function WorkoutList({ workouts, isLoading, error, onDelete }) {
+export default function WorkoutList({ workouts, isLoading, error, onDelete, onEdit }) {
+  const now = new Date();
+  const upcomingWorkouts = workouts.filter((workout) => {
+    if (!workout?.date) return false;
+    const workoutDate = new Date(workout.date);
+    if (Number.isNaN(workoutDate.getTime())) return false;
+    return workoutDate > now;
+  });
+
   return (
     <div className="rounded-2xl border border-primary/10 bg-background-light p-5 sm:p-6 dark:bg-background-dark/40">
       <div className="mb-5 flex items-center justify-between">
         <h3 className="text-lg font-bold">Upcoming Workouts</h3>
         <span className="text-xs uppercase tracking-widest text-slate-400">
-          {workouts.length} scheduled
+          {upcomingWorkouts.length} scheduled
         </span>
       </div>
 
@@ -17,7 +25,7 @@ export default function WorkoutList({ workouts, isLoading, error, onDelete }) {
           {error}
         </StatusMessage>
       ) : null}
-      {!isLoading && !error && workouts.length === 0 ? (
+      {!isLoading && !error && upcomingWorkouts.length === 0 ? (
         <div className="mx-auto max-w-md py-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
             <span className="material-icons text-3xl">event_available</span>
@@ -28,10 +36,10 @@ export default function WorkoutList({ workouts, isLoading, error, onDelete }) {
           </p>
         </div>
       ) : null}
-      {!isLoading && !error && workouts.length > 0 ? (
+      {!isLoading && !error && upcomingWorkouts.length > 0 ? (
         <div className="space-y-4">
-          {workouts.map((workout) => (
-            <WorkoutListItem key={workout.id} workout={workout} onDelete={onDelete} />
+          {upcomingWorkouts.map((workout) => (
+            <WorkoutListItem key={workout.id} workout={workout} onDelete={onDelete} onEdit={onEdit} />
           ))}
         </div>
       ) : null}

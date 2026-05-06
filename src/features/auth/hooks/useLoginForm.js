@@ -47,7 +47,7 @@ export function useLoginForm() {
       });
 
       login(auth.user ?? { email: normalizedEmail }, auth.accessToken);
-      router.push("/workouts");
+      router.push("/dashboard");
     } catch (submissionError) {
       if (submissionError.fieldErrors && Object.keys(submissionError.fieldErrors).length > 0) {
         setFieldErrors(submissionError.fieldErrors);

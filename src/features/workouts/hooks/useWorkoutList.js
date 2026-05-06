@@ -41,6 +41,17 @@ export function useWorkoutList() {
     setWorkouts((current) => [workout, ...current]);
   };
 
+  const upsertWorkout = (workout) => {
+    setWorkouts((current) => {
+      const index = current.findIndex((item) => item.id === workout.id);
+      if (index === -1) return [workout, ...current];
+
+      const next = [...current];
+      next[index] = workout;
+      return next;
+    });
+  };
+
   const removeWorkout = async (workoutId) => {
     await deleteWorkout(workoutId);
     setWorkouts((current) => current.filter((workout) => workout.id !== workoutId));
@@ -51,6 +62,7 @@ export function useWorkoutList() {
     isLoading,
     error,
     prependWorkout,
+    upsertWorkout,
     removeWorkout,
   };
 }

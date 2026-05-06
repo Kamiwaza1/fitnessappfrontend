@@ -2,26 +2,49 @@
 
 import { useState } from "react";
 import { getTodayIsoDate } from "@/shared/utils/date";
-import { createWorkout } from "@/features/workouts/api/workoutsApi";
+import { createWorkout, updateWorkout } from "@/features/workouts/api/workoutsApi";
 import { validateWorkoutForm } from "@/features/workouts/utils/workoutValidation";
 
 const initialFormState = () => ({
   title: "",
-  goal: "",
+  description: "",
+  category: "GENERAL",
   date: getTodayIsoDate(),
   duration: "60",
+  sets: "3",
+  reps: "10",
+  weightKg: "20",
   notes: "",
 });
 
 export function useWorkoutComposer({ onWorkoutCreated }) {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [formState, setFormState] = useState(initialFormState);
+  const [editingWorkoutId, setEditingWorkoutId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
   const resetComposer = () => {
     setFormState(initialFormState());
+    setEditingWorkoutId(null);
     setSubmitError("");
+  };
+
+  const openComposerForEdit = (workout) => {
+    setEditingWorkoutId(workout.id);
+    setFormState({
+      title: workout.title || "",
+      description: workout.description || workout.goal || "",
+      category: workout.category || "GENERAL",
+      date: workout.workoutDate || workout.date || getTodayIsoDate(),
+      duration: String(workout.durationMinutes || workout.duration || "60"),
+      sets: String(workout.sets || "3"),
+      reps: String(workout.reps || "10"),
+      weightKg: String(workout.weightKg || "20"),
+      notes: workout.notes || "",
+    });
+    setSubmitError("");
+    setIsComposerOpen(true);
   };
 
   const closeComposer = () => {
@@ -42,7 +65,10 @@ export function useWorkoutComposer({ onWorkoutCreated }) {
     setSubmitError("");
 
     try {
-      const workout = await createWorkout({ formState });
+      const workout = editingWorkoutId
+        ? await updateWorkout({ workoutId: editingWorkoutId, formState })
+        : await createWorkout({ formState });
+
       onWorkoutCreated(workout);
       resetComposer();
       setIsComposerOpen(false);
@@ -60,8 +86,10 @@ export function useWorkoutComposer({ onWorkoutCreated }) {
     submitError,
     setIsComposerOpen,
     setFormState,
+    editingWorkoutId,
     resetComposer,
     closeComposer,
+    openComposerForEdit,
     submitWorkout,
   };
 }

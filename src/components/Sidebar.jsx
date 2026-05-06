@@ -53,7 +53,7 @@ export default function Sidebar() {
                         />
                     </div>
                     <div>
-                        <p className="text-sm font-bold">{user?.fullName || user?.email || user?.username}</p>
+                        <p className="text-sm font-bold">{user?.fullName}</p>
                     </div>
                 </div>
             </div>

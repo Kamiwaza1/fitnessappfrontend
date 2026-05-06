@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { loginUser } from '@/features/auth/api/authApi';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -13,39 +14,11 @@ export default function LoginPage() {
     const handleLogin = async () => {
         setError("");
         try {
-            console.log("Sending login request", { email, password });
-            const res = await fetch("http://localhost:8080/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-
-            });
-            console.log("Login response status:", res.status);
-            if (!res.ok) {
-                let data;
-                try {
-                    data = await res.json();
-                } catch (jsonErr) {
-                    console.log("Failed to parse error response as JSON", jsonErr);
-                    data = {};
-                }
-                console.log("Login error response:", data);
-                setError(data.message || "Login failed");
-                return;
-            }
-            console.log("Login successful, parsing user...");
-            let data = {};
-            try {
-                data = await res.json();
-            } catch (err) {
-                console.log('Failed to parse login response JSON', err);
-            }
-            // If API returns user object, set it in context; otherwise fallback to email
-            login(data.user || { email });
-            router.push("/");
+            const auth = await loginUser({ email, password });
+            login(auth.user ?? { email }, auth.accessToken);
+            router.push("/dashboard");
         } catch (err) {
-            console.log("Network error during login:", err);
-            setError("Network error");
+            setError(err?.message || "Login failed");
         }
     };
 

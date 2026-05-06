@@ -8,19 +8,21 @@ import WorkoutPageHeader from "@/features/workouts/components/WorkoutPageHeader"
 import AppPageShell from "@/shared/components/AppPageShell";
 
 export default function WorkoutsPage() {
-  const { workouts, isLoading, error, prependWorkout, removeWorkout } = useWorkoutList();
+  const { workouts, isLoading, error, upsertWorkout, removeWorkout } = useWorkoutList();
   const {
     isComposerOpen,
     formState,
+    editingWorkoutId,
     isSubmitting,
     submitError,
     setIsComposerOpen,
     setFormState,
     resetComposer,
     closeComposer,
+    openComposerForEdit,
     submitWorkout,
   } = useWorkoutComposer({
-    onWorkoutCreated: prependWorkout,
+    onWorkoutCreated: upsertWorkout,
   });
 
   const handleDeleteWorkout = async (workoutId) => {
@@ -35,11 +37,12 @@ export default function WorkoutsPage() {
     <AppPageShell mainClassName="relative flex h-screen flex-col overflow-hidden">
       <WorkoutPageHeader onCreateWorkout={() => setIsComposerOpen(true)} />
 
-      <section className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-36 sm:p-8">
+      <section className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-8 sm:p-8">
         <div className="mx-auto max-w-5xl space-y-6">
           {isComposerOpen ? (
             <WorkoutComposerForm
               formState={formState}
+              editingWorkoutId={editingWorkoutId}
               submitError={submitError}
               isSubmitting={isSubmitting}
               onChange={(field, value) =>
@@ -59,16 +62,11 @@ export default function WorkoutsPage() {
             isLoading={isLoading}
             error={error}
             onDelete={handleDeleteWorkout}
+            onEdit={openComposerForEdit}
           />
         </div>
       </section>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between border-t border-primary/10 bg-background-dark/80 px-5 py-4 backdrop-blur-xl sm:px-8">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-slate-500">Planner Status</p>
-          <p className="text-sm text-slate-300">Workout planner ready</p>
-        </div>
-      </footer>
     </AppPageShell>
   );
 }

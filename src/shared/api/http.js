@@ -1,7 +1,14 @@
 import { getClientAuthToken } from "@/shared/utils/authTokenStorage";
 
+function sanitizeAuthToken(rawToken) {
+  if (typeof rawToken !== "string") return "";
+
+  const trimmed = rawToken.trim().replace(/^\"|\"$/g, "");
+  return trimmed.replace(/^Bearer\s+/i, "").trim();
+}
+
 export function getAuthHeaders() {
-  const token = getClientAuthToken();
+  const token = sanitizeAuthToken(getClientAuthToken());
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -9,7 +16,12 @@ export async function parseJsonSafely(response) {
   try {
     return await response.json();
   } catch {
-    return null;
+    try {
+      const text = await response.text();
+      return text ? { message: text } : null;
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -33,8 +45,10 @@ export async function fetchAuthenticatedJson(url, options = {}) {
     ...(options.headers || {}),
   };
 
+  const nextCredentials = options.credentials ?? "omit";
+
   return fetchJson(url, {
-    credentials: "include",
+    credentials: nextCredentials,
     ...options,
     headers,
   });
