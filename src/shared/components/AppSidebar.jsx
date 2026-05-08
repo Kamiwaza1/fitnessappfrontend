@@ -74,7 +74,7 @@ export default function AppSidebar() {
           </div>
           <div>
             <p suppressHydrationWarning className="text-sm font-bold">
-              {user?.fullName || user?.username || "User"}
+              {user?.fullName}
             </p>
           </div>
         </div>

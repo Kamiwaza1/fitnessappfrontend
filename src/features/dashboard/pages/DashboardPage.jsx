@@ -5,7 +5,8 @@ import AppPageShell from "@/shared/components/AppPageShell";
 import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import { useAuth } from "@/context/AuthContext";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -184,19 +185,18 @@ export default function DashboardPage() {
               <span className="material-icons cursor-pointer text-primary">bar_chart</span>
             </div>
             <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer
+                className="h-40 w-full"
+                config={{ minutes: { label: "Minutes", color: "#0df259" } }}
+              >
                 <BarChart data={weeklyDurationData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
-                  <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={28} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(13,242,89,0.25)", borderRadius: 8 }}
-                    labelStyle={{ color: "#e2e8f0" }}
-                    itemStyle={{ color: "#0df259" }}
-                  />
-                  <Bar dataKey="minutes" fill="#0df259" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.2)" />
+                  <XAxis dataKey="day" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} width={28} />
+                  <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+                  <Bar dataKey="minutes" fill="var(--color-minutes)" radius={[6, 6, 0, 0]} />
                 </BarChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </div>
 
@@ -210,19 +210,24 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer
+                className="h-40 w-full"
+                config={{ minutes: { label: "Minutes", color: "#0df259" } }}
+              >
                 <LineChart data={weeklyDurationData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.2)" />
-                  <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} width={28} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(13,242,89,0.25)", borderRadius: 8 }}
-                    labelStyle={{ color: "#e2e8f0" }}
-                    itemStyle={{ color: "#0df259" }}
+                  <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.2)" />
+                  <XAxis dataKey="day" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} width={28} />
+                  <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                  <Line
+                    type="monotone"
+                    dataKey="minutes"
+                    stroke="var(--color-minutes)"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "var(--color-minutes)" }}
                   />
-                  <Line type="monotone" dataKey="minutes" stroke="#0df259" strokeWidth={2} dot={{ r: 3, fill: "#0df259" }} />
                 </LineChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </div>
         </div>

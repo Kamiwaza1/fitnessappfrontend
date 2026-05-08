@@ -51,6 +51,39 @@ export default function WorkoutsPage() {
                   [field]: value,
                 }))
               }
+              onExerciseChange={(index, field, value) =>
+                setFormState((current) => ({
+                  ...current,
+                  exercises: (current.exercises || []).map((exercise, exerciseIndex) =>
+                    exerciseIndex === index ? { ...exercise, [field]: value } : exercise
+                  ),
+                }))
+              }
+              onAddExercise={() =>
+                setFormState((current) => ({
+                  ...current,
+                  exercises: [
+                    ...(current.exercises || []),
+                    {
+                      name: "",
+                      muscleType: "FULL_BODY",
+                      sets: "3",
+                      reps: "10",
+                      weightKg: "20",
+                      notes: "",
+                    },
+                  ],
+                }))
+              }
+              onRemoveExercise={(index) =>
+                setFormState((current) => ({
+                  ...current,
+                  exercises:
+                    (current.exercises || []).length <= 1
+                      ? current.exercises
+                      : current.exercises.filter((_, exerciseIndex) => exerciseIndex !== index),
+                }))
+              }
               onReset={resetComposer}
               onClose={closeComposer}
               onSubmit={submitWorkout}

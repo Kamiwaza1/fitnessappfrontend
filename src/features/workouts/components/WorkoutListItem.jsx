@@ -28,9 +28,7 @@ export default function WorkoutListItem({ workout, onDelete, onEdit }) {
       <p className="mb-2 text-sm text-slate-300">
         {workout.goal || "No goal added"} • {workout.duration} mins • {workout.date || "Date not set"}
       </p>
-      <p className="text-xs text-slate-400">
-        {workout.exercises.length} exercises • {workout.notes || "No notes"}
-      </p>
+      
     </article>
   );
 }

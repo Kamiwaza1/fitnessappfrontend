@@ -39,19 +39,27 @@ export function validateWorkoutForm(formState) {
     return "Duration cannot be greater than 999 minutes";
   }
 
-  const sets = Number(formState.sets);
-  if (!sets || sets < 1) {
-    return "Sets must be at least 1.";
+  const exercises = Array.isArray(formState.exercises) ? formState.exercises : [];
+  if (exercises.length === 0) {
+    return "At least one exercise is required.";
   }
-
-  const reps = Number(formState.reps);
-  if (!reps || reps < 1) {
-    return "Reps must be at least 1.";
-  }
-
-  const weightKg = Number(formState.weightKg);
-  if (!Number.isFinite(weightKg) || weightKg < 0) {
-    return "Weight must be 0 or higher.";
+  for (const exercise of exercises) {
+    const exerciseName = (exercise?.name || "").trim();
+    if (!exerciseName) {
+      return "Each exercise must have a name.";
+    }
+    const sets = Number(exercise?.sets);
+    if (!sets || sets < 1) {
+      return "Each exercise must have sets of at least 1.";
+    }
+    const reps = Number(exercise?.reps);
+    if (!reps || reps < 1) {
+      return "Each exercise must have reps of at least 1.";
+    }
+    const weightKg = Number(exercise?.weightKg);
+    if (!Number.isFinite(weightKg) || weightKg < 0) {
+      return "Each exercise weight must be 0 or higher.";
+    }
   }
 
   if ((formState.description || "").trim().length > 255) {

@@ -1,20 +1,14 @@
 export function normalizeWorkout(workout, index = 0) {
   const exercises = Array.isArray(workout?.exercises)
     ? workout.exercises.map((exercise, exerciseIndex) => {
-        if (typeof exercise === "string") {
-          return {
-            id: `${exercise}-${exerciseIndex}`,
-            name: exercise,
-            focus: "",
-            equipment: "",
-          };
-        }
-
         return {
           id: exercise?.id || exercise?._id || `${exercise?.name || "exercise"}-${exerciseIndex}`,
           name: exercise?.name || `Exercise ${exerciseIndex + 1}`,
-          focus: exercise?.focus || "",
-          equipment: exercise?.equipment || "",
+          muscleType: exercise?.muscleType || "FULL_BODY",
+          sets: Number.isFinite(Number(exercise?.sets)) ? Number(exercise?.sets) : null,
+          reps: Number.isFinite(Number(exercise?.reps)) ? Number(exercise?.reps) : null,
+          weightKg: Number.isFinite(Number(exercise?.weightKg)) ? Number(exercise?.weightKg) : null,
+          notes: exercise?.notes || "",
         };
       })
     : [];
@@ -36,6 +30,7 @@ export function normalizeWorkout(workout, index = 0) {
     notes: workout?.notes || "",
     description: workout?.description || "",
     category: workout?.category || "GENERAL",
+    muscleType: workout?.muscleType || "FULL_BODY",
     exercises,
     status: workout?.status || "Scheduled",
   };

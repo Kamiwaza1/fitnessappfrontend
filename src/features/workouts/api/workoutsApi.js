@@ -29,20 +29,27 @@ export async function createWorkout({ formState }) {
   const trimmedDescription = formState.description.trim();
   const trimmedNotes = formState.notes.trim();
   const duration = Number(formState.duration);
-  const sets = Number(formState.sets);
-  const reps = Number(formState.reps);
-  const weightKg = Number(formState.weightKg);
+  const exercises = (formState.exercises || []).map((exercise) => ({
+    name: exercise.name.trim(),
+    muscleType: exercise.muscleType,
+    sets: Number(exercise.sets),
+    reps: Number(exercise.reps),
+    weightKg: Number(exercise.weightKg),
+    notes: (exercise.notes || "").trim(),
+  }));
 
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
     durationMinutes: duration,
-    sets,
-    reps,
-    weightKg,
+    sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
+    reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
+    weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),
     notes: trimmedNotes,
     description: trimmedDescription,
     category: formState.category,
+    muscleType: formState.muscleType,
+    exercises,
   };
 
   try {
@@ -74,20 +81,27 @@ export async function updateWorkout({ workoutId, formState }) {
   const trimmedDescription = formState.description.trim();
   const trimmedNotes = formState.notes.trim();
   const duration = Number(formState.duration);
-  const sets = Number(formState.sets);
-  const reps = Number(formState.reps);
-  const weightKg = Number(formState.weightKg);
+  const exercises = (formState.exercises || []).map((exercise) => ({
+    name: exercise.name.trim(),
+    muscleType: exercise.muscleType,
+    sets: Number(exercise.sets),
+    reps: Number(exercise.reps),
+    weightKg: Number(exercise.weightKg),
+    notes: (exercise.notes || "").trim(),
+  }));
 
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
     durationMinutes: duration,
-    sets,
-    reps,
-    weightKg,
+    sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
+    reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
+    weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),
     notes: trimmedNotes,
     description: trimmedDescription,
     category: formState.category,
+    muscleType: formState.muscleType,
+    exercises,
   };
 
   try {
