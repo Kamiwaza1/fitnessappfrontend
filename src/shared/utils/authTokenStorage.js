@@ -1,4 +1,6 @@
-const AUTH_TOKEN_KEYS = ["authToken", "token"];
+const ACCESS_TOKEN_KEYS = ["accessToken", "authToken", "token"];
+const REFRESH_TOKEN_KEYS = ["refreshToken"];
+const AUTH_USER_KEYS = ["user"];
 const AUTH_COOKIE_NAMES = ["authToken", "token", "jwt", "accessToken"];
 
 function safeDecodeURIComponent(value) {
@@ -50,9 +52,36 @@ export function isTokenExpired(token, nowMs = Date.now()) {
 export function readStoredAuthToken() {
   if (typeof window === "undefined") return null;
 
-  for (const key of AUTH_TOKEN_KEYS) {
+  for (const key of ACCESS_TOKEN_KEYS) {
     const value = window.localStorage.getItem(key);
     if (value) return value;
+  }
+
+  return null;
+}
+
+export function readStoredRefreshToken() {
+  if (typeof window === "undefined") return null;
+
+  for (const key of REFRESH_TOKEN_KEYS) {
+    const value = window.localStorage.getItem(key);
+    if (value) return value;
+  }
+
+  return null;
+}
+
+export function readStoredAuthUser() {
+  if (typeof window === "undefined") return null;
+
+  for (const key of AUTH_USER_KEYS) {
+    const rawValue = window.localStorage.getItem(key);
+    if (!rawValue) continue;
+    try {
+      return JSON.parse(rawValue);
+    } catch {
+      return null;
+    }
   }
 
   return null;
@@ -86,7 +115,7 @@ export function getClientAuthToken() {
 export function storeAuthToken(token) {
   if (!token || typeof window === "undefined") return;
 
-  for (const key of AUTH_TOKEN_KEYS) {
+  for (const key of ACCESS_TOKEN_KEYS) {
     window.localStorage.setItem(key, token);
   }
 
@@ -104,10 +133,33 @@ export function storeAuthToken(token) {
   document.cookie = `authToken=${encodeURIComponent(token)};${cookieParts.join(";")}`;
 }
 
+export function storeAuthSession({ accessToken, refreshToken, user }) {
+  if (typeof window === "undefined") return;
+  if (accessToken) {
+    storeAuthToken(accessToken);
+  }
+  if (refreshToken) {
+    for (const key of REFRESH_TOKEN_KEYS) {
+      window.localStorage.setItem(key, refreshToken);
+    }
+  }
+  if (user) {
+    for (const key of AUTH_USER_KEYS) {
+      window.localStorage.setItem(key, JSON.stringify(user));
+    }
+  }
+}
+
 export function clearStoredAuthToken() {
   if (typeof window === "undefined") return;
 
-  for (const key of AUTH_TOKEN_KEYS) {
+  for (const key of ACCESS_TOKEN_KEYS) {
+    window.localStorage.removeItem(key);
+  }
+  for (const key of REFRESH_TOKEN_KEYS) {
+    window.localStorage.removeItem(key);
+  }
+  for (const key of AUTH_USER_KEYS) {
     window.localStorage.removeItem(key);
   }
 

@@ -10,15 +10,20 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogin = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         setError("");
         try {
             const auth = await loginUser({ email, password });
-            login(auth.user ?? { email }, auth.accessToken);
+            login(auth);
             router.push("/dashboard");
         } catch (err) {
             setError(err?.message || "Login failed");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -44,9 +49,13 @@ export default function LoginPage() {
                         onChange={e => setPassword(e.target.value)}
                         required
                     />
-                    <button className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg mt-4 hover:bg-primary/90 transition-all flex items-center justify-center space-x-2" type="submit">
+                    <button
+                        className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg mt-4 hover:bg-primary/90 transition-all flex items-center justify-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
                         <span className="material-icons">login</span>
-                        <span>Login</span>
+                        <span>{isSubmitting ? "Signing in..." : "Login"}</span>
                     </button>
                 </form>
                 {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}

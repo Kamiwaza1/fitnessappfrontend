@@ -44,7 +44,7 @@ export function useRegisterForm() {
         password: values.password,
       });
 
-      login(auth.user ?? { email: normalizedEmail, fullName: normalizedName }, auth.accessToken);
+      login(auth);
       router.push("/workouts");
     } catch (submissionError) {
       if (submissionError.fieldErrors && Object.keys(submissionError.fieldErrors).length > 0) {

@@ -6,8 +6,9 @@ import {
   decodeJwtPayload,
   getTokenExpiryMs,
   isTokenExpired,
+  readStoredAuthUser,
   readStoredAuthToken,
-  storeAuthToken,
+  storeAuthSession,
 } from "@/shared/utils/authTokenStorage";
 
 const AuthContext = createContext();
@@ -27,7 +28,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const initialToken = readStoredAuthToken();
     if (!initialToken || isTokenExpired(initialToken)) return null;
-    return getUserFromToken(initialToken);
+    return readStoredAuthUser() || getUserFromToken(initialToken);
   });
 
   const logout = useCallback(() => {
@@ -38,17 +39,19 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(
     (authOrUsername, maybeToken) => {
-      const authUser =
+      const authPayload =
         authOrUsername && typeof authOrUsername === "object" && !Array.isArray(authOrUsername)
           ? authOrUsername
           : null;
+      const authUser = authPayload?.user || authPayload;
       const username =
         typeof authOrUsername === "string"
           ? authOrUsername
           : authUser?.email || authUser?.username || authUser?.fullName;
-      const nextToken = authUser
-        ? maybeToken || authUser.accessToken || authUser.token || null
+      const nextToken = authPayload
+        ? maybeToken || authPayload.accessToken || authPayload.token || authUser?.accessToken || authUser?.token || null
         : maybeToken || null;
+      const nextRefreshToken = authPayload?.refreshToken || null;
 
       if (nextToken) {
         if (isTokenExpired(nextToken)) {
@@ -57,12 +60,18 @@ export function AuthProvider({ children }) {
         }
 
         const parsedUser = getUserFromToken(nextToken);
-        storeAuthToken(nextToken);
-        setToken(nextToken);
-        setUser({
+        const normalizedUser = {
+          ...authUser,
           username: username || parsedUser.username,
           fullName: authUser?.fullName || parsedUser.fullName || null,
+        };
+        storeAuthSession({
+          accessToken: nextToken,
+          refreshToken: nextRefreshToken,
+          user: normalizedUser,
         });
+        setToken(nextToken);
+        setUser(normalizedUser);
         return;
       }
 

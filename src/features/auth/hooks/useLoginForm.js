@@ -46,7 +46,7 @@ export function useLoginForm() {
         password: values.password,
       });
 
-      login(auth.user ?? { email: normalizedEmail }, auth.accessToken);
+      login(auth);
       router.push("/dashboard");
     } catch (submissionError) {
       if (submissionError.fieldErrors && Object.keys(submissionError.fieldErrors).length > 0) {
