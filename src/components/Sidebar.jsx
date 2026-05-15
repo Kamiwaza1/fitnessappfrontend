@@ -1,22 +1,30 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
+    const router = useRouter();
+    const { user, logout } = useAuth();
     const navItems = [
         { name: 'Dashboard', icon: 'dashboard', path: '/' },
         { name: 'Workouts', icon: 'fitness_center', path: '/workouts' },
         { name: 'Nutrition', icon: 'restaurant', path: '/nutrition' },
         { name: 'Progress', icon: 'insights', path: '/progress' },
         { name: 'Settings', icon: 'settings', path: '/settings' },
-        { name: 'Logout', icon: 'logout', path: '/login' },
     ];
     const pathname = usePathname();
     const { user } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        router.replace('/login');
+    };
+
+    const displayName = user?.fullName;
 
     return (
         <aside className="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 hidden lg:flex flex-col sticky top-0 h-screen">
@@ -42,6 +50,14 @@ export default function Sidebar() {
                         </Link>
                     );
                 })}
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                >
+                    <span className="material-icons">logout</span>
+                    <span className="font-medium">Logout</span>
+                </button>
             </nav>
             <div className="p-6 border-t border-primary/10">
                 <div className="flex items-center space-x-3">

@@ -2,6 +2,8 @@
 const backendBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 /** @type {import('next').NextConfig} */
+const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8080';
+
 const nextConfig = {
   output: "standalone",
   reactCompiler: true,

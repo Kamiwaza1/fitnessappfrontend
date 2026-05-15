@@ -98,6 +98,20 @@ export function AuthProvider({ children }) {
     return () => window.clearTimeout(timeoutId);
   }, [token, logout]);
 
+  useEffect(() => {
+    if (!token || typeof window === 'undefined') return;
+    const expiryMs = getTokenExpiryMs(token);
+    if (!expiryMs) return;
+
+    const msUntilExpiry = expiryMs - Date.now();
+    const timeoutId = window.setTimeout(() => {
+      logout();
+      window.location.assign('/login');
+    }, Math.max(msUntilExpiry, 0));
+
+    return () => window.clearTimeout(timeoutId);
+  }, [token, logout]);
+
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
