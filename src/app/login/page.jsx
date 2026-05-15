@@ -1,42 +1,69 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { loginUser } from '@/features/auth/api/authApi';
 
 export default function LoginPage() {
     const router = useRouter();
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const { login } = useAuth();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogin = async () => {
-        setIsLoggingIn(true);
-
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        setError("");
         try {
-            // Simulate login API call
-            const response = await fetch("/api/login", {
-                method: "POST",
-                body: JSON.stringify({ username: "user", password: "password" }),
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!response.ok) {
-                throw new Error("Login failed");
-            }
-
-            // Redirect to dashboard after successful login
+            const auth = await loginUser({ email, password });
+            login(auth);
             router.push("/dashboard");
-        } catch (error) {
-            console.error(error);
-            alert("Login failed. Please try again.");
+        } catch (err) {
+            setError(err?.message || "Login failed");
         } finally {
-            setIsLoggingIn(false);
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div>
-            <h1>Login</h1>
-            <button onClick={handleLogin} disabled={isLoggingIn}>
-                {isLoggingIn ? "Logging in..." : "Login"}
-            </button>
+        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center font-display">
+            <div className="w-full max-w-md bg-white dark:bg-background-dark rounded-xl shadow-lg p-8 border border-primary/10 flex flex-col items-center">
+                <h1 className="text-3xl font-extrabold tracking-tighter text-primary italic mb-6">DARK LIFT</h1>
+                <p className="text-slate-500 dark:text-slate-300 mb-8 text-center">Welcome back! Please log in to continue.</p>
+                <form className="w-full flex flex-col gap-4" onSubmit={e => { e.preventDefault(); handleLogin(); }}>
+                    <input
+                        className="w-full px-4 py-2 rounded-lg border border-primary/20 bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary"
+                        type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        className="w-full px-4 py-2 rounded-lg border border-primary/20 bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                    />
+                    <button
+                        className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg mt-4 hover:bg-primary/90 transition-all flex items-center justify-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        <span className="material-icons">login</span>
+                        <span>{isSubmitting ? "Signing in..." : "Login"}</span>
+                    </button>
+                </form>
+                {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
+                <div className="mt-6 text-xs text-slate-400 text-center">
+                    <span> Dont have an account?</span>
+                    <a href="/register" className="text-primary font-bold ml-1 hover:underline">Register</a>
+                </div>
+            </div>
         </div>
     );
 }

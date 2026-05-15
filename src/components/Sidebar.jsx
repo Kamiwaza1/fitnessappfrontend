@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
     const router = useRouter();
@@ -67,8 +68,7 @@ export default function Sidebar() {
                         />
                     </div>
                     <div>
-                        <p className="text-sm font-bold">{displayName}</p>
-                        
+                        <p className="text-sm font-bold">{user?.fullName}</p>
                     </div>
                 </div>
             </div>

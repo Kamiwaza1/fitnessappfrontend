@@ -1,52 +1,35 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
   clearStoredAuthToken,
   decodeJwtPayload,
   getTokenExpiryMs,
   isTokenExpired,
+  readStoredAuthUser,
   readStoredAuthToken,
-} from '@/lib/authToken';
+  storeAuthSession,
+} from "@/shared/utils/authTokenStorage";
 
 const AuthContext = createContext();
 
 function getUserFromToken(token) {
   const payload = decodeJwtPayload(token);
-  const fullName =
-    payload?.fullName ||
-    payload?.name ||
-    payload?.full_name ||
-    [payload?.given_name, payload?.family_name].filter(Boolean).join(" ").trim() ||
-    null;
+  if (!payload) return { username: "User", fullName: null };
 
   return {
-    username: payload?.sub || payload?.email || payload?.username || "User",
-    fullName,
+    username: payload.email || payload.username || payload.sub || "User",
+    fullName: payload.fullName || payload.name || null,
   };
 }
 
-function getInitialAuthState() {
-  if (typeof window === 'undefined') {
-    return { user: null, token: null };
-  }
-
-  const stored = readStoredAuthToken();
-  if (!stored) {
-    return { user: null, token: null };
-  }
-
-  if (isTokenExpired(stored)) {
-    clearStoredAuthToken();
-    return { user: null, token: null };
-  }
-
-  return { user: getUserFromToken(stored), token: stored };
-}
-
 export function AuthProvider({ children }) {
-  const initialAuthState = getInitialAuthState();
-  const [user, setUser] = useState(initialAuthState.user);
-  const [token, setToken] = useState(initialAuthState.token);
+  const [token, setToken] = useState(() => readStoredAuthToken());
+  const [user, setUser] = useState(() => {
+    const initialToken = readStoredAuthToken();
+    if (!initialToken || isTokenExpired(initialToken)) return null;
+    return readStoredAuthUser() || getUserFromToken(initialToken);
+  });
 
   const logout = useCallback(() => {
     setUser(null);
@@ -54,25 +37,66 @@ export function AuthProvider({ children }) {
     clearStoredAuthToken();
   }, []);
 
-  const login = (username, newToken) => {
-    if (newToken) {
-      if (isTokenExpired(newToken)) {
-        clearStoredAuthToken();
-        setUser(null);
-        setToken(null);
+  const login = useCallback(
+    (authOrUsername, maybeToken) => {
+      const authPayload =
+        authOrUsername && typeof authOrUsername === "object" && !Array.isArray(authOrUsername)
+          ? authOrUsername
+          : null;
+      const authUser = authPayload?.user || authPayload;
+      const username =
+        typeof authOrUsername === "string"
+          ? authOrUsername
+          : authUser?.email || authUser?.username || authUser?.fullName;
+      const nextToken = authPayload
+        ? maybeToken || authPayload.accessToken || authPayload.token || authUser?.accessToken || authUser?.token || null
+        : maybeToken || null;
+      const nextRefreshToken = authPayload?.refreshToken || null;
+
+      if (nextToken) {
+        if (isTokenExpired(nextToken)) {
+          logout();
+          return;
+        }
+
+        const parsedUser = getUserFromToken(nextToken);
+        const normalizedUser = {
+          ...authUser,
+          username: username || parsedUser.username,
+          fullName: authUser?.fullName || parsedUser.fullName || null,
+        };
+        storeAuthSession({
+          accessToken: nextToken,
+          refreshToken: nextRefreshToken,
+          user: normalizedUser,
+        });
+        setToken(nextToken);
+        setUser(normalizedUser);
         return;
       }
-      const parsedUser = getUserFromToken(newToken);
-      setToken(newToken);
-      setUser({
-        username: username || parsedUser.username,
-        fullName: parsedUser.fullName || null,
-      });
-      return;
-    }
 
-    setUser({ username: username || "User", fullName: null });
-  };
+      setUser({
+        username: username || "User",
+        fullName: authUser?.fullName || null,
+      });
+    },
+    [logout]
+  );
+
+  useEffect(() => {
+    if (!token || typeof window === "undefined") return undefined;
+
+    const expiryMs = getTokenExpiryMs(token);
+    if (!expiryMs) return undefined;
+
+    const msUntilExpiry = expiryMs - Date.now();
+    const timeoutId = window.setTimeout(() => {
+      logout();
+      window.location.assign("/");
+    }, Math.max(msUntilExpiry, 0));
+
+    return () => window.clearTimeout(timeoutId);
+  }, [token, logout]);
 
   useEffect(() => {
     if (!token || typeof window === 'undefined') return;

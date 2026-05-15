@@ -1,4 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { isTokenExpired } from "@/shared/utils/authTokenStorage";
+
+function clearAuthCookies(response) {
+  response.cookies.set("authToken", "", { maxAge: 0, path: "/" });
+  response.cookies.set("token", "", { maxAge: 0, path: "/" });
+  response.cookies.set("jwt", "", { maxAge: 0, path: "/" });
+  response.cookies.set("accessToken", "", { maxAge: 0, path: "/" });
+  return response;
+}
 
 function clearAuthCookies(response) {
   response.cookies.delete('authToken');
@@ -8,34 +17,19 @@ function clearAuthCookies(response) {
 }
 
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
   const authToken =
-    request.cookies.get('authToken')?.value ||
-    request.cookies.get('token')?.value ||
-    request.cookies.get('jwt')?.value;
+    request.cookies.get("authToken")?.value ||
+    request.cookies.get("token")?.value ||
+    request.cookies.get("jwt")?.value ||
+    request.cookies.get("accessToken")?.value;
 
-  const hasToken = Boolean(authToken);
-  const hasValidToken = hasToken && !isTokenExpired(authToken);
-
-  // Allow unauthenticated access to /, /login, and /register
-  if (pathname === '/' || pathname === '/login' || pathname === '/register') {
-    if (hasValidToken) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    if (hasToken) {
-      return clearAuthCookies(NextResponse.next());
-    }
-    return NextResponse.next();
-  }
-
-  // Protect all non-public routes
-  if (!hasValidToken) {
-    return clearAuthCookies(NextResponse.redirect(new URL('/login', request.url)));
+  if (authToken && isTokenExpired(authToken)) {
+    return clearAuthCookies(NextResponse.next());
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api).*)'],
+  matcher: ["/"],
 };
