@@ -17,7 +17,6 @@ export default function Sidebar() {
         { name: 'Settings', icon: 'settings', path: '/settings' },
     ];
     const pathname = usePathname();
-    const { user } = useAuth();
 
     const handleLogout = () => {
         logout();
