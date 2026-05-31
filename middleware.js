@@ -9,13 +9,6 @@ function clearAuthCookies(response) {
   return response;
 }
 
-function clearAuthCookies(response) {
-  response.cookies.delete('authToken');
-  response.cookies.delete('token');
-  response.cookies.delete('jwt');
-  return response;
-}
-
 export function middleware(request) {
   const authToken =
     request.cookies.get("authToken")?.value ||
