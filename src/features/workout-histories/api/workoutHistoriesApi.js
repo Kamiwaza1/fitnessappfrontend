@@ -1,8 +1,8 @@
 import { fetchAuthenticatedJson } from "@/shared/api/http";
+import { buildApiUrl } from "@/shared/api/apiBase";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 const WORKOUT_HISTORIES_API_ENDPOINT =
-  process.env.NEXT_PUBLIC_WORKOUT_HISTORIES_API_ENDPOINT ?? `${API_BASE}/api/v1/workout-history`;
+  process.env.NEXT_PUBLIC_WORKOUT_HISTORIES_API_ENDPOINT ?? buildApiUrl("/api/v1/workout-history");
 
 function getAuthorizationErrorMessage(error, fallbackMessage) {
   if (error?.status === 401 || error?.status === 403) {

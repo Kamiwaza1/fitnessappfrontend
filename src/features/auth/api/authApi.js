@@ -1,6 +1,6 @@
 import { parseAuthErrorResponse } from "@/lib/authError";
+import { buildApiUrl } from "@/shared/api/apiBase";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 const AUTH_API_BASE = "/api/v1/auth";
 
 const API_TIMEOUT_MS = 15000;
@@ -89,7 +89,7 @@ function normalizeAuthResponse(data) {
 }
 
 export async function loginUser({ email, password }) {
-  const response = await authFetch(`${API_BASE}${AUTH_API_BASE}/login`, {
+  const response = await authFetch(buildApiUrl(`${AUTH_API_BASE}/login`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -107,7 +107,7 @@ export async function loginUser({ email, password }) {
 }
 
 export async function registerUser({ fullName, email, password }) {
-  const response = await authFetch(`${API_BASE}${AUTH_API_BASE}/register`, {
+  const response = await authFetch(buildApiUrl(`${AUTH_API_BASE}/register`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fullName, email, password }),

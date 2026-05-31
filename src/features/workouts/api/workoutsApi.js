@@ -1,8 +1,8 @@
 import { fetchAuthenticatedJson } from "@/shared/api/http";
 import { extractWorkoutCollection, normalizeWorkout } from "@/features/workouts/utils/workoutTransforms";
+import { buildApiUrl } from "@/shared/api/apiBase";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
-const WORKOUTS_API_ENDPOINT = `${API_BASE}/api/v1/workouts`;
+const WORKOUTS_API_ENDPOINT = buildApiUrl("/api/v1/workouts");
 
 function getAuthorizationErrorMessage(error, fallbackMessage) {
   if (error?.status === 401 || error?.status === 403) {
