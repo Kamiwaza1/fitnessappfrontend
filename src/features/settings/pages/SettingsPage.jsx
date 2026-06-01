@@ -133,15 +133,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <AppPageShell mainClassName="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between border-b border-primary/10 bg-background-light/80 px-4 py-3 backdrop-blur-md sm:px-8 dark:bg-background-dark/80">
+    <AppPageShell mainClassName="flex h-screen flex-col overflow-hidden">
+      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-primary/10 bg-background-light/80 px-8 backdrop-blur-md dark:bg-background-dark/80">
         <div>
           <h2 className="text-xl font-bold">Settings</h2>
           <p className="text-xs text-slate-500">Account security and nutrition preferences</p>
         </div>
       </header>
 
-      <section className="custom-scrollbar flex-1 p-4 sm:p-8">
+      <section className="custom-scrollbar flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-6">
             <SettingsCard
