@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { loginUser } from '@/features/auth/api/authApi';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -9,43 +10,20 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleLogin = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         setError("");
         try {
-            console.log("Sending login request", { email, password });
-            const res = await fetch("http://localhost:8080/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-
-            });
-            console.log("Login response status:", res.status);
-            if (!res.ok) {
-                let data;
-                try {
-                    data = await res.json();
-                } catch (jsonErr) {
-                    console.log("Failed to parse error response as JSON", jsonErr);
-                    data = {};
-                }
-                console.log("Login error response:", data);
-                setError(data.message || "Login failed");
-                return;
-            }
-            console.log("Login successful, parsing user...");
-            let data = {};
-            try {
-                data = await res.json();
-            } catch (err) {
-                console.log('Failed to parse login response JSON', err);
-            }
-            // If API returns user object, set it in context; otherwise fallback to email
-            login(data.user || { email });
-            router.push("/");
+            const auth = await loginUser({ email, password });
+            login(auth);
+            router.push("/dashboard");
         } catch (err) {
-            console.log("Network error during login:", err);
-            setError("Network error");
+            setError(err?.message || "Login failed");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -71,9 +49,13 @@ export default function LoginPage() {
                         onChange={e => setPassword(e.target.value)}
                         required
                     />
-                    <button className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg mt-4 hover:bg-primary/90 transition-all flex items-center justify-center space-x-2" type="submit">
+                    <button
+                        className="w-full bg-primary text-background-dark font-bold py-3 rounded-lg mt-4 hover:bg-primary/90 transition-all flex items-center justify-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
                         <span className="material-icons">login</span>
-                        <span>Login</span>
+                        <span>{isSubmitting ? "Signing in..." : "Login"}</span>
                     </button>
                 </form>
                 {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
