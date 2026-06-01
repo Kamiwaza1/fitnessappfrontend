@@ -44,15 +44,15 @@ export default function DashboardPage() {
   }, [workouts]);
 
   return (
-    <AppPageShell mainClassName="h-screen overflow-hidden">
-      <header className="flex items-center justify-between p-5">
-        <div>
-          <h2 className="text-3xl font-bold">
+    <AppPageShell mainClassName="min-h-dvh">
+      <header className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <h2 className="text-2xl font-bold sm:text-3xl">
             Welcome back, <span className="text-primary">{displayName}</span>
           </h2>
           <p className="mt-1 text-slate-400">Ready to crush your session today?</p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between gap-4 sm:justify-end">
           <div className="hidden text-right sm:block">
             <p suppressHydrationWarning className="text-xs uppercase tracking-widest text-slate-400">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
@@ -65,7 +65,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="space-y-4 px-5 pb-5">
+      <div className="space-y-4 px-4 pb-6 sm:px-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="grid grid-cols-1 gap-3 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5 md:grid-cols-2 lg:col-span-2">
             <div className="flex flex-col items-center justify-center space-y-4">

@@ -34,10 +34,10 @@ export default function WorkoutsPage() {
   };
 
   return (
-    <AppPageShell mainClassName="relative flex h-screen flex-col overflow-hidden">
+    <AppPageShell mainClassName="relative flex min-h-dvh flex-col">
       <WorkoutPageHeader onCreateWorkout={() => setIsComposerOpen(true)} />
 
-      <section className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-8 sm:p-8">
+      <section className="custom-scrollbar flex-1 p-3 pb-6 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-5xl space-y-6">
           {isComposerOpen ? (
             <WorkoutComposerForm

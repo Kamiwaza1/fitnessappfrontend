@@ -1,20 +1,19 @@
 import WorkoutListItem from "@/features/workouts/components/WorkoutListItem";
 import StatusMessage from "@/shared/components/StatusMessage";
+import { toIsoLocalDate } from "@/shared/utils/date";
 
 export default function WorkoutList({ workouts, isLoading, error, onDelete, onEdit }) {
-  const now = new Date();
+  const today = toIsoLocalDate();
   const upcomingWorkouts = workouts.filter((workout) => {
-    if (!workout?.date) return false;
-    const workoutDate = new Date(workout.date);
-    if (Number.isNaN(workoutDate.getTime())) return false;
-    return workoutDate > now;
+    const workoutDate = String(workout?.workoutDate || workout?.date || "").slice(0, 10);
+    return workoutDate >= today;
   });
 
   return (
-    <div className="rounded-2xl border border-primary/10 bg-background-light p-5 sm:p-6 dark:bg-background-dark/40">
-      <div className="mb-5 flex items-center justify-between">
+    <div className="rounded-xl border border-primary/10 bg-background-light p-4 sm:p-5 dark:bg-background-dark/40">
+      <div className="mb-5 flex items-center justify-between gap-3">
         <h3 className="text-lg font-bold">Upcoming Workouts</h3>
-        <span className="text-xs uppercase tracking-widest text-slate-400">
+        <span className="shrink-0 text-xs uppercase tracking-widest text-slate-400">
           {upcomingWorkouts.length} scheduled
         </span>
       </div>

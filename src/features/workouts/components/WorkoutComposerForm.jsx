@@ -13,11 +13,11 @@ export default function WorkoutComposerForm({
 }) {
   return (
     <form
-      className="grid grid-cols-1 gap-4 rounded-2xl border border-primary/20 bg-background-light p-5 text-slate-900 shadow-sm sm:p-6 md:grid-cols-2 dark:bg-background-dark dark:text-slate-100"
+      className="grid grid-cols-1 gap-4 rounded-xl border border-primary/20 bg-background-light p-4 text-slate-900 shadow-sm sm:p-5 md:grid-cols-2 dark:bg-background-dark dark:text-slate-100"
       onSubmit={onSubmit}
     >
-      <div className="md:col-span-2 flex items-start justify-between gap-3">
-        <div>
+      <div className="flex items-start justify-between gap-3 md:col-span-2">
+        <div className="min-w-0">
           <h2 className="text-lg font-bold">
             {editingWorkoutId ? "Edit Workout Details" : "New Workout Details"}
           </h2>
@@ -27,7 +27,7 @@ export default function WorkoutComposerForm({
         </div>
         <button
           type="button"
-          className="h-9 w-9 rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           onClick={onClose}
         >
           <span className="material-icons text-base">close</span>
@@ -112,12 +112,12 @@ export default function WorkoutComposerForm({
         />
       </label>
 
-      <div className="md:col-span-2 space-y-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-        <div className="flex items-center justify-between">
+      <div className="space-y-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700 md:col-span-2">
+        <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold">Exercises</h3>
           <button
             type="button"
-            className="rounded-md border border-primary/40 px-2 py-1 text-xs text-primary hover:bg-primary/10"
+            className="shrink-0 rounded-md border border-primary/40 px-2 py-1 text-xs text-primary hover:bg-primary/10"
             onClick={onAddExercise}
           >
             Add Exercise
@@ -125,15 +125,15 @@ export default function WorkoutComposerForm({
         </div>
 
         {(formState.exercises || []).map((exercise, index) => (
-          <div key={index} className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-3 md:grid-cols-6 dark:border-slate-700">
+          <div key={index} className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-6 dark:border-slate-700">
             <input
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm md:col-span-2 dark:border-slate-700 dark:bg-slate-900/70"
+              className="col-span-2 rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm sm:col-span-2 dark:border-slate-700 dark:bg-slate-900/70"
               placeholder="Exercise name"
               value={exercise.name}
               onChange={(event) => onExerciseChange(index, "name", event.target.value)}
             />
             <select
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70"
+              className="col-span-2 rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm sm:col-span-1 dark:border-slate-700 dark:bg-slate-900/70"
               value={exercise.muscleType}
               onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
             >
@@ -185,7 +185,7 @@ export default function WorkoutComposerForm({
             </div>
             <textarea
               rows="2"
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm md:col-span-6 dark:border-slate-700 dark:bg-slate-900/70"
+              className="col-span-2 rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm sm:col-span-6 dark:border-slate-700 dark:bg-slate-900/70"
               placeholder="Exercise notes (optional)"
               value={exercise.notes || ""}
               onChange={(event) => onExerciseChange(index, "notes", event.target.value)}
@@ -205,11 +205,11 @@ export default function WorkoutComposerForm({
         />
       </label>
 
-      <div className="md:col-span-2 mt-1 flex flex-col gap-3 sm:flex-row sm:justify-end">
+      <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:justify-end md:col-span-2">
         {submitError ? <p className="mr-auto text-sm text-red-400">{submitError}</p> : null}
         <button
           type="button"
-          className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="min-h-11 rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           onClick={onReset}
           disabled={isSubmitting}
         >
@@ -217,7 +217,7 @@ export default function WorkoutComposerForm({
         </button>
         <button
           type="submit"
-          className="rounded-lg bg-primary px-6 py-2 font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-primary px-6 py-2 font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Saving..." : editingWorkoutId ? "Update Workout" : "Save Workout"}

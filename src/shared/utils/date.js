@@ -1,5 +1,5 @@
 export function getTodayIsoDate() {
-  return new Date().toISOString().slice(0, 10);
+  return toIsoLocalDate();
 }
 
 export function toIsoLocalDate(date = new Date()) {
