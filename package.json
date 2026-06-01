@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:e2e": "BACKEND_URL=${BACKEND_URL:-http://localhost:8080} next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cy:open": "ELECTRON_RUN_AS_NODE= TS_NODE_PROJECT=cypress/tsconfig.json cypress open",
+    "cy:run": "ELECTRON_RUN_AS_NODE= TS_NODE_PROJECT=cypress/tsconfig.json cypress run",
+    "e2e": "start-server-and-test dev:e2e http://localhost:3000 cy:run"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -15,10 +19,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
-    "next": "16.1.6",
+    "next": "^16.2.7",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-is": "^19.2.6",
     "recharts": "^3.8.0",
     "shadcn": "^4.7.0",
     "tailwind-merge": "^3.5.0",
@@ -28,11 +33,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/react": "19.2.15",
     "autoprefixer": "^10.5.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "cypress": "^15.16.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "postcss": "^8.5.15",
-    "tailwindcss": "^4.3.0"
+    "start-server-and-test": "^3.0.5",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.9.3"
   }
 }
