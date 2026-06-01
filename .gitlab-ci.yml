@@ -8,6 +8,7 @@ variables:
   NODE_IMAGE: node:22-alpine
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_DRIVER: overlay2
+  COOLIFY_WEBHOOK: "$COOLIFY_WEBHOOK"
 
 cache:
   key:
@@ -75,6 +76,8 @@ deploy_docker:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE:latest"
+    - echo "Triggering Coolify deployment"
+    - 'curl -fsSL "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"'
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "Development"'
