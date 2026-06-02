@@ -2,7 +2,7 @@ import WorkoutListItem from "@/features/workouts/components/WorkoutListItem";
 import StatusMessage from "@/shared/components/StatusMessage";
 import { toIsoLocalDate } from "@/shared/utils/date";
 
-export default function WorkoutList({ workouts, isLoading, error, onDelete, onEdit }) {
+export default function WorkoutList({ workouts, isLoading, error, onDelete, onEdit, onStart, onStartLive }) {
   const today = toIsoLocalDate();
   const upcomingWorkouts = workouts.filter((workout) => {
     const workoutDate = String(workout?.workoutDate || workout?.date || "").slice(0, 10);
@@ -38,7 +38,14 @@ export default function WorkoutList({ workouts, isLoading, error, onDelete, onEd
       {!isLoading && !error && upcomingWorkouts.length > 0 ? (
         <div className="space-y-4">
           {upcomingWorkouts.map((workout) => (
-            <WorkoutListItem key={workout.id} workout={workout} onDelete={onDelete} onEdit={onEdit} />
+            <WorkoutListItem
+              key={workout.id}
+              workout={workout}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              onStart={onStart}
+              onStartLive={onStartLive}
+            />
           ))}
         </div>
       ) : null}

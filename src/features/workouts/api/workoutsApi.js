@@ -133,3 +133,17 @@ export async function deleteWorkout(workoutId) {
     throw new Error("Could not delete workout. Please try again.");
   }
 }
+
+export async function saveWorkoutSession(payload) {
+  try {
+    return await fetchAuthenticatedJson(buildApiUrl("/api/v1/workout-history"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    throw new Error(getAuthorizationErrorMessage(error, "Could not save workout session."));
+  }
+}

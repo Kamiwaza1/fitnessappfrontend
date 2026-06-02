@@ -11,7 +11,7 @@ import {
 } from "@/features/nutrition/api/nutritionApi";
 import AppPageShell from "@/shared/components/AppPageShell";
 import StatusMessage from "@/shared/components/StatusMessage";
-import { formatLongDate, getTodayIsoDate } from "@/shared/utils/date";
+import { formatLongDate, getTodayIsoDate, toIsoLocalDate } from "@/shared/utils/date";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
 import { CALORIE_TARGET_EVENT, readCalorieTarget, saveCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 
@@ -700,11 +700,13 @@ export default function NutritionPage() {
   };
 
   const shiftDate = (days) => {
-    const date = new Date(`${selectedDate}T00:00:00`);
-    date.setDate(date.getDate() + days);
-    const nextDate = date.toISOString().slice(0, 10);
-    setSelectedDate(nextDate);
-    setFormState((current) => ({ ...current, mealDate: nextDate }));
+    setSelectedDate((currentDate) => {
+      const date = new Date(`${currentDate}T00:00:00`);
+      date.setDate(date.getDate() + days);
+      const nextDate = toIsoLocalDate(date);
+      setFormState((current) => ({ ...current, mealDate: nextDate }));
+      return nextDate;
+    });
   };
 
   const handleSearchChange = (nextQuery) => {
