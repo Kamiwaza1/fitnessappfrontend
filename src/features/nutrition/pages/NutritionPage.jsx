@@ -11,9 +11,9 @@ import {
 } from "@/features/nutrition/api/nutritionApi";
 import AppPageShell from "@/shared/components/AppPageShell";
 import StatusMessage from "@/shared/components/StatusMessage";
-import { formatLongDate, getTodayIsoDate } from "@/shared/utils/date";
+import { formatLongDate, getTodayIsoDate, toIsoLocalDate } from "@/shared/utils/date";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
-import { CALORIE_TARGET_EVENT, readCalorieTarget, saveCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
+import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 
 const CATEGORY_LABELS = {
   BREAKFAST: "Breakfast",
@@ -523,7 +523,7 @@ export default function NutritionPage() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const [calorieTarget, setCalorieTarget] = useState(() => readCalorieTarget());
+  const calorieTarget = useCalorieTarget();
 
   useEffect(() => {
     let isMounted = true;
@@ -541,7 +541,6 @@ export default function NutritionPage() {
 
         if (currentUser?.dailyCalorieTarget) {
           saveCalorieTarget(currentUser.dailyCalorieTarget);
-          setCalorieTarget(currentUser.dailyCalorieTarget);
         }
         setEntries(nextEntries);
       } catch (error) {
@@ -587,23 +586,6 @@ export default function NutritionPage() {
       window.clearTimeout(timeoutId);
     };
   }, [searchQuery]);
-
-  useEffect(() => {
-    const syncCalorieTarget = (event) => {
-      setCalorieTarget(event.detail ?? readCalorieTarget());
-    };
-    const syncStorageCalorieTarget = (event) => {
-      if (event.key === "fitness.calorieTarget") setCalorieTarget(readCalorieTarget());
-    };
-
-    window.addEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-    window.addEventListener("storage", syncStorageCalorieTarget);
-
-    return () => {
-      window.removeEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-      window.removeEventListener("storage", syncStorageCalorieTarget);
-    };
-  }, []);
 
   const visibleEntries = useMemo(
     () => entries.filter((entry) => entry.mealDate === selectedDate),
@@ -700,11 +682,13 @@ export default function NutritionPage() {
   };
 
   const shiftDate = (days) => {
-    const date = new Date(`${selectedDate}T00:00:00`);
-    date.setDate(date.getDate() + days);
-    const nextDate = date.toISOString().slice(0, 10);
-    setSelectedDate(nextDate);
-    setFormState((current) => ({ ...current, mealDate: nextDate }));
+    setSelectedDate((currentDate) => {
+      const date = new Date(`${currentDate}T00:00:00`);
+      date.setDate(date.getDate() + days);
+      const nextDate = toIsoLocalDate(date);
+      setFormState((current) => ({ ...current, mealDate: nextDate }));
+      return nextDate;
+    });
   };
 
   const handleSearchChange = (nextQuery) => {

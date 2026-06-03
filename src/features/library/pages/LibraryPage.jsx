@@ -4,7 +4,7 @@ import AppPageShell from "@/shared/components/AppPageShell";
 
 export default function LibraryPage() {
   return (
-    <AppPageShell mainClassName="flex h-screen flex-col overflow-hidden">
+    <AppPageShell mainClassName="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-primary/10 bg-background-light/50 px-8 backdrop-blur-md dark:bg-background-dark/50">
         <div className="flex max-w-xl flex-1 items-center gap-4">
           <div className="relative w-full">

@@ -27,28 +27,27 @@ export async function fetchWorkouts() {
 export async function createWorkout({ formState }) {
   const trimmedTitle = formState.title.trim();
   const trimmedDescription = formState.description.trim();
-  const trimmedNotes = formState.notes.trim();
-  const duration = Number(formState.duration);
   const exercises = (formState.exercises || []).map((exercise) => ({
     name: exercise.name.trim(),
     muscleType: exercise.muscleType,
     sets: Number(exercise.sets),
-    reps: Number(exercise.reps),
-    weightKg: Number(exercise.weightKg),
-    notes: (exercise.notes || "").trim(),
+    reps: 1,
+    weightKg: 0,
+    notes: "",
   }));
+  const primaryMuscleType = exercises[0]?.muscleType || "FULL_BODY";
 
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
-    durationMinutes: duration,
+    durationMinutes: 1,
     sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
     reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
     weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),
-    notes: trimmedNotes,
+    notes: "",
     description: trimmedDescription,
     category: formState.category,
-    muscleType: formState.muscleType,
+    muscleType: primaryMuscleType,
     exercises,
   };
 
@@ -79,28 +78,27 @@ export async function createWorkout({ formState }) {
 export async function updateWorkout({ workoutId, formState }) {
   const trimmedTitle = formState.title.trim();
   const trimmedDescription = formState.description.trim();
-  const trimmedNotes = formState.notes.trim();
-  const duration = Number(formState.duration);
   const exercises = (formState.exercises || []).map((exercise) => ({
     name: exercise.name.trim(),
     muscleType: exercise.muscleType,
     sets: Number(exercise.sets),
-    reps: Number(exercise.reps),
-    weightKg: Number(exercise.weightKg),
-    notes: (exercise.notes || "").trim(),
+    reps: 1,
+    weightKg: 0,
+    notes: "",
   }));
+  const primaryMuscleType = exercises[0]?.muscleType || "FULL_BODY";
 
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
-    durationMinutes: duration,
+    durationMinutes: 1,
     sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
     reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
     weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),
-    notes: trimmedNotes,
+    notes: "",
     description: trimmedDescription,
     category: formState.category,
-    muscleType: formState.muscleType,
+    muscleType: primaryMuscleType,
     exercises,
   };
 
@@ -131,5 +129,19 @@ export async function deleteWorkout(workoutId) {
     });
   } catch {
     throw new Error("Could not delete workout. Please try again.");
+  }
+}
+
+export async function saveWorkoutSession(payload) {
+  try {
+    return await fetchAuthenticatedJson(buildApiUrl("/api/v1/workout-history"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    throw new Error(getAuthorizationErrorMessage(error, "Could not save workout session."));
   }
 }

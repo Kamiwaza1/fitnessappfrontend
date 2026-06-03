@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createLiveWorkoutRoom } from "@/features/live-workouts/api/liveWorkoutsApi";
 import { useWorkoutComposer } from "@/features/workouts/hooks/useWorkoutComposer";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import WorkoutComposerForm from "@/features/workouts/components/WorkoutComposerForm";
 import WorkoutList from "@/features/workouts/components/WorkoutList";
 import WorkoutPageHeader from "@/features/workouts/components/WorkoutPageHeader";
+import ActiveWorkoutSession from "@/features/workouts/components/ActiveWorkoutSession";
+import { useActiveWorkoutSession } from "@/features/workouts/hooks/useActiveWorkoutSession";
 import AppPageShell from "@/shared/components/AppPageShell";
 
 export default function WorkoutsPage() {
+  const router = useRouter();
+  const [joinRoomCode, setJoinRoomCode] = useState("");
   const { workouts, isLoading, error, upsertWorkout, removeWorkout } = useWorkoutList();
   const {
     isComposerOpen,
@@ -24,6 +31,7 @@ export default function WorkoutsPage() {
   } = useWorkoutComposer({
     onWorkoutCreated: upsertWorkout,
   });
+  const workoutSession = useActiveWorkoutSession();
 
   const handleDeleteWorkout = async (workoutId) => {
     try {
@@ -33,11 +41,32 @@ export default function WorkoutsPage() {
     }
   };
 
-  return (
-    <AppPageShell mainClassName="relative flex h-screen flex-col overflow-hidden">
-      <WorkoutPageHeader onCreateWorkout={() => setIsComposerOpen(true)} />
+  const handleStartLiveWorkout = async (workout) => {
+    try {
+      const room = await createLiveWorkoutRoom(workout.id);
+      router.push(`/live-workouts/${room.roomCode}`);
+    } catch (error) {
+      window.alert(error?.message || "Could not start live workout. Please try again.");
+    }
+  };
 
-      <section className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-8 sm:p-8">
+  const handleJoinLiveWorkout = (event) => {
+    event.preventDefault();
+    const roomCode = joinRoomCode.trim().toUpperCase();
+    if (!roomCode) return;
+    router.push(`/live-workouts/${roomCode}`);
+  };
+
+  return (
+    <AppPageShell mainClassName="relative flex min-h-dvh flex-col">
+      <WorkoutPageHeader
+        joinRoomCode={joinRoomCode}
+        onCreateWorkout={() => setIsComposerOpen(true)}
+        onJoinRoom={handleJoinLiveWorkout}
+        onJoinRoomCodeChange={setJoinRoomCode}
+      />
+
+      <section className="custom-scrollbar flex-1 p-3 pb-6 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-5xl space-y-6">
           {isComposerOpen ? (
             <WorkoutComposerForm
@@ -90,12 +119,33 @@ export default function WorkoutsPage() {
             />
           ) : null}
 
+          {workoutSession.activeSession ? (
+            <ActiveWorkoutSession
+              session={workoutSession.activeSession}
+              remainingRestSeconds={workoutSession.remainingRestSeconds}
+              restDurationSeconds={workoutSession.restDurationSeconds}
+              totals={workoutSession.totals}
+              saveError={workoutSession.saveError}
+              isSaving={workoutSession.isSaving}
+              onAddSet={workoutSession.addSet}
+              onUpdateSet={workoutSession.updateSet}
+              onRemoveSet={workoutSession.removeSet}
+              onToggleCompleted={workoutSession.toggleExerciseCompleted}
+              onFinish={workoutSession.finishWorkout}
+              onDiscard={workoutSession.discardWorkout}
+              onRestDurationChange={workoutSession.setRestDurationSeconds}
+              onRestartRestTimer={workoutSession.restartRestTimer}
+            />
+          ) : null}
+
           <WorkoutList
             workouts={workouts}
             isLoading={isLoading}
             error={error}
             onDelete={handleDeleteWorkout}
             onEdit={openComposerForEdit}
+            onStart={workoutSession.startWorkout}
+            onStartLive={handleStartLiveWorkout}
           />
         </div>
       </section>

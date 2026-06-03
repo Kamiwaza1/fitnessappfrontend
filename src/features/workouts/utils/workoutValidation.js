@@ -30,15 +30,6 @@ export function validateWorkoutForm(formState) {
     return "Workout date cannot be more than one year ahead";
   }
 
-  const duration = Number(formState.duration);
-  if (!duration || duration < 1) {
-    return "Duration must be at least 1 minute.";
-  }
-
-  if (duration > 999) {
-    return "Duration cannot be greater than 999 minutes";
-  }
-
   const exercises = Array.isArray(formState.exercises) ? formState.exercises : [];
   if (exercises.length === 0) {
     return "At least one exercise is required.";
@@ -52,22 +43,13 @@ export function validateWorkoutForm(formState) {
     if (!sets || sets < 1) {
       return "Each exercise must have sets of at least 1.";
     }
-    const reps = Number(exercise?.reps);
-    if (!reps || reps < 1) {
-      return "Each exercise must have reps of at least 1.";
-    }
-    const weightKg = Number(exercise?.weightKg);
-    if (!Number.isFinite(weightKg) || weightKg < 0) {
-      return "Each exercise weight must be 0 or higher.";
+    if (!exercise?.muscleType) {
+      return "Each exercise must have a muscle type.";
     }
   }
 
   if ((formState.description || "").trim().length > 255) {
     return "Description cannot be longer than 255 characters";
-  }
-
-  if ((formState.notes || "").trim().length > 1000) {
-    return "Notes cannot be longer than 1000 characters";
   }
 
   return "";

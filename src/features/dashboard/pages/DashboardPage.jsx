@@ -9,13 +9,13 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "rec
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchNutritionEntries } from "@/features/nutrition/api/nutritionApi";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
-import { CALORIE_TARGET_EVENT, readCalorieTarget, saveCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
+import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { workouts, isLoading, error } = useWorkoutList();
   const [nutritionEntries, setNutritionEntries] = useState([]);
-  const [calorieTarget, setCalorieTarget] = useState(() => readCalorieTarget());
+  const calorieTarget = useCalorieTarget();
   const todayWorkout = workouts.find((workout) => workout.workoutDate === toIsoLocalDate());
   const displayName = user?.fullName;
 
@@ -61,7 +61,6 @@ export default function DashboardPage() {
 
         if (currentUser?.dailyCalorieTarget) {
           saveCalorieTarget(currentUser.dailyCalorieTarget);
-          setCalorieTarget(currentUser.dailyCalorieTarget);
         }
         setNutritionEntries(nextEntries);
       } catch {
@@ -73,23 +72,6 @@ export default function DashboardPage() {
 
     return () => {
       isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const syncCalorieTarget = (event) => {
-      setCalorieTarget(event.detail ?? readCalorieTarget());
-    };
-    const syncStorageCalorieTarget = (event) => {
-      if (event.key === "fitness.calorieTarget") setCalorieTarget(readCalorieTarget());
-    };
-
-    window.addEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-    window.addEventListener("storage", syncStorageCalorieTarget);
-
-    return () => {
-      window.removeEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-      window.removeEventListener("storage", syncStorageCalorieTarget);
     };
   }, []);
 
@@ -132,15 +114,15 @@ export default function DashboardPage() {
   const calorieStrokeOffset = 352 - (calorieProgress / 100) * 352;
 
   return (
-    <AppPageShell mainClassName="h-screen overflow-hidden">
-      <header className="flex items-center justify-between p-5">
-        <div>
-          <h2 className="text-3xl font-bold">
+    <AppPageShell mainClassName="min-h-dvh">
+      <header className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <h2 className="text-2xl font-bold sm:text-3xl">
             Welcome back, <span className="text-primary">{displayName}</span>
           </h2>
           <p className="mt-1 text-slate-400">Ready to crush your session today?</p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between gap-4 sm:justify-end">
           <div className="hidden text-right sm:block">
             <p suppressHydrationWarning className="text-xs uppercase tracking-widest text-slate-400">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
@@ -153,7 +135,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="space-y-4 px-5 pb-5">
+      <div className="space-y-4 px-4 pb-6 sm:px-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="grid grid-cols-1 gap-3 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5 md:grid-cols-2 lg:col-span-2">
             <div className="flex flex-col items-center justify-center space-y-4">

@@ -9,18 +9,12 @@ const initialFormState = () => ({
   title: "",
   description: "",
   category: "GENERAL",
-  muscleType: "FULL_BODY",
   date: getTodayIsoDate(),
-  duration: "60",
-  notes: "",
   exercises: [
     {
       name: "",
       muscleType: "FULL_BODY",
       sets: "3",
-      reps: "10",
-      weightKg: "20",
-      notes: "",
     },
   ],
 });
@@ -44,28 +38,19 @@ export function useWorkoutComposer({ onWorkoutCreated }) {
       title: workout.title || "",
       description: workout.description || workout.goal || "",
       category: workout.category || "GENERAL",
-      muscleType: workout.muscleType || "FULL_BODY",
       date: workout.workoutDate || workout.date || getTodayIsoDate(),
-      duration: String(workout.durationMinutes || workout.duration || "60"),
-      notes: workout.notes || "",
       exercises:
         Array.isArray(workout.exercises) && workout.exercises.length > 0
           ? workout.exercises.map((exercise) => ({
               name: exercise.name || "",
               muscleType: exercise.muscleType || "FULL_BODY",
               sets: String(exercise.sets ?? "3"),
-              reps: String(exercise.reps ?? "10"),
-              weightKg: String(exercise.weightKg ?? "20"),
-              notes: exercise.notes || "",
             }))
           : [
               {
                 name: workout.title || "",
                 muscleType: workout.muscleType || "FULL_BODY",
                 sets: String(workout.sets || "3"),
-                reps: String(workout.reps || "10"),
-                weightKg: String(workout.weightKg || "20"),
-                notes: "",
               },
             ],
     });

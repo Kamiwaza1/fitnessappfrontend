@@ -2,6 +2,7 @@ const ACCESS_TOKEN_KEYS = ["accessToken", "authToken", "token"];
 const REFRESH_TOKEN_KEYS = ["refreshToken"];
 const AUTH_USER_KEYS = ["user"];
 const AUTH_COOKIE_NAMES = ["authToken", "token", "jwt", "accessToken"];
+export const AUTH_SESSION_EVENT = "fitness:auth-session-updated";
 
 function safeDecodeURIComponent(value) {
   try {
@@ -87,6 +88,17 @@ export function readStoredAuthUser() {
   return null;
 }
 
+export function readStoredAuthUserJson() {
+  if (typeof window === "undefined") return "";
+
+  for (const key of AUTH_USER_KEYS) {
+    const rawValue = window.localStorage.getItem(key);
+    if (rawValue) return rawValue;
+  }
+
+  return "";
+}
+
 export function readAuthTokenFromCookies(cookieSource) {
   const cookieString =
     typeof cookieSource === "string"
@@ -148,6 +160,7 @@ export function storeAuthSession({ accessToken, refreshToken, user }) {
       window.localStorage.setItem(key, JSON.stringify(user));
     }
   }
+  window.dispatchEvent(new CustomEvent(AUTH_SESSION_EVENT));
 }
 
 export function clearStoredAuthToken() {
@@ -166,4 +179,5 @@ export function clearStoredAuthToken() {
   document.cookie = "authToken=;path=/;max-age=0";
   document.cookie = "token=;path=/;max-age=0";
   document.cookie = "jwt=;path=/;max-age=0";
+  window.dispatchEvent(new CustomEvent(AUTH_SESSION_EVENT));
 }
