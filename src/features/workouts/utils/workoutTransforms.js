@@ -1,13 +1,15 @@
 export function normalizeWorkout(workout, index = 0) {
   const exercises = Array.isArray(workout?.exercises)
     ? workout.exercises.map((exercise, exerciseIndex) => {
+        const reps = Number(exercise?.reps);
+        const weightKg = Number(exercise?.weightKg);
         return {
           id: exercise?.id || exercise?._id || `${exercise?.name || "exercise"}-${exerciseIndex}`,
           name: exercise?.name || `Exercise ${exerciseIndex + 1}`,
           muscleType: exercise?.muscleType || "FULL_BODY",
           sets: Number.isFinite(Number(exercise?.sets)) ? Number(exercise?.sets) : null,
-          reps: Number.isFinite(Number(exercise?.reps)) ? Number(exercise?.reps) : null,
-          weightKg: Number.isFinite(Number(exercise?.weightKg)) ? Number(exercise?.weightKg) : null,
+          reps: Number.isFinite(reps) && reps > 1 ? reps : null,
+          weightKg: Number.isFinite(weightKg) && weightKg > 0 ? weightKg : null,
           notes: exercise?.notes || "",
         };
       })

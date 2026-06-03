@@ -7,14 +7,14 @@ export function buildLiveWorkoutSocketUrl() {
 
   const apiBaseUrl = getApiBaseUrl();
   if (!apiBaseUrl) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === "https:" ? "https:" : "http:";
     const isNextDevServer = window.location.port === "3000" || window.location.port === "3001";
     const host = isNextDevServer ? `${window.location.hostname}:8080` : window.location.host;
     return `${protocol}//${host}/ws`;
   }
 
   const url = new URL(apiBaseUrl);
-  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.protocol = url.protocol === "https:" ? "https:" : "http:";
   url.pathname = "/ws";
   url.search = "";
   return url.toString();

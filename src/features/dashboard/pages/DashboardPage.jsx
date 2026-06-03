@@ -9,13 +9,13 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "rec
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchNutritionEntries } from "@/features/nutrition/api/nutritionApi";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
-import { CALORIE_TARGET_EVENT, readCalorieTarget, saveCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
+import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { workouts, isLoading, error } = useWorkoutList();
   const [nutritionEntries, setNutritionEntries] = useState([]);
-  const [calorieTarget, setCalorieTarget] = useState(() => readCalorieTarget());
+  const calorieTarget = useCalorieTarget();
   const todayWorkout = workouts.find((workout) => workout.workoutDate === toIsoLocalDate());
   const displayName = user?.fullName;
 
@@ -61,7 +61,6 @@ export default function DashboardPage() {
 
         if (currentUser?.dailyCalorieTarget) {
           saveCalorieTarget(currentUser.dailyCalorieTarget);
-          setCalorieTarget(currentUser.dailyCalorieTarget);
         }
         setNutritionEntries(nextEntries);
       } catch {
@@ -73,23 +72,6 @@ export default function DashboardPage() {
 
     return () => {
       isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const syncCalorieTarget = (event) => {
-      setCalorieTarget(event.detail ?? readCalorieTarget());
-    };
-    const syncStorageCalorieTarget = (event) => {
-      if (event.key === "fitness.calorieTarget") setCalorieTarget(readCalorieTarget());
-    };
-
-    window.addEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-    window.addEventListener("storage", syncStorageCalorieTarget);
-
-    return () => {
-      window.removeEventListener(CALORIE_TARGET_EVENT, syncCalorieTarget);
-      window.removeEventListener("storage", syncStorageCalorieTarget);
     };
   }, []);
 

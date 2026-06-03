@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AppPageShell from "@/shared/components/AppPageShell";
 import StatusMessage from "@/shared/components/StatusMessage";
 import { useAuth } from "@/context/AuthContext";
@@ -15,14 +15,22 @@ function getParticipantLabel(participant) {
   return participant?.displayName || participant?.email || "User";
 }
 
+function normalizeRoomCode(value) {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+  return String(rawValue || "").trim().toUpperCase();
+}
+
 export default function LiveWorkoutRoomPage({ roomCode }) {
   const router = useRouter();
+  const routeParams = useParams();
   const { user } = useAuth();
-  const normalizedRoomCode = String(roomCode || "").toUpperCase();
+  const fallbackRoomCode = routeParams?.roomCode;
+  const normalizedRoomCode = normalizeRoomCode(roomCode || fallbackRoomCode);
   const [room, setRoom] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [isClosing, setIsClosing] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
   const [progress, setProgress] = useState({
     currentExerciseIndex: 0,
     completedSets: 0,
@@ -111,18 +119,35 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
     }
   };
 
+  const handleCopyRoomCode = async () => {
+    try {
+      await navigator.clipboard.writeText(normalizedRoomCode);
+      setCopyMessage("Code copied");
+    } catch {
+      setCopyMessage("Copy failed");
+    }
+  };
+
+  const handleCopyInviteLink = async () => {
+    const inviteLink = typeof window === "undefined" ? normalizedRoomCode : window.location.href;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopyMessage("Invite link copied");
+    } catch {
+      setCopyMessage("Copy failed");
+    }
+  };
+
   return (
     <AppPageShell mainClassName="min-h-dvh">
       <section className="mx-auto flex max-w-5xl flex-col gap-5 p-4 sm:p-6 lg:p-8">
-        <header className="flex flex-col gap-4 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40 sm:flex-row sm:items-start sm:justify-between">
+        <header className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary/70">Live Workout</p>
             <h1 className="mt-2 break-words text-2xl font-bold sm:text-3xl">
               {room?.workoutName || "Live Room"}
             </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Room code <span className="font-bold text-primary">{normalizedRoomCode}</span>
-            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary">
@@ -146,12 +171,46 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
               </button>
             ) : null}
           </div>
+          </div>
+
+          <div className="mt-5 rounded-xl border border-primary/20 bg-primary/10 p-4 dark:bg-primary/5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Room Code</p>
+                <div className="mt-2 select-all break-all rounded-lg border border-primary/30 bg-background-light px-4 py-3 font-mono text-4xl font-black tracking-[0.18em] text-primary dark:bg-background-dark">
+                  {normalizedRoomCode || "NO CODE"}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row lg:flex-col lg:w-44">
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleCopyRoomCode}
+                  disabled={!normalizedRoomCode}
+                >
+                  <span className="material-icons text-base">content_copy</span>
+                  Copy Code
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleCopyInviteLink}
+                  disabled={!normalizedRoomCode}
+                >
+                  <span className="material-icons text-base">link</span>
+                  Copy Link
+                </button>
+                {copyMessage ? <p className="text-center text-xs font-bold text-primary">{copyMessage}</p> : null}
+              </div>
+            </div>
+          </div>
         </header>
 
         {isLoading ? <StatusMessage>Loading live room...</StatusMessage> : null}
         {!isLoading && error ? <StatusMessage tone="error">{error}</StatusMessage> : null}
 
         {!isLoading && room ? (
+          <>
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <section className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
               <h2 className="text-lg font-bold">Your Progress</h2>
@@ -213,6 +272,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
               </div>
             </aside>
           </div>
+          </>
         ) : null}
       </section>
     </AppPageShell>

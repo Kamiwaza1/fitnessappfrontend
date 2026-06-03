@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+
 const CALORIE_TARGET_KEY = "fitness.calorieTarget";
 export const CALORIE_TARGET_EVENT = "fitness:calorie-target-updated";
 
@@ -23,4 +25,24 @@ export function saveCalorieTarget(value) {
 
   window.dispatchEvent(new CustomEvent(CALORIE_TARGET_EVENT, { detail: nextValue }));
   return nextValue;
+}
+
+function subscribeToCalorieTarget(callback) {
+  if (typeof window === "undefined") return () => {};
+
+  const syncStorageCalorieTarget = (event) => {
+    if (event.key === CALORIE_TARGET_KEY) callback();
+  };
+
+  window.addEventListener(CALORIE_TARGET_EVENT, callback);
+  window.addEventListener("storage", syncStorageCalorieTarget);
+
+  return () => {
+    window.removeEventListener(CALORIE_TARGET_EVENT, callback);
+    window.removeEventListener("storage", syncStorageCalorieTarget);
+  };
+}
+
+export function useCalorieTarget() {
+  return useSyncExternalStore(subscribeToCalorieTarget, readCalorieTarget, () => null);
 }

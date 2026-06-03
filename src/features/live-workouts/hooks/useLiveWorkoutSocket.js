@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import { getLiveWorkoutAuthHeader } from "@/features/live-workouts/api/liveWorkoutsApi";
 import { buildLiveWorkoutSocketUrl } from "@/features/live-workouts/utils/liveWorkoutSocketUrl";
 
@@ -20,7 +21,7 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
 
     const normalizedRoomCode = roomCode.toUpperCase();
     const client = new Client({
-      brokerURL: buildLiveWorkoutSocketUrl(),
+      webSocketFactory: () => new SockJS(buildLiveWorkoutSocketUrl()),
       connectHeaders: {
         Authorization: authHeader,
       },

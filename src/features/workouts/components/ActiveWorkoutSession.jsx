@@ -22,10 +22,10 @@ function ExerciseLogger({
     .join(" · ");
 
   return (
-    <article className="rounded-xl border border-primary/10 bg-slate-950/50 p-4">
+    <article className="rounded-xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-900/70">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h4 className="break-words text-lg font-black text-white">{exercise.name}</h4>
+          <h4 className="break-words text-lg font-black text-slate-900 dark:text-white">{exercise.name}</h4>
           <p className="mt-1 text-sm text-slate-400">{targetText || "No planning target set"}</p>
           {exercise.notes ? <p className="mt-2 text-sm text-slate-500">{exercise.notes}</p> : null}
         </div>
@@ -34,7 +34,7 @@ function ExerciseLogger({
           className={`flex min-h-10 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-bold transition-colors ${
             exercise.completed
               ? "border-primary bg-primary text-background"
-              : "border-slate-700 text-slate-300 hover:bg-slate-800"
+              : "border-slate-300 text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
           onClick={() => onToggleCompleted(exercise.id)}
         >
@@ -43,7 +43,7 @@ function ExerciseLogger({
         </button>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-background-dark/80 p-3">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
         <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary">
           <span className="material-icons text-base">post_add</span>
           Post-set entry
@@ -55,7 +55,7 @@ function ExerciseLogger({
               type="number"
               min="1"
               inputMode="numeric"
-              className="mt-2 min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-bold text-white focus:border-primary focus:ring-primary"
+              className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white"
               placeholder={exercise.targetReps ? String(exercise.targetReps) : "8"}
               value={draft.reps}
               onChange={(event) => onDraftChange(exercise.id, "reps", event.target.value)}
@@ -68,7 +68,7 @@ function ExerciseLogger({
               min="0"
               step="0.5"
               inputMode="decimal"
-              className="mt-2 min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-bold text-white focus:border-primary focus:ring-primary"
+              className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white"
               placeholder={exercise.targetWeightKg ? String(exercise.targetWeightKg) : "0"}
               value={draft.weightKg}
               onChange={(event) => onDraftChange(exercise.id, "weightKg", event.target.value)}
@@ -90,13 +90,13 @@ function ExerciseLogger({
           {exercise.loggedSets.map((set, index) => (
             <div
               key={set.id}
-              className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-2"
+              className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-800 dark:bg-slate-900/70"
             >
               <span className="text-xs font-black uppercase text-slate-500">Set {index + 1}</span>
               <input
                 type="number"
                 min="1"
-                className="min-h-9 rounded-md border border-slate-700 bg-slate-950 px-2 text-sm font-bold text-white"
+                className="min-h-9 rounded-md border border-slate-300 bg-white px-2 text-sm font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 value={set.reps}
                 aria-label={`Set ${index + 1} reps`}
                 onChange={(event) =>
@@ -110,7 +110,7 @@ function ExerciseLogger({
                 type="number"
                 min="0"
                 step="0.5"
-                className="min-h-9 rounded-md border border-slate-700 bg-slate-950 px-2 text-sm font-bold text-white"
+                className="min-h-9 rounded-md border border-slate-300 bg-white px-2 text-sm font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 value={set.weightKg}
                 aria-label={`Set ${index + 1} lift weight`}
                 onChange={(event) =>
@@ -192,7 +192,7 @@ export default function ActiveWorkoutSession({
   };
 
   return (
-    <section className="space-y-4 rounded-xl border border-primary/20 bg-background-dark p-4 text-slate-100 shadow-sm sm:p-5">
+    <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-100 p-4 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <span className="rounded bg-primary/15 px-2 py-1 text-[11px] font-black uppercase tracking-widest text-primary">
@@ -204,7 +204,7 @@ export default function ActiveWorkoutSession({
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
           <div className="flex items-center justify-between gap-6">
             <div>
               <p className="text-xs font-black uppercase tracking-widest text-slate-500">Rest timer</p>
@@ -220,7 +220,7 @@ export default function ActiveWorkoutSession({
                 className={`rounded-lg border px-3 py-2 text-xs font-black ${
                   restDurationSeconds === seconds
                     ? "border-primary bg-primary/15 text-primary"
-                    : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 }`}
                 onClick={() => onRestDurationChange(seconds)}
               >
@@ -229,7 +229,7 @@ export default function ActiveWorkoutSession({
             ))}
             <button
               type="button"
-              className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-black text-slate-300 hover:bg-slate-800"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               onClick={onRestartRestTimer}
             >
               Restart
@@ -258,7 +258,7 @@ export default function ActiveWorkoutSession({
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
         <button
           type="button"
-          className="min-h-11 rounded-lg border border-slate-700 px-4 font-bold text-slate-300 hover:bg-slate-800"
+          className="min-h-11 rounded-lg border border-slate-300 px-4 font-bold text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           onClick={onDiscard}
           disabled={isSaving}
         >

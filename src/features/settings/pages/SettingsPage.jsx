@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { fetchCurrentUser, updateCurrentUser } from "@/features/settings/api/userApi";
-import { readCalorieTarget, saveCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
+import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 import AppPageShell from "@/shared/components/AppPageShell";
 import StatusMessage from "@/shared/components/StatusMessage";
 
@@ -38,7 +38,9 @@ function SettingsCard({ icon, title, description, children }) {
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const [calorieTarget, setCalorieTarget] = useState(() => String(readCalorieTarget() || ""));
+  const savedCalorieTarget = useCalorieTarget();
+  const [calorieTarget, setCalorieTarget] = useState("");
+  const [hasEditedTarget, setHasEditedTarget] = useState(false);
   const [targetMessage, setTargetMessage] = useState("");
   const [targetError, setTargetError] = useState("");
   const [isSavingTarget, setIsSavingTarget] = useState(false);
@@ -58,6 +60,7 @@ export default function SettingsPage() {
         const target = currentUser?.dailyCalorieTarget;
         if (target) {
           setCalorieTarget(String(target));
+          setHasEditedTarget(true);
           saveCalorieTarget(target);
         }
       } catch {
@@ -77,7 +80,8 @@ export default function SettingsPage() {
     setTargetMessage("");
     setTargetError("");
 
-    const nextTarget = Number(calorieTarget);
+    const displayedCalorieTarget = hasEditedTarget ? calorieTarget : String(savedCalorieTarget || "");
+    const nextTarget = Number(displayedCalorieTarget);
     if (!Number.isFinite(nextTarget) || nextTarget < 1 || nextTarget > 10000) {
       setTargetError("Calorie target must be between 1 and 10,000 kcal.");
       return;
@@ -90,6 +94,7 @@ export default function SettingsPage() {
       const savedTarget = updatedUser?.dailyCalorieTarget ?? Math.round(nextTarget);
       saveCalorieTarget(savedTarget);
       setCalorieTarget(String(savedTarget));
+      setHasEditedTarget(true);
       setTargetMessage("Calorie target saved.");
     } catch (error) {
       setTargetError(error?.message || "Could not save calorie target.");
@@ -169,8 +174,11 @@ export default function SettingsPage() {
                       min="1"
                       max="10000"
                       type="number"
-                      value={calorieTarget}
-                      onChange={(event) => setCalorieTarget(event.target.value)}
+                      value={hasEditedTarget ? calorieTarget : String(savedCalorieTarget || "")}
+                      onChange={(event) => {
+                        setHasEditedTarget(true);
+                        setCalorieTarget(event.target.value);
+                      }}
                       className="w-full min-w-0 bg-transparent px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none dark:text-white"
                     />
                     <span className="grid w-16 shrink-0 place-items-center border-l border-slate-200 text-xs normal-case tracking-normal text-slate-400 dark:border-white/10">
