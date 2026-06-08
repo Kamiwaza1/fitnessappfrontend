@@ -135,17 +135,18 @@ export default function WorkoutsPage() {
               onDiscard={workoutSession.discardWorkout}
               onRestDurationChange={workoutSession.setRestDurationSeconds}
               onRestartRestTimer={workoutSession.restartRestTimer}
+              onStartLive={() => handleStartLiveWorkout({ id: workoutSession.activeSession.workoutId })}
             />
           ) : null}
 
           <WorkoutList
             workouts={workouts}
+            activeWorkoutId={workoutSession.activeSession?.workoutId}
             isLoading={isLoading}
             error={error}
             onDelete={handleDeleteWorkout}
             onEdit={openComposerForEdit}
             onStart={workoutSession.startWorkout}
-            onStartLive={handleStartLiveWorkout}
           />
         </div>
       </section>
