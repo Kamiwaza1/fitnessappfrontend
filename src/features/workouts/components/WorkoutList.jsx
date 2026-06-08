@@ -2,11 +2,11 @@ import WorkoutListItem from "@/features/workouts/components/WorkoutListItem";
 import StatusMessage from "@/shared/components/StatusMessage";
 import { toIsoLocalDate } from "@/shared/utils/date";
 
-export default function WorkoutList({ workouts, isLoading, error, onDelete, onEdit, onStart, onStartLive }) {
+export default function WorkoutList({ workouts, activeWorkoutId = null, isLoading, error, onDelete, onEdit, onStart }) {
   const today = toIsoLocalDate();
   const upcomingWorkouts = workouts.filter((workout) => {
     const workoutDate = String(workout?.workoutDate || workout?.date || "").slice(0, 10);
-    return workoutDate >= today;
+    return workoutDate >= today && String(workout?.id) !== String(activeWorkoutId || "");
   });
 
   return (
@@ -44,7 +44,6 @@ export default function WorkoutList({ workouts, isLoading, error, onDelete, onEd
               onDelete={onDelete}
               onEdit={onEdit}
               onStart={onStart}
-              onStartLive={onStartLive}
             />
           ))}
         </div>

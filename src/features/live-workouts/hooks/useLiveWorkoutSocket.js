@@ -52,12 +52,6 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
 
     return () => {
       window.clearTimeout(connectingTimeout);
-      if (client.connected) {
-        client.publish({
-          destination: `/app/live-workouts/${normalizedRoomCode}/leave`,
-          body: "{}",
-        });
-      }
       client.deactivate();
       clientRef.current = null;
     };

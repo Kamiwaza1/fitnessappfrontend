@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { useAuth } from "@/context/AuthContext";
+import {
+  ACTIVE_LIVE_WORKOUT_ROOM_CHANGED,
+  getActiveLiveWorkoutRoom,
+} from "@/features/live-workouts/utils/activeLiveWorkoutRoom";
 
 const NAV_ITEMS = [
   { name: "Dashboard", icon: "dashboard", path: "/dashboard" },
@@ -20,6 +25,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [activeRoom, setActiveRoom] = useState(() => getActiveLiveWorkoutRoom());
   const initials = String(user?.fullName || user?.email || "U")
     .trim()
     .split(/\s+/)
@@ -27,6 +33,26 @@ export default function AppSidebar() {
     .map((part) => part[0])
     .join("")
     .toUpperCase();
+  const activeRoomHref = activeRoom?.roomCode ? `/live-workouts/${activeRoom.roomCode}` : "";
+  const isActiveRoomPage = useMemo(() => pathname === activeRoomHref, [activeRoomHref, pathname]);
+
+  useEffect(() => {
+    const handleActiveRoomChanged = (event) => {
+      setActiveRoom(event.detail ?? getActiveLiveWorkoutRoom());
+    };
+
+    const handleStorage = () => {
+      setActiveRoom(getActiveLiveWorkoutRoom());
+    };
+
+    window.addEventListener(ACTIVE_LIVE_WORKOUT_ROOM_CHANGED, handleActiveRoomChanged);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener(ACTIVE_LIVE_WORKOUT_ROOM_CHANGED, handleActiveRoomChanged);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -41,6 +67,24 @@ export default function AppSidebar() {
         </div>
 
         <nav className="flex-1 space-y-2 px-4">
+          {activeRoom?.roomCode ? (
+            <Link
+              href={activeRoomHref}
+              className={clsx(
+                "mb-4 flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
+                isActiveRoomPage
+                  ? "border-primary bg-primary text-background"
+                  : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+              )}
+            >
+              <span className="material-symbols-outlined text-[22px]">sensors</span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-bold">{activeRoom.workoutName || "Live Workout"}</span>
+                <span className="block text-xs font-semibold opacity-75">Room {activeRoom.roomCode}</span>
+              </span>
+            </Link>
+          ) : null}
+
           {NAV_ITEMS.map((item) => {
             const isActive = item.matchPrefix ? pathname.startsWith(item.matchPrefix) : pathname === item.path;
 
@@ -84,6 +128,17 @@ export default function AppSidebar() {
           </div>
         </div>
       </aside>
+
+      {activeRoom?.roomCode && !isActiveRoomPage ? (
+        <Link
+          href={activeRoomHref}
+          className="fixed inset-x-3 bottom-[78px] z-50 flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary px-3 py-2 text-xs font-bold text-background shadow-xl shadow-slate-950/20 lg:hidden"
+        >
+          <span className="material-symbols-outlined text-[18px]">sensors</span>
+          <span className="truncate">{activeRoom.workoutName || "Live Workout"}</span>
+          <span className="shrink-0 opacity-80">{activeRoom.roomCode}</span>
+        </Link>
+      ) : null}
 
       <nav className="fixed inset-x-3 bottom-3 z-50 flex gap-1 overflow-x-auto rounded-xl border border-primary/15 bg-background-light/95 p-1 shadow-2xl shadow-slate-950/20 backdrop-blur dark:bg-background-dark/95 lg:hidden">
         {NAV_ITEMS.map((item) => {
