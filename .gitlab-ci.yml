@@ -6,7 +6,7 @@ stages:
 
 variables:
   NODE_IMAGE: node:22-alpine
-  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_CERTDIR: ""
   DOCKER_DRIVER: overlay2
   COOLIFY_WEBHOOK: "$COOLIFY_WEBHOOK"
 
@@ -70,9 +70,13 @@ deploy_docker:
   image: docker:27
   services:
     - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
+    - docker info
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker push "$CI_REGISTRY_IMAGE:latest"
