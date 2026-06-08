@@ -30,7 +30,6 @@ function joinNames(items = []) {
 }
 
 const PAGE_SIZE = 100;
-const ENGLISH_LANGUAGE_ID = "2";
 
 const MUSCLE_GROUPS = [
   {
@@ -130,6 +129,8 @@ function MuscleGroupPicker({
             <Button
               key={group.id}
               type="button"
+              data-cy="library-muscle-group"
+              data-group-id={group.id}
               onClick={() => onExpandedGroupChange(isExpanded ? "" : group.id)}
               disabled={disabled}
               variant="secondary"
@@ -156,6 +157,8 @@ function MuscleGroupPicker({
                 <Button
                   key={muscle.id}
                   type="button"
+                  data-cy="library-muscle-option"
+                  data-muscle-id={muscle.id}
                   onClick={() => onMuscleSelect(String(muscle.id))}
                   size="sm"
                   variant={isActive ? "default" : "secondary"}
@@ -183,6 +186,8 @@ function ExerciseCard({ exercise, isSelected, onSelect }) {
   return (
     <button
       type="button"
+      data-cy="library-exercise-card"
+      data-exercise-id={exercise.id}
       onClick={() => onSelect(exercise)}
       className={`group flex min-h-[260px] w-full flex-col overflow-hidden rounded-lg border text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 ${
         isSelected
@@ -435,7 +440,6 @@ export default function LibraryPage() {
       try {
         const payload = await searchExerciseLibrary({
           q: query,
-          language: ENGLISH_LANGUAGE_ID,
           limit: PAGE_SIZE,
           offset: 0,
           muscleId: filters.muscleId,
@@ -522,7 +526,6 @@ export default function LibraryPage() {
     try {
       const payload = await searchExerciseLibrary({
         q: query,
-        language: ENGLISH_LANGUAGE_ID,
         limit: PAGE_SIZE,
         offset: exercises.length,
         muscleId: filters.muscleId,
