@@ -1,13 +1,15 @@
 export function normalizeWorkout(workout, index = 0) {
   const exercises = Array.isArray(workout?.exercises)
     ? workout.exercises.map((exercise, exerciseIndex) => {
+        const reps = Number(exercise?.reps);
+        const weightKg = Number(exercise?.weightKg);
         return {
           id: exercise?.id || exercise?._id || `${exercise?.name || "exercise"}-${exerciseIndex}`,
           name: exercise?.name || `Exercise ${exerciseIndex + 1}`,
           muscleType: exercise?.muscleType || "FULL_BODY",
           sets: Number.isFinite(Number(exercise?.sets)) ? Number(exercise?.sets) : null,
-          reps: Number.isFinite(Number(exercise?.reps)) ? Number(exercise?.reps) : null,
-          weightKg: Number.isFinite(Number(exercise?.weightKg)) ? Number(exercise?.weightKg) : null,
+          reps: Number.isFinite(reps) && reps > 1 ? reps : null,
+          weightKg: Number.isFinite(weightKg) && weightKg > 0 ? weightKg : null,
           notes: exercise?.notes || "",
         };
       })
@@ -20,7 +22,7 @@ export function normalizeWorkout(workout, index = 0) {
     goal: workout?.description || workout?.goal || workout?.primaryGoal || "",
     date: workout?.date || workout?.scheduledDate || workout?.workoutDate || "",
     workoutDate: String(workout?.workoutDate || workout?.scheduledDate || workout?.date || "").slice(0, 10),
-    duration: String(workout?.duration || workout?.durationMinutes || 60),
+    duration: String(workout?.duration || workout?.durationMinutes || ""),
     durationMinutes: Number.isFinite(Number(workout?.durationMinutes || workout?.duration))
       ? Number(workout?.durationMinutes || workout?.duration)
       : null,

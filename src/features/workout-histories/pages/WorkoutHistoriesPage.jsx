@@ -8,8 +8,8 @@ export default function WorkoutHistoriesPage() {
   const { workoutHistories, isLoading, error } = useWorkoutHistories();
 
   return (
-    <AppPageShell mainClassName="relative flex h-screen flex-col overflow-hidden">
-      <section className="custom-scrollbar flex-1 overflow-y-auto p-5 pb-8 sm:p-8">
+    <AppPageShell mainClassName="relative flex min-h-dvh flex-col">
+      <section className="custom-scrollbar flex-1 p-4 pb-6 sm:p-8">
         <div className="mx-auto max-w-5xl">
           <header className="mb-6 rounded-2xl border border-primary/10 bg-background-light p-5 sm:p-6 dark:bg-background-dark/40">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">

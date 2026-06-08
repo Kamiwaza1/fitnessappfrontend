@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppPageShell from "@/shared/components/AppPageShell";
 import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import { useAuth } from "@/context/AuthContext";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { fetchNutritionEntries } from "@/features/nutrition/api/nutritionApi";
+import { fetchCurrentUser } from "@/features/settings/api/userApi";
+import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { workouts, isLoading, error } = useWorkoutList();
+  const [nutritionEntries, setNutritionEntries] = useState([]);
+  const calorieTarget = useCalorieTarget();
   const todayWorkout = workouts.find((workout) => workout.workoutDate === toIsoLocalDate());
   const displayName = user?.fullName;
 
@@ -43,29 +49,91 @@ export default function DashboardPage() {
     return days;
   }, [workouts]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboardData() {
+      try {
+        const [nextEntries, currentUser] = await Promise.all([
+          fetchNutritionEntries(),
+          fetchCurrentUser().catch(() => null),
+        ]);
+        if (!isMounted) return;
+
+        if (currentUser?.dailyCalorieTarget) {
+          saveCalorieTarget(currentUser.dailyCalorieTarget);
+        }
+        setNutritionEntries(nextEntries);
+      } catch {
+        if (isMounted) setNutritionEntries([]);
+      }
+    }
+
+    loadDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const todayNutritionTotals = useMemo(() => {
+    const today = toIsoLocalDate();
+    return nutritionEntries
+      .filter((entry) => entry.mealDate === today)
+      .reduce(
+        (totals, entry) => ({
+          calories: totals.calories + Number(entry.calories || 0),
+          proteinGrams: totals.proteinGrams + Number(entry.proteinGrams || 0),
+        }),
+        { calories: 0, proteinGrams: 0 }
+      );
+  }, [nutritionEntries]);
+
+  const weeklyNutritionData = useMemo(() => {
+    const now = new Date();
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(now);
+      date.setDate(now.getDate() - (6 - index));
+      return {
+        key: date.toISOString().slice(0, 10),
+        day: date.toLocaleDateString("en-US", { weekday: "short" }),
+        calories: 0,
+      };
+    });
+
+    nutritionEntries.forEach((entry) => {
+      const target = days.find((item) => item.key === entry.mealDate);
+      if (target) target.calories += Number(entry.calories || 0);
+    });
+
+    return days;
+  }, [nutritionEntries]);
+
+  const calorieProgress = calorieTarget
+    ? Math.min(100, (todayNutritionTotals.calories / calorieTarget) * 100)
+    : 0;
+  const calorieStrokeOffset = 352 - (calorieProgress / 100) * 352;
+
   return (
-    <AppPageShell mainClassName="h-screen overflow-hidden">
-      <header className="flex items-center justify-between p-5">
-        <div>
-          <h2 className="text-3xl font-bold">
+    <AppPageShell mainClassName="min-h-dvh">
+      <header className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <h2 className="text-2xl font-bold sm:text-3xl">
             Welcome back, <span className="text-primary">{displayName}</span>
           </h2>
           <p className="mt-1 text-slate-400">Ready to crush your session today?</p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between gap-4 sm:justify-end">
           <div className="hidden text-right sm:block">
             <p suppressHydrationWarning className="text-xs uppercase tracking-widest text-slate-400">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <p suppressHydrationWarning className="font-bold">{formatLongDate(new Date())}</p>
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-background-light text-primary transition-colors hover:bg-primary/10 dark:bg-background-dark/80">
-            <span className="material-icons">notifications</span>
-          </button>
         </div>
       </header>
 
-      <div className="space-y-4 px-5 pb-5">
+      <div className="space-y-4 px-4 pb-6 sm:px-5">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="grid grid-cols-1 gap-3 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5 md:grid-cols-2 lg:col-span-2">
             <div className="flex flex-col items-center justify-center space-y-4">
@@ -88,14 +156,14 @@ export default function DashboardPage() {
                     r="56"
                     stroke="currentColor"
                     strokeDasharray="352"
-                    strokeDashoffset="352"
+                    strokeDashoffset={calorieStrokeOffset}
                     strokeWidth="7"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-extrabold italic">0</span>
+                  <span className="text-2xl font-extrabold italic">{todayNutritionTotals.calories}</span>
                   <span className="text-[10px] uppercase tracking-widest text-slate-400">
-                    / 2,400 Kcal
+                    {calorieTarget ? `/ ${calorieTarget} Kcal` : "Kcal"}
                   </span>
                 </div>
               </div>
@@ -126,10 +194,8 @@ export default function DashboardPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-extrabold italic">0g</span>
-                  <span className="text-[10px] uppercase tracking-widest text-slate-400">
-                    / 180g Protein
-                  </span>
+                  <span className="text-2xl font-extrabold italic">{todayNutritionTotals.proteinGrams}g</span>
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400">Protein</span>
                 </div>
               </div>
               <p className="text-center font-bold">Daily Protein</p>
@@ -149,14 +215,12 @@ export default function DashboardPage() {
               <div className="mt-4 flex items-center space-x-4 text-sm font-medium">
                 {todayWorkout ? (
                   <>
-                    <span className="inline-flex items-center space-x-1 text-primary">
-                      <span className="material-icons text-base">schedule</span>
-                      <span>
-                        {todayWorkout.durationMinutes
-                          ? `${todayWorkout.durationMinutes} min`
-                          : "Duration TBD"}
+                    {todayWorkout.durationMinutes ? (
+                      <span className="inline-flex items-center space-x-1 text-primary">
+                        <span className="material-icons text-base">schedule</span>
+                        <span>{todayWorkout.durationMinutes} min</span>
                       </span>
-                    </span>
+                    ) : null}
                     <span className="inline-flex items-center space-x-1 text-slate-300">
                       <span className="material-icons text-base">event</span>
                       <span>{workouts.length} scheduled</span>
@@ -169,10 +233,12 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <button className="mt-4 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-2.5 font-bold text-background transition-all hover:bg-primary/90">
-              <span>{todayWorkout ? "START WORKOUT" : "PLAN WORKOUT"}</span>
-              <span className="material-icons">play_arrow</span>
-            </button>
+            <Link
+              href="/workouts"
+              className="mt-4 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-2.5 font-bold text-background transition-all hover:bg-primary/90"
+            >
+              <span>{todayWorkout ? "OPEN WORKOUT" : "PLAN WORKOUT"}</span>
+            </Link>
           </div>
         </div>
 
@@ -203,28 +269,30 @@ export default function DashboardPage() {
           <div className="relative overflow-hidden rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
-                Body Weight Trend (kg)
+                Weekly Calories
               </h3>
               <div className="flex space-x-4">
-                <span className="text-xs font-bold text-primary">Avg: --</span>
+                <span className="text-xs font-bold text-primary">
+                  {weeklyNutritionData.reduce((sum, day) => sum + day.calories, 0)} kcal
+                </span>
               </div>
             </div>
             <div className="h-40">
               <ChartContainer
                 className="h-40 w-full"
-                config={{ minutes: { label: "Minutes", color: "#0df259" } }}
+                config={{ calories: { label: "Calories", color: "#0df259" } }}
               >
-                <LineChart data={weeklyDurationData}>
+                <LineChart data={weeklyNutritionData}>
                   <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.2)" />
                   <XAxis dataKey="day" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} width={28} />
                   <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                   <Line
                     type="monotone"
-                    dataKey="minutes"
-                    stroke="var(--color-minutes)"
+                    dataKey="calories"
+                    stroke="var(--color-calories)"
                     strokeWidth={2}
-                    dot={{ r: 3, fill: "var(--color-minutes)" }}
+                    dot={{ r: 3, fill: "var(--color-calories)" }}
                   />
                 </LineChart>
               </ChartContainer>

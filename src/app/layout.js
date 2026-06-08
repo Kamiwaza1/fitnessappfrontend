@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
       </head>
       <body
-        className={`${lexend.variable} font-display antialiased bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen`}
+        className={`${lexend.variable} min-h-screen bg-background font-display text-foreground antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

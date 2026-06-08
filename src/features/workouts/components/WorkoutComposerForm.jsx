@@ -1,3 +1,23 @@
+const muscleOptions = [
+  ["FULL_BODY", "Full Body"],
+  ["CHEST", "Chest"],
+  ["BACK", "Back"],
+  ["SHOULDERS", "Shoulders"],
+  ["BICEPS", "Biceps"],
+  ["TRICEPS", "Triceps"],
+  ["LEGS", "Legs"],
+  ["GLUTES", "Glutes"],
+  ["CORE", "Core"],
+  ["CALVES", "Calves"],
+];
+
+function FieldLabel({ children }) {
+  return <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{children}</span>;
+}
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100";
+
 export default function WorkoutComposerForm({
   formState,
   editingWorkoutId,
@@ -11,213 +31,169 @@ export default function WorkoutComposerForm({
   onClose,
   onSubmit,
 }) {
+  const exercises = formState.exercises || [];
+
   return (
     <form
-      className="grid grid-cols-1 gap-4 rounded-2xl border border-primary/20 bg-background-light p-5 text-slate-900 shadow-sm sm:p-6 md:grid-cols-2 dark:bg-background-dark dark:text-slate-100"
+      className="overflow-hidden rounded-xl border border-primary/20 bg-background-light text-slate-900 shadow-sm dark:bg-background-dark dark:text-slate-100"
       onSubmit={onSubmit}
     >
-      <div className="md:col-span-2 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-bold">
-            {editingWorkoutId ? "Edit Workout Details" : "New Workout Details"}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Set your session details and pick your exercises.
+      <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-4 sm:p-5 dark:border-slate-800">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            {editingWorkoutId ? "Edit Workout" : "Create Workout"}
           </p>
+          <h2 className="mt-1 text-xl font-bold">
+            {editingWorkoutId ? "Update your plan" : "Build a workout plan"}
+          </h2>
         </div>
         <button
           type="button"
-          className="h-9 w-9 rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           onClick={onClose}
         >
-          <span className="material-icons text-base">close</span>
+          Close
         </button>
       </div>
 
-      <label className="md:col-span-1">
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Workout Title</span>
-        <input
-          required
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500"
-          placeholder="Push Day - Heavy"
-          value={formState.title}
-          onChange={(event) => onChange("title", event.target.value)}
-        />
-      </label>
-
-      <label className="md:col-span-1">
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Category</span>
-        <select
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-          value={formState.category}
-          onChange={(event) => onChange("category", event.target.value)}
-        >
-          <option value="GENERAL">General</option>
-          <option value="STRENGTH">Strength</option>
-          <option value="CARDIO">Cardio</option>
-          <option value="MOBILITY">Mobility</option>
-          <option value="RECOVERY">Recovery</option>
-        </select>
-      </label>
-
-      <label className="md:col-span-1">
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Muscle Type</span>
-        <select
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-          value={formState.muscleType}
-          onChange={(event) => onChange("muscleType", event.target.value)}
-        >
-          <option value="FULL_BODY">Full Body</option>
-          <option value="CHEST">Chest</option>
-          <option value="BACK">Back</option>
-          <option value="SHOULDERS">Shoulders</option>
-          <option value="BICEPS">Biceps</option>
-          <option value="TRICEPS">Triceps</option>
-          <option value="LEGS">Legs</option>
-          <option value="GLUTES">Glutes</option>
-          <option value="CORE">Core</option>
-          <option value="CALVES">Calves</option>
-        </select>
-      </label>
-
-      <label className="md:col-span-1">
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</span>
-        <input
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500"
-          placeholder="Push day focus and intensity"
-          value={formState.description}
-          onChange={(event) => onChange("description", event.target.value)}
-        />
-      </label>
-
-      <label>
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Workout Date</span>
-        <input
-          type="date"
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-          value={formState.date}
-          onChange={(event) => onChange("date", event.target.value)}
-        />
-      </label>
-
-      <label>
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Duration (mins)</span>
-        <input
-          type="number"
-          min="1"
-          max="999"
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100"
-          value={formState.duration}
-          onChange={(event) => onChange("duration", event.target.value)}
-        />
-      </label>
-
-      <div className="md:col-span-2 space-y-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Exercises</h3>
-          <button
-            type="button"
-            className="rounded-md border border-primary/40 px-2 py-1 text-xs text-primary hover:bg-primary/10"
-            onClick={onAddExercise}
-          >
-            Add Exercise
-          </button>
-        </div>
-
-        {(formState.exercises || []).map((exercise, index) => (
-          <div key={index} className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-3 md:grid-cols-6 dark:border-slate-700">
-            <input
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm md:col-span-2 dark:border-slate-700 dark:bg-slate-900/70"
-              placeholder="Exercise name"
-              value={exercise.name}
-              onChange={(event) => onExerciseChange(index, "name", event.target.value)}
-            />
-            <select
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70"
-              value={exercise.muscleType}
-              onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
-            >
-              <option value="FULL_BODY">Full Body</option>
-              <option value="CHEST">Chest</option>
-              <option value="BACK">Back</option>
-              <option value="SHOULDERS">Shoulders</option>
-              <option value="BICEPS">Biceps</option>
-              <option value="TRICEPS">Triceps</option>
-              <option value="LEGS">Legs</option>
-              <option value="GLUTES">Glutes</option>
-              <option value="CORE">Core</option>
-              <option value="CALVES">Calves</option>
-            </select>
-            <input
-              type="number"
-              min="1"
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70"
-              placeholder="Sets"
-              value={exercise.sets}
-              onChange={(event) => onExerciseChange(index, "sets", event.target.value)}
-            />
-            <input
-              type="number"
-              min="1"
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70"
-              placeholder="Reps"
-              value={exercise.reps}
-              onChange={(event) => onExerciseChange(index, "reps", event.target.value)}
-            />
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                className="w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/70"
-                placeholder="Weight kg"
-                value={exercise.weightKg}
-                onChange={(event) => onExerciseChange(index, "weightKg", event.target.value)}
-              />
-              <button
-                type="button"
-                className="rounded-md border border-red-500/40 px-2 text-red-400 hover:bg-red-500/10"
-                onClick={() => onRemoveExercise(index)}
-                disabled={(formState.exercises || []).length <= 1}
-              >
-                <span className="material-icons text-sm">remove</span>
-              </button>
-            </div>
-            <textarea
-              rows="2"
-              className="rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm md:col-span-6 dark:border-slate-700 dark:bg-slate-900/70"
-              placeholder="Exercise notes (optional)"
-              value={exercise.notes || ""}
-              onChange={(event) => onExerciseChange(index, "notes", event.target.value)}
-            />
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+        <section className="space-y-4 border-b border-slate-200 p-4 sm:p-5 lg:border-b-0 lg:border-r dark:border-slate-800">
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Session</h3>
           </div>
-        ))}
+
+          <label className="block">
+            <FieldLabel>Workout Title</FieldLabel>
+	            <input
+	              required
+	              className={inputClassName}
+	              value={formState.title}
+	              onChange={(event) => onChange("title", event.target.value)}
+	            />
+          </label>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <label className="block">
+              <FieldLabel>Category</FieldLabel>
+              <select
+                className={inputClassName}
+                value={formState.category}
+                onChange={(event) => onChange("category", event.target.value)}
+              >
+                <option value="GENERAL">General</option>
+                <option value="STRENGTH">Strength</option>
+                <option value="CARDIO">Cardio</option>
+                <option value="MOBILITY">Mobility</option>
+                <option value="RECOVERY">Recovery</option>
+              </select>
+            </label>
+            <label className="block">
+              <FieldLabel>Workout Date</FieldLabel>
+              <input
+                type="date"
+                className={inputClassName}
+                value={formState.date}
+                onChange={(event) => onChange("date", event.target.value)}
+              />
+            </label>
+          </div>
+
+          <label className="block">
+            <FieldLabel>Description</FieldLabel>
+	            <input
+	              className={inputClassName}
+	              value={formState.description}
+	              onChange={(event) => onChange("description", event.target.value)}
+	            />
+          </label>
+        </section>
+
+        <section className="space-y-4 p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Exercises</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{exercises.length} movements</p>
+            </div>
+            <button
+              type="button"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg border border-primary/40 px-3 py-2 text-sm font-bold text-primary hover:bg-primary/10"
+              onClick={onAddExercise}
+            >
+              Add Exercise
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {exercises.map((exercise, index) => (
+              <article key={index} className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="rounded bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    Exercise {index + 1}
+                  </span>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => onRemoveExercise(index)}
+                    disabled={exercises.length <= 1}
+                  >
+                    Remove
+                  </button>
+                </div>
+
+	                <div className="grid gap-3 md:grid-cols-6">
+	                  <label className="block md:col-span-3">
+	                    <FieldLabel>Exercise Name</FieldLabel>
+	                    <input
+	                      className={inputClassName}
+	                      value={exercise.name}
+	                      onChange={(event) => onExerciseChange(index, "name", event.target.value)}
+	                    />
+	                  </label>
+	                  <label className="block md:col-span-3">
+	                    <FieldLabel>Muscle Type</FieldLabel>
+	                    <select
+	                      className={inputClassName}
+	                      value={exercise.muscleType}
+	                      onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
+	                    >
+	                      {muscleOptions.map(([value, label]) => (
+	                        <option key={value} value={value}>
+	                          {label}
+	                        </option>
+	                      ))}
+	                    </select>
+	                  </label>
+
+	                  <label className="block md:col-span-6">
+	                    <FieldLabel>Sets</FieldLabel>
+	                    <input
+	                      type="number"
+	                      min="1"
+	                      className={inputClassName}
+	                      value={exercise.sets}
+	                      onChange={(event) => onExerciseChange(index, "sets", event.target.value)}
+	                    />
+	                  </label>
+	                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
 
-      <label className="md:col-span-2">
-        <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Coaching Notes</span>
-        <textarea
-          rows="3"
-          className="mt-2 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500"
-          placeholder="Start with activation warm-up and keep rest under 90 seconds."
-          value={formState.notes}
-          onChange={(event) => onChange("notes", event.target.value)}
-        />
-      </label>
-
-      <div className="md:col-span-2 mt-1 flex flex-col gap-3 sm:flex-row sm:justify-end">
-        {submitError ? <p className="mr-auto text-sm text-red-400">{submitError}</p> : null}
+      <div className="sticky bottom-0 flex flex-col gap-3 border-t border-slate-200 bg-background-light/95 p-4 backdrop-blur sm:flex-row sm:items-center sm:justify-end dark:border-slate-800 dark:bg-background-dark/95">
+        {submitError ? <p className="mr-auto text-sm font-semibold text-red-400">{submitError}</p> : null}
         <button
           type="button"
-          className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="min-h-11 rounded-lg border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           onClick={onReset}
           disabled={isSubmitting}
         >
-          Reset Form
+          Reset
         </button>
         <button
           type="submit"
-          className="rounded-lg bg-primary px-6 py-2 font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-primary px-6 py-2 font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Saving..." : editingWorkoutId ? "Update Workout" : "Save Workout"}

@@ -4,13 +4,19 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
     const router = useRouter();
     const { user, logout } = useAuth();
+    const initials = String(user?.fullName || user?.email || "U")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase();
     const navItems = [
-        { name: 'Dashboard', icon: 'dashboard', path: '/' },
+        { name: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
         { name: 'Workouts', icon: 'fitness_center', path: '/workouts' },
         { name: 'Nutrition', icon: 'restaurant', path: '/nutrition' },
         { name: 'Progress', icon: 'insights', path: '/progress' },
@@ -22,8 +28,6 @@ export default function Sidebar() {
         logout();
         router.replace('/login');
     };
-
-    const displayName = user?.fullName;
 
     return (
         <aside className="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 hidden lg:flex flex-col sticky top-0 h-screen">
@@ -60,12 +64,8 @@ export default function Sidebar() {
             </nav>
             <div className="p-6 border-t border-primary/10">
                 <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                        <img
-                            className="w-full h-full rounded-full object-cover"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQcBtgXEw0VFaRSi3XPmNzdcp32KXAOrKbg7UUoBLGx73i10fq8nY7LjAtsH-SqM-TGV3w5F22O_Mv9PEpo6HgnHY_-XQHYKOasR0aKSsd36w7MDrD1Og0IfJMRsjeGDftJTF5kkSIQUCZNe66KOwHdj6WW17YSZvWxS4vrdFukEVhZl6UUb6-9r5rR3slEVrcP6t26N9BQqGxwKYHAl426QNQ47K8fc3GFWvK7R72LqK0PsiilF1ZwbNv5wnNpukscaUm3mXBIxut"
-                            alt="User profile"
-                        />
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 text-sm font-black text-primary">
+                        {initials}
                     </div>
                     <div>
                         <p className="text-sm font-bold">{user?.fullName}</p>

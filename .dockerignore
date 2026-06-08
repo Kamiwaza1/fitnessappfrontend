@@ -6,3 +6,10 @@ build.log
 .gitignore
 compose.yml
 compose.yaml
+public/videos
+*.mp4
+*.mov
+*.webm
+*.m4v
+*.avi
+*.mkv

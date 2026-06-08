@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function LoginForm({
-  loginRef,
   values,
   error,
   fieldErrors,
@@ -10,10 +12,14 @@ export default function LoginForm({
   onSubmit,
 }) {
   return (
-    <section ref={loginRef} id="auth-section" className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-10 backdrop-blur-xl">
-        <h2 className="mb-2 text-2xl font-bold text-white">Sign in</h2>
-        <p className="mb-8 text-sm text-zinc-400">Enter your credentials to continue.</p>
+    <section className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
+      <Card className="w-full max-w-md border-primary/20 bg-card p-2 backdrop-blur-xl">
+        <CardHeader className="text-center">
+          <p className="mb-2 text-2xl font-extrabold italic tracking-tighter text-primary">DARK LIFT</p>
+          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardDescription>Enter your credentials to continue.</CardDescription>
+        </CardHeader>
+        <CardContent>
 
         {error ? (
           <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -23,61 +29,63 @@ export default function LoginForm({
 
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-400">
+            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
               Email / Username
             </label>
-            <input
+            <Input
               type="email"
               value={values.email}
               onChange={(event) => onChange("email", event.target.value)}
               required
               autoComplete="username"
-              className={`w-full rounded-lg border bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors ${
+              className={
                 fieldErrors.email
-                  ? "border-red-500/80 shadow-[0_0_0_1px_rgba(239,68,68,0.45)]"
-                  : "border-white/10 focus:border-primary focus:shadow-[0_0_0_1px_var(--color-primary)]"
-              }`}
+                  ? "border-red-500/80 ring-2 ring-red-500/30"
+                  : ""
+              }
             />
             {fieldErrors.email ? <p className="text-xs text-red-300">{fieldErrors.email}</p> : null}
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-400">
+            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
               Password
             </label>
-            <input
+            <Input
               type="password"
               value={values.password}
               onChange={(event) => onChange("password", event.target.value)}
               required
               autoComplete="current-password"
-              className={`w-full rounded-lg border bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors ${
+              className={
                 fieldErrors.password
-                  ? "border-red-500/80 shadow-[0_0_0_1px_rgba(239,68,68,0.45)]"
-                  : "border-white/10 focus:border-primary focus:shadow-[0_0_0_1px_var(--color-primary)]"
-              }`}
+                  ? "border-red-500/80 ring-2 ring-red-500/30"
+                  : ""
+              }
             />
             {fieldErrors.password ? (
               <p className="text-xs text-red-300">{fieldErrors.password}</p>
             ) : null}
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="h-12 w-full rounded-full bg-primary text-sm font-bold tracking-[0.05em] text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            size="lg"
+            className="w-full rounded-full tracking-[0.05em]"
           >
             {isSubmitting ? "Signing in..." : "Sign In"}
-          </button>
+          </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-6 text-center text-sm text-primary/60">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="font-semibold text-primary hover:underline">
             Register
           </Link>
         </p>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

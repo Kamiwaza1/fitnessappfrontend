@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
+  AUTH_SESSION_EVENT,
   clearStoredAuthToken,
   decodeJwtPayload,
   getTokenExpiryMs,
   isTokenExpired,
-  readStoredAuthUser,
+  readStoredAuthUserJson,
   readStoredAuthToken,
   storeAuthSession,
 } from "@/shared/utils/authTokenStorage";
@@ -23,17 +24,47 @@ function getUserFromToken(token) {
   };
 }
 
+function subscribeToAuthSession(callback) {
+  if (typeof window === "undefined") return () => {};
+
+  window.addEventListener(AUTH_SESSION_EVENT, callback);
+  window.addEventListener("storage", callback);
+
+  return () => {
+    window.removeEventListener(AUTH_SESSION_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+function getAuthTokenSnapshot() {
+  const token = readStoredAuthToken();
+  return token && !isTokenExpired(token) ? token : null;
+}
+
+function getAuthUserSnapshot() {
+  const token = getAuthTokenSnapshot();
+  if (!token) return "";
+  return readStoredAuthUserJson();
+}
+
+function parseAuthUser(userJson, token) {
+  if (userJson) {
+    try {
+      return JSON.parse(userJson);
+    } catch {
+      return token ? getUserFromToken(token) : null;
+    }
+  }
+
+  return token ? getUserFromToken(token) : null;
+}
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => readStoredAuthToken());
-  const [user, setUser] = useState(() => {
-    const initialToken = readStoredAuthToken();
-    if (!initialToken || isTokenExpired(initialToken)) return null;
-    return readStoredAuthUser() || getUserFromToken(initialToken);
-  });
+  const token = useSyncExternalStore(subscribeToAuthSession, getAuthTokenSnapshot, () => null);
+  const userJson = useSyncExternalStore(subscribeToAuthSession, getAuthUserSnapshot, () => "");
+  const user = useMemo(() => parseAuthUser(userJson, token), [userJson, token]);
 
   const logout = useCallback(() => {
-    setUser(null);
-    setToken(null);
     clearStoredAuthToken();
   }, []);
 
@@ -70,14 +101,14 @@ export function AuthProvider({ children }) {
           refreshToken: nextRefreshToken,
           user: normalizedUser,
         });
-        setToken(nextToken);
-        setUser(normalizedUser);
         return;
       }
 
-      setUser({
-        username: username || "User",
-        fullName: authUser?.fullName || null,
+      storeAuthSession({
+        user: {
+          username: username || "User",
+          fullName: authUser?.fullName || null,
+        },
       });
     },
     [logout]
