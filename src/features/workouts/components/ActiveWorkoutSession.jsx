@@ -31,15 +31,14 @@ function ExerciseLogger({
         </div>
         <button
           type="button"
-          className={`flex min-h-10 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-bold transition-colors ${
+          className={`flex min-h-10 shrink-0 items-center rounded-lg border px-3 text-sm font-bold transition-colors ${
             exercise.completed
               ? "border-primary bg-primary text-background"
               : "border-slate-300 text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
           onClick={() => onToggleCompleted(exercise.id)}
         >
-          <span className="material-icons text-base">{exercise.completed ? "check" : "radio_button_unchecked"}</span>
-          Done
+          {exercise.completed ? "Done" : "Mark done"}
         </button>
       </div>
 
@@ -56,7 +55,6 @@ function ExerciseLogger({
               min="1"
               inputMode="numeric"
               className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-              placeholder={exercise.targetReps ? String(exercise.targetReps) : "8"}
               value={draft.reps}
               onChange={(event) => onDraftChange(exercise.id, "reps", event.target.value)}
             />
@@ -69,17 +67,15 @@ function ExerciseLogger({
               step="0.5"
               inputMode="decimal"
               className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-              placeholder={exercise.targetWeightKg ? String(exercise.targetWeightKg) : "0"}
               value={draft.weightKg}
               onChange={(event) => onDraftChange(exercise.id, "weightKg", event.target.value)}
             />
           </label>
           <button
             type="button"
-            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 font-black text-background hover:bg-primary/90"
+            className="flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 font-black text-background hover:bg-primary/90"
             onClick={() => onAddSet(exercise.id)}
           >
-            <span className="material-icons text-base">add</span>
             Log set
           </button>
         </div>
@@ -122,11 +118,10 @@ function ExerciseLogger({
               />
               <button
                 type="button"
-                className="grid h-9 w-9 place-items-center rounded-md text-red-400 hover:bg-red-500/10"
+                className="rounded-md px-2 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10"
                 onClick={() => onRemoveSet(exercise.id, set.id)}
-                aria-label={`Remove set ${index + 1}`}
               >
-                <span className="material-icons text-base">delete</span>
+                Remove
               </button>
             </div>
           ))}

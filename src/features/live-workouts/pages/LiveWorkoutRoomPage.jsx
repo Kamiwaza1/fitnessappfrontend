@@ -7,7 +7,7 @@ import StatusMessage from "@/shared/components/StatusMessage";
 import { useAuth } from "@/context/AuthContext";
 import {
   closeLiveWorkoutRoom,
-  fetchLiveWorkoutRoom,
+  fetchLiveWorkoutRoomDetails,
 } from "@/features/live-workouts/api/liveWorkoutsApi";
 import { useLiveWorkoutSocket } from "@/features/live-workouts/hooks/useLiveWorkoutSocket";
 
@@ -31,6 +31,9 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
   const [error, setError] = useState("");
   const [isClosing, setIsClosing] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [chatText, setChatText] = useState("");
+  const [chatError, setChatError] = useState("");
   const [progress, setProgress] = useState({
     currentExerciseIndex: 0,
     completedSets: 0,
@@ -41,12 +44,18 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
     if (event?.room) {
       setRoom(event.room);
     }
+    if (event?.type === "MESSAGE_SENT" && event.message) {
+      setMessages((current) => {
+        if (current.some((message) => message.messageId === event.message.messageId)) return current;
+        return [...current, event.message];
+      });
+    }
     if (event?.type === "ROOM_CLOSED") {
       setError("This live workout room has ended.");
     }
   }, []);
 
-  const { connectionState, sendProgress, leaveRoom } = useLiveWorkoutSocket({
+  const { connectionState, sendProgress, sendMessage, leaveRoom } = useLiveWorkoutSocket({
     roomCode: normalizedRoomCode,
     enabled: Boolean(room && !error),
     onEvent: handleSocketEvent,
@@ -59,8 +68,11 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
       setIsLoading(true);
       setError("");
       try {
-        const nextRoom = await fetchLiveWorkoutRoom(normalizedRoomCode);
-        if (isMounted) setRoom(nextRoom);
+        const details = await fetchLiveWorkoutRoomDetails(normalizedRoomCode);
+        if (isMounted) {
+          setRoom(details.room);
+          setMessages(details.messages);
+        }
       } catch (loadError) {
         if (isMounted) setError(loadError?.message || "Could not load live workout room.");
       } finally {
@@ -138,6 +150,23 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
     }
   };
 
+  const handleSendMessage = (event) => {
+    event.preventDefault();
+    const text = chatText.trim();
+    if (!text) return;
+    if (text.length > 500) {
+      setChatError("Message cannot be longer than 500 characters.");
+      return;
+    }
+    const didSend = sendMessage(text);
+    if (!didSend) {
+      setChatError("Chat is not connected yet.");
+      return;
+    }
+    setChatText("");
+    setChatError("");
+  };
+
   return (
     <AppPageShell mainClassName="min-h-dvh">
       <section className="mx-auto flex max-w-5xl flex-col gap-5 p-4 sm:p-6 lg:p-8">
@@ -184,20 +213,18 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
               <div className="flex flex-col gap-2 sm:flex-row lg:flex-col lg:w-44">
                 <button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={handleCopyRoomCode}
                   disabled={!normalizedRoomCode}
                 >
-                  <span className="material-icons text-base">content_copy</span>
                   Copy Code
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-primary/30 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={handleCopyInviteLink}
                   disabled={!normalizedRoomCode}
                 >
-                  <span className="material-icons text-base">link</span>
                   Copy Link
                 </button>
                 {copyMessage ? <p className="text-center text-xs font-bold text-primary">{copyMessage}</p> : null}
@@ -211,7 +238,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
 
         {!isLoading && room ? (
           <>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
             <section className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
               <h2 className="text-lg font-bold">Your Progress</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -250,26 +277,93 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
               </div>
             </section>
 
-            <aside className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold">Participants</h2>
-                <span className="text-xs uppercase tracking-widest text-slate-400">{participants.length} online</span>
-              </div>
-              <div className="space-y-3">
-                {participants.map((participant) => (
-                  <div key={participant.email} className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="truncate font-bold">{getParticipantLabel(participant)}</p>
-                      <span className="rounded bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-                        {participant.status}
-                      </span>
+            <aside className="space-y-5">
+              <div className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Participants</h2>
+                  <span className="text-xs uppercase tracking-widest text-slate-400">{participants.length} online</span>
+                </div>
+                <div className="space-y-3">
+                  {participants.map((participant) => (
+                    <div key={participant.email} className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="truncate font-bold">{getParticipantLabel(participant)}</p>
+                        <span className="rounded bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+                          {participant.status}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                        Exercise {participant.currentExerciseIndex ?? 0} · {participant.completedSets ?? 0} sets
+                      </p>
                     </div>
-                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      Exercise {participant.currentExerciseIndex ?? 0} · {participant.completedSets ?? 0} sets
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+
+              <section className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-background-dark/40">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold">Room Chat</h2>
+                  <span className="text-xs uppercase tracking-widest text-slate-400">{messages.length} messages</span>
+                </div>
+
+                <div className="flex max-h-80 flex-col gap-3 overflow-y-auto rounded-lg border border-primary/10 bg-background-dark/30 p-3">
+                  {messages.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-slate-500">No messages yet.</p>
+                  ) : (
+                    messages.map((message) => {
+                      const isMine = message.senderEmail === currentUserEmail;
+                      return (
+                        <div
+                          key={message.messageId || `${message.senderEmail}-${message.createdAt}`}
+                          className={`rounded-lg border p-3 ${
+                            isMine
+                              ? "border-primary/30 bg-primary/10"
+                              : "border-slate-700 bg-slate-900/40"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="truncate text-xs font-bold text-primary">
+                              {message.senderName || message.senderEmail || "User"}
+                            </p>
+                            <time className="shrink-0 text-[10px] text-slate-500">
+                              {message.createdAt
+                                ? new Date(message.createdAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : ""}
+                            </time>
+                          </div>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-100">{message.text}</p>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                <form onSubmit={handleSendMessage} className="mt-3 space-y-2">
+                  <label className="sr-only" htmlFor="live-workout-message">
+                    Message
+                  </label>
+                  <textarea
+                    id="live-workout-message"
+                    value={chatText}
+                    onChange={(event) => setChatText(event.target.value)}
+                    maxLength={500}
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900/70"
+                    placeholder="Send a message..."
+                  />
+                  {chatError ? <p className="text-xs font-bold text-red-400">{chatError}</p> : null}
+                  <button
+                    type="submit"
+                    disabled={!chatText.trim() || connectionState !== "CONNECTED"}
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Send Message
+                  </button>
+                </form>
+              </section>
             </aside>
           </div>
           </>

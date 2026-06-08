@@ -274,7 +274,18 @@ Cypress.Commands.add("setCalorieTarget", (dailyCalorieTarget) => {
 });
 
 Cypress.Commands.add("fillFieldByLabel", (label, value) => {
-  cy.contains("label", label).find("input, textarea, select").first().clear().type(String(value));
+  cy.contains("label", label).find("input, textarea, select").first().then(($field) => {
+    const tagName = $field[0].tagName.toLowerCase();
+    const nextValue = String(value);
+
+    if (tagName === "select") {
+      cy.wrap($field).select(nextValue);
+      return;
+    }
+
+    cy.wrap($field).clear({ force: true });
+    cy.contains("label", label).find("input, textarea").first().type(nextValue, { force: true });
+  });
 });
 
 Cypress.Commands.add("findByAriaLabelFallback", (label) => {

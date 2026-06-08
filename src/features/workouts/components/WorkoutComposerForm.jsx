@@ -16,7 +16,7 @@ function FieldLabel({ children }) {
 }
 
 const inputClassName =
-  "mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500";
+  "mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-background-light px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100";
 
 export default function WorkoutComposerForm({
   formState,
@@ -49,11 +49,10 @@ export default function WorkoutComposerForm({
         </div>
         <button
           type="button"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-300 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           onClick={onClose}
-          aria-label="Close workout form"
         >
-          <span className="material-icons text-base">close</span>
+          Close
         </button>
       </div>
 
@@ -65,13 +64,12 @@ export default function WorkoutComposerForm({
 
           <label className="block">
             <FieldLabel>Workout Title</FieldLabel>
-            <input
-              required
-              className={inputClassName}
-              placeholder="Push Day - Heavy"
-              value={formState.title}
-              onChange={(event) => onChange("title", event.target.value)}
-            />
+	            <input
+	              required
+	              className={inputClassName}
+	              value={formState.title}
+	              onChange={(event) => onChange("title", event.target.value)}
+	            />
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
@@ -102,12 +100,11 @@ export default function WorkoutComposerForm({
 
           <label className="block">
             <FieldLabel>Description</FieldLabel>
-            <input
-              className={inputClassName}
-              placeholder="Push day focus and intensity"
-              value={formState.description}
-              onChange={(event) => onChange("description", event.target.value)}
-            />
+	            <input
+	              className={inputClassName}
+	              value={formState.description}
+	              onChange={(event) => onChange("description", event.target.value)}
+	            />
           </label>
         </section>
 
@@ -119,10 +116,9 @@ export default function WorkoutComposerForm({
             </div>
             <button
               type="button"
-              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-primary/40 px-3 py-2 text-sm font-bold text-primary hover:bg-primary/10"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg border border-primary/40 px-3 py-2 text-sm font-bold text-primary hover:bg-primary/10"
               onClick={onAddExercise}
             >
-              <span className="material-icons text-base">add</span>
               Add Exercise
             </button>
           </div>
@@ -136,43 +132,49 @@ export default function WorkoutComposerForm({
                   </span>
                   <button
                     type="button"
-                    className="grid h-8 w-8 place-items-center rounded-lg border border-red-500/40 text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => onRemoveExercise(index)}
                     disabled={exercises.length <= 1}
-                    aria-label="Remove exercise"
                   >
-                    <span className="material-icons text-sm">remove</span>
+                    Remove
                   </button>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-6">
-                  <input
-                    className={`${inputClassName} mt-0 md:col-span-3`}
-                    placeholder="Exercise name"
-                    value={exercise.name}
-                    onChange={(event) => onExerciseChange(index, "name", event.target.value)}
-                  />
-                  <select
-                    className={`${inputClassName} mt-0 md:col-span-3`}
-                    value={exercise.muscleType}
-                    onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
-                  >
-                    {muscleOptions.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+	                <div className="grid gap-3 md:grid-cols-6">
+	                  <label className="block md:col-span-3">
+	                    <FieldLabel>Exercise Name</FieldLabel>
+	                    <input
+	                      className={inputClassName}
+	                      value={exercise.name}
+	                      onChange={(event) => onExerciseChange(index, "name", event.target.value)}
+	                    />
+	                  </label>
+	                  <label className="block md:col-span-3">
+	                    <FieldLabel>Muscle Type</FieldLabel>
+	                    <select
+	                      className={inputClassName}
+	                      value={exercise.muscleType}
+	                      onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
+	                    >
+	                      {muscleOptions.map(([value, label]) => (
+	                        <option key={value} value={value}>
+	                          {label}
+	                        </option>
+	                      ))}
+	                    </select>
+	                  </label>
 
-                  <input
-                    type="number"
-                    min="1"
-                    className={`${inputClassName} mt-0 md:col-span-6`}
-                    placeholder="Sets"
-                    value={exercise.sets}
-                    onChange={(event) => onExerciseChange(index, "sets", event.target.value)}
-                  />
-                </div>
+	                  <label className="block md:col-span-6">
+	                    <FieldLabel>Sets</FieldLabel>
+	                    <input
+	                      type="number"
+	                      min="1"
+	                      className={inputClassName}
+	                      value={exercise.sets}
+	                      onChange={(event) => onExerciseChange(index, "sets", event.target.value)}
+	                    />
+	                  </label>
+	                </div>
               </article>
             ))}
           </div>

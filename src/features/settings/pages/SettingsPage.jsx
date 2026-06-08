@@ -191,14 +191,13 @@ export default function SettingsPage() {
                 {targetMessage ? <StatusMessage className="text-left text-primary">{targetMessage}</StatusMessage> : null}
 
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="submit"
-                    disabled={isSavingTarget}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <span className="material-icons text-base">save</span>
-                    {isSavingTarget ? "Saving..." : "Save target"}
-                  </button>
+	                  <button
+	                    type="submit"
+	                    disabled={isSavingTarget}
+	                    className="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+	                  >
+	                    {isSavingTarget ? "Saving..." : "Save target"}
+	                  </button>
                 </div>
               </form>
             </SettingsCard>
@@ -244,14 +243,13 @@ export default function SettingsPage() {
                 {passwordError ? <StatusMessage tone="error" className="text-left">{passwordError}</StatusMessage> : null}
                 {passwordMessage ? <StatusMessage className="text-left text-primary">{passwordMessage}</StatusMessage> : null}
 
-                <button
-                  type="submit"
-                  disabled={isSavingPassword}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <span className="material-icons text-base">lock_reset</span>
-                  {isSavingPassword ? "Updating..." : "Update password"}
-                </button>
+	                <button
+	                  type="submit"
+	                  disabled={isSavingPassword}
+	                  className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+	                >
+	                  {isSavingPassword ? "Updating..." : "Update password"}
+	                </button>
               </form>
             </SettingsCard>
           </div>

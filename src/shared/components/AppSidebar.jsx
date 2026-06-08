@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
@@ -9,6 +8,9 @@ import { useAuth } from "@/context/AuthContext";
 const NAV_ITEMS = [
   { name: "Dashboard", icon: "dashboard", path: "/dashboard" },
   { name: "Workouts", icon: "fitness_center", path: "/workouts" },
+  { name: "Exercise Library", icon: "menu_book", path: "/library" },
+  { name: "Live Workout", icon: "sensors", path: "/live-workouts", matchPrefix: "/live-workouts" },
+  { name: "History", icon: "history", path: "/workout-histories" },
   { name: "Nutrition", icon: "restaurant", path: "/nutrition" },
   { name: "Progress", icon: "insights", path: "/progress" },
   { name: "Settings", icon: "settings", path: "/settings" },
@@ -18,6 +20,13 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const initials = String(user?.fullName || user?.email || "U")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   const handleLogout = () => {
     logout();
@@ -33,7 +42,7 @@ export default function AppSidebar() {
 
         <nav className="flex-1 space-y-2 px-4">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = item.matchPrefix ? pathname.startsWith(item.matchPrefix) : pathname === item.path;
 
             return (
               <Link
@@ -64,14 +73,8 @@ export default function AppSidebar() {
 
         <div className="border-t border-primary/10 p-5">
           <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary/20">
-              <Image
-                className="h-full w-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQcBtgXEw0VFaRSi3XPmNzdcp32KXAOrKbg7UUoBLGx73i10fq8nY7LjAtsH-SqM-TGV3w5F22O_Mv9PEpo6HgnHY_-XQHYKOasR0aKSsd36w7MDrD1Og0IfJMRsjeGDftJTF5kkSIQUCZNe66KOwHdj6WW17YSZvWxS4vrdFukEVhZl6UUb6-9r5rR3slEVrcP6t26N9BQqGxwKYHAl426QNQ47K8fc3GFWvK7R72LqK0PsiilF1ZwbNv5wnNpukscaUm3mXBIxut"
-                alt="User profile"
-                width={40}
-                height={40}
-              />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-primary/20 text-sm font-black text-primary">
+              {initials}
             </div>
             <div className="min-w-0">
               <p suppressHydrationWarning className="truncate text-sm font-bold">
@@ -82,16 +85,16 @@ export default function AppSidebar() {
         </div>
       </aside>
 
-      <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-xl border border-primary/15 bg-background-light/95 p-1 shadow-2xl shadow-slate-950/20 backdrop-blur dark:bg-background-dark/95 lg:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-50 flex gap-1 overflow-x-auto rounded-xl border border-primary/15 bg-background-light/95 p-1 shadow-2xl shadow-slate-950/20 backdrop-blur dark:bg-background-dark/95 lg:hidden">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = item.matchPrefix ? pathname.startsWith(item.matchPrefix) : pathname === item.path;
 
           return (
             <Link
               key={item.name}
               href={item.path}
               className={clsx(
-                "flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-2 text-[10px] font-semibold transition-colors",
+                "flex min-w-[72px] flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-2 text-[10px] font-semibold transition-colors",
                 isActive ? "bg-primary text-background" : "text-slate-500 dark:text-slate-400"
               )}
             >

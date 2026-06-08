@@ -19,8 +19,7 @@ describe("workouts without API mocks", () => {
     cy.fillFieldByLabel("Workout Title", title);
     cy.fillFieldByLabel("Description", "Cypress real backend workout");
     cy.fillFieldByLabel("Workout Date", tomorrow);
-    cy.fillFieldByLabel("Duration (mins)", "55");
-    cy.get('input[placeholder="Exercise name"]').first().clear().type(`${prefix()} Bench Press`);
+    cy.fillFieldByLabel("Exercise Name", `${prefix()} Bench Press`);
     cy.contains("button", "Save Workout").click();
 
     cy.contains(title, { timeout: 10000 }).should("be.visible");

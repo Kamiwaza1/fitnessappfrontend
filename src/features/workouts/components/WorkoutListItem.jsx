@@ -14,27 +14,26 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart, on
           </span>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/30 bg-primary text-background transition-colors hover:bg-primary/90"
+            className="flex h-7 items-center justify-center rounded-lg border border-primary/30 bg-primary px-2 text-xs font-bold text-background transition-colors hover:bg-primary/90"
             onClick={() => onStart(workout)}
-            aria-label="Start workout"
           >
-            <span className="material-icons text-sm">play_arrow</span>
+            Start
           </button>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/30 text-primary transition-colors hover:bg-primary/10"
-            onClick={() => onEdit(workout)}
             aria-label="Edit workout"
+            className="flex h-7 items-center justify-center rounded-lg border border-primary/30 px-2 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
+            onClick={() => onEdit(workout)}
           >
-            <span className="material-icons text-sm">edit</span>
+            Edit
           </button>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/30 text-red-400 transition-colors hover:bg-red-500/10"
-            onClick={() => onDelete(workout.id)}
             aria-label="Delete workout"
+            className="flex h-7 items-center justify-center rounded-lg border border-red-500/30 px-2 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/10"
+            onClick={() => onDelete(workout.id)}
           >
-            <span className="material-icons text-sm">delete</span>
+            Delete
           </button>
         </div>
       </div>
@@ -56,10 +55,9 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart, on
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
+          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
           onClick={() => onStartLive(workout)}
         >
-          <span className="material-icons text-base">sensors</span>
           Start Live
         </button>
       </div>

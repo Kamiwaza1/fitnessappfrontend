@@ -110,16 +110,15 @@ function SegmentedControl({ value, onChange }) {
         ["manual", "Manual", "edit_note"],
         ["ocr", "OCR", "document_scanner"],
         ["database", "Foods", "search"],
-      ].map(([mode, label, icon]) => (
+      ].map(([mode, label]) => (
         <button
           key={mode}
           type="button"
           onClick={() => onChange(mode)}
-          className={`flex items-center justify-center gap-1 rounded-md px-2 py-2 transition-colors ${
+          className={`flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
             value === mode ? "bg-primary text-background" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
-          <span className="material-icons text-sm">{icon}</span>
           <span>{label}</span>
         </button>
       ))}
@@ -139,10 +138,9 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200"
-            aria-label="Cancel editing"
+            className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200"
           >
-            <span className="material-icons text-base">close</span>
+            Cancel
           </button>
         ) : null}
       </div>
@@ -233,9 +231,8 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className="material-icons text-base">{editingEntryId ? "save" : "add"}</span>
         {isSubmitting ? "Saving..." : editingEntryId ? "Update food" : "Add food"}
       </button>
     </form>
@@ -320,9 +317,8 @@ function OcrScanner({ selectedDate, onApplyScan }) {
         type="button"
         onClick={scanImage}
         disabled={isScanning || !selectedFile}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className="material-icons text-base">document_scanner</span>
         {isScanning ? "Scanning..." : "Scan image"}
       </button>
 
@@ -353,7 +349,7 @@ function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchErr
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           className="w-full rounded-lg border border-transparent bg-slate-100 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-background-dark"
-          placeholder="Search foods database..."
+          aria-label="Search foods database"
           type="text"
         />
       </div>
@@ -488,17 +484,17 @@ function FoodLogList({ entries, isLoading, error, onEdit, onDelete }) {
               <div className="flex shrink-0 gap-2">
                 <button
                   onClick={() => onEdit(entry)}
-                  className="rounded-lg bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
                   aria-label={`Edit ${entry.mealName}`}
+                  className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
                 >
-                  <span className="material-icons text-base">edit</span>
+                  Edit
                 </button>
                 <button
                   onClick={() => onDelete(entry.id)}
-                  className="rounded-lg bg-red-500/10 p-2 text-red-500 hover:bg-red-500/20"
                   aria-label={`Delete ${entry.mealName}`}
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-500/20"
                 >
-                  <span className="material-icons text-base">delete</span>
+                  Delete
                 </button>
               </div>
             </div>
@@ -709,10 +705,10 @@ export default function NutritionPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => shiftDate(-1)}
-              className="rounded-lg bg-primary/10 p-2 text-primary transition-colors hover:bg-primary/20"
               aria-label="Previous day"
+              className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
             >
-              <span className="material-icons">chevron_left</span>
+              Previous
             </button>
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold leading-none text-slate-900 dark:text-white">Food Diary</h1>
@@ -722,10 +718,10 @@ export default function NutritionPage() {
             </div>
             <button
               onClick={() => shiftDate(1)}
-              className="rounded-lg bg-primary/10 p-2 text-primary transition-colors hover:bg-primary/20"
               aria-label="Next day"
+              className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
             >
-              <span className="material-icons">chevron_right</span>
+              Next
             </button>
           </div>
 

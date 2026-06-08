@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppPageShell from "@/shared/components/AppPageShell";
 import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
@@ -129,9 +130,6 @@ export default function DashboardPage() {
             </p>
             <p suppressHydrationWarning className="font-bold">{formatLongDate(new Date())}</p>
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-background-light text-primary transition-colors hover:bg-primary/10 dark:bg-background-dark/80">
-            <span className="material-icons">notifications</span>
-          </button>
         </div>
       </header>
 
@@ -217,14 +215,12 @@ export default function DashboardPage() {
               <div className="mt-4 flex items-center space-x-4 text-sm font-medium">
                 {todayWorkout ? (
                   <>
-                    <span className="inline-flex items-center space-x-1 text-primary">
-                      <span className="material-icons text-base">schedule</span>
-                      <span>
-                        {todayWorkout.durationMinutes
-                          ? `${todayWorkout.durationMinutes} min`
-                          : "Duration TBD"}
+                    {todayWorkout.durationMinutes ? (
+                      <span className="inline-flex items-center space-x-1 text-primary">
+                        <span className="material-icons text-base">schedule</span>
+                        <span>{todayWorkout.durationMinutes} min</span>
                       </span>
-                    </span>
+                    ) : null}
                     <span className="inline-flex items-center space-x-1 text-slate-300">
                       <span className="material-icons text-base">event</span>
                       <span>{workouts.length} scheduled</span>
@@ -237,10 +233,12 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <button className="mt-4 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-2.5 font-bold text-background transition-all hover:bg-primary/90">
-              <span>{todayWorkout ? "START WORKOUT" : "PLAN WORKOUT"}</span>
-              <span className="material-icons">play_arrow</span>
-            </button>
+            <Link
+              href="/workouts"
+              className="mt-4 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-2.5 font-bold text-background transition-all hover:bg-primary/90"
+            >
+              <span>{todayWorkout ? "OPEN WORKOUT" : "PLAN WORKOUT"}</span>
+            </Link>
           </div>
         </div>
 

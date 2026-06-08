@@ -81,8 +81,8 @@ export default function ProgressPage() {
                 </button>
               ))}
             </div>
-            <button className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/20 px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/30">
-              <span className="material-icons text-sm">download</span> Export
+            <button className="rounded-lg border border-primary/30 bg-primary/20 px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/30">
+              Export
             </button>
           </div>
         </header>

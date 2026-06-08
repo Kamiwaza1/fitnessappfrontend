@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function RegisterForm({
   values,
@@ -9,25 +12,33 @@ export default function RegisterForm({
   onSubmit,
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-light px-4 py-6 font-display text-slate-900 dark:bg-background-dark dark:text-slate-100 sm:px-6 sm:py-10">
-      <div className="flex w-full max-w-md flex-col items-center rounded-xl border border-primary/10 bg-white p-5 shadow-lg dark:bg-background-dark sm:p-8">
-        <h1 className="mb-4 text-2xl font-extrabold tracking-tighter text-primary italic sm:mb-6 sm:text-3xl">
-          DARK LIFT
-        </h1>
-        <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-300 sm:mb-8 sm:text-base">
-          Create your account to get started.
-        </p>
+    <section className="flex min-h-screen items-center justify-center px-4 py-10 font-display sm:px-6">
+      <Card className="w-full max-w-md border-primary/20 bg-card p-2 backdrop-blur-xl">
+        <CardHeader className="text-center">
+          <p className="mb-2 text-2xl font-extrabold italic tracking-tighter text-primary">DARK LIFT</p>
+          <CardTitle className="text-2xl font-bold">Create account</CardTitle>
+          <CardDescription>Create your account to get started.</CardDescription>
+        </CardHeader>
+        <CardContent>
 
-        <form className="flex w-full flex-col gap-4" onSubmit={onSubmit}>
-          <div>
-            <input
-              className={`w-full rounded-lg border bg-background-light px-4 py-3 text-sm text-slate-900 focus:ring-2 dark:bg-background-dark dark:text-slate-100 sm:text-base ${
+        {error ? (
+          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        ) : null}
+
+        <form className="flex flex-col gap-5" onSubmit={onSubmit}>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
+              Full Name
+            </label>
+            <Input
+              className={
                 fieldErrors.fullName
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-primary/20 focus:ring-primary"
-              }`}
+                  ? "border-red-500/80 ring-2 ring-red-500/30"
+                  : ""
+              }
               type="text"
-              placeholder="Full Name"
               value={values.fullName}
               onChange={(event) => onChange("fullName", event.target.value)}
               required
@@ -37,15 +48,17 @@ export default function RegisterForm({
             ) : null}
           </div>
 
-          <div>
-            <input
-              className={`w-full rounded-lg border bg-background-light px-4 py-3 text-sm text-slate-900 focus:ring-2 dark:bg-background-dark dark:text-slate-100 sm:text-base ${
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
+              Email
+            </label>
+            <Input
+              className={
                 fieldErrors.email
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-primary/20 focus:ring-primary"
-              }`}
+                  ? "border-red-500/80 ring-2 ring-red-500/30"
+                  : ""
+              }
               type="email"
-              placeholder="Email"
               value={values.email}
               onChange={(event) => onChange("email", event.target.value)}
               required
@@ -53,15 +66,17 @@ export default function RegisterForm({
             {fieldErrors.email ? <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p> : null}
           </div>
 
-          <div>
-            <input
-              className={`w-full rounded-lg border bg-background-light px-4 py-3 text-sm text-slate-900 focus:ring-2 dark:bg-background-dark dark:text-slate-100 sm:text-base ${
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
+              Password
+            </label>
+            <Input
+              className={
                 fieldErrors.password
-                  ? "border-red-400 focus:ring-red-400"
-                  : "border-primary/20 focus:ring-primary"
-              }`}
+                  ? "border-red-500/80 ring-2 ring-red-500/30"
+                  : ""
+              }
               type="password"
-              placeholder="Password"
               value={values.password}
               onChange={(event) => onChange("password", event.target.value)}
               required
@@ -71,25 +86,24 @@ export default function RegisterForm({
             ) : null}
           </div>
 
-          <button
-            className="mt-2 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-3 font-bold text-background transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-4"
+          <Button
+            className="w-full rounded-full tracking-[0.05em]"
+            size="lg"
             type="submit"
             disabled={isSubmitting}
           >
-            <span className="material-icons">person_add</span>
-            <span>{isSubmitting ? "Registering..." : "Register"}</span>
-          </button>
+            {isSubmitting ? "Registering..." : "Register"}
+          </Button>
         </form>
 
-        {error ? <div className="mt-4 text-sm text-red-500">{error}</div> : null}
-
-        <div className="mt-5 text-center text-xs text-slate-400 sm:mt-6 sm:text-sm">
+        <div className="mt-6 text-center text-sm text-primary/60">
           <span>Already have an account?</span>
-          <Link href="/" className="ml-1 font-bold text-primary hover:underline">
+          <Link href="/login" className="ml-1 font-bold text-primary hover:underline">
             Login
           </Link>
         </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </section>
   );
 }

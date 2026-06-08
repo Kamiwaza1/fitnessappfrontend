@@ -2,10 +2,17 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --primary: #22c55e;
-  --background-light: #f8fafc;
-  --background-dark: #0f172a;
+  --foreground: #16a34a;
+  --primary: #16a34a;
+  --background-light: #ffffff;
+  --background-dark: #000000;
+  --card: rgba(255, 255, 255, 0.18);
+  --card-foreground: #16a34a;
+  --muted: rgba(0, 0, 0, 0.08);
+  --muted-foreground: rgba(0, 0, 0, 0.68);
+  --border: rgba(0, 0, 0, 0.18);
+  --input: rgba(255, 255, 255, 0.26);
+  --ring: #16a34a;
 }
 
 @theme inline {
@@ -14,6 +21,13 @@
   --color-primary: var(--primary);
   --color-background-light: var(--background-light);
   --color-background-dark: var(--background-dark);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: "Lexend", "Segoe UI", sans-serif;
@@ -21,10 +35,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --background-light: #111827;
-    --background-dark: #020617;
+    --background: #000000;
+    --foreground: #7cff9b;
+    --primary: #7cff9b;
+    --background-light: #000000;
+    --background-dark: #000000;
+    --card: rgba(124, 255, 155, 0.08);
+    --card-foreground: #7cff9b;
+    --muted: rgba(124, 255, 155, 0.12);
+    --muted-foreground: rgba(124, 255, 155, 0.72);
+    --border: rgba(124, 255, 155, 0.2);
+    --input: rgba(124, 255, 155, 0.08);
+    --ring: #7cff9b;
   }
 }
 

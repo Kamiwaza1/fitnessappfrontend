@@ -76,6 +76,19 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
     [roomCode]
   );
 
+  const sendMessage = useCallback(
+    (text) => {
+      const client = clientRef.current;
+      if (!client?.connected || !roomCode) return false;
+      client.publish({
+        destination: `/app/live-workouts/${roomCode.toUpperCase()}/messages`,
+        body: JSON.stringify({ text }),
+      });
+      return true;
+    },
+    [roomCode]
+  );
+
   const leaveRoom = useCallback(() => {
     const client = clientRef.current;
     if (!client?.connected || !roomCode) return false;
@@ -89,6 +102,7 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
   return {
     connectionState: isUnauthorized ? "UNAUTHORIZED" : connectionState,
     sendProgress,
+    sendMessage,
     leaveRoom,
   };
 }

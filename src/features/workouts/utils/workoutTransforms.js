@@ -22,7 +22,7 @@ export function normalizeWorkout(workout, index = 0) {
     goal: workout?.description || workout?.goal || workout?.primaryGoal || "",
     date: workout?.date || workout?.scheduledDate || workout?.workoutDate || "",
     workoutDate: String(workout?.workoutDate || workout?.scheduledDate || workout?.date || "").slice(0, 10),
-    duration: String(workout?.duration || workout?.durationMinutes || 60),
+    duration: String(workout?.duration || workout?.durationMinutes || ""),
     durationMinutes: Number.isFinite(Number(workout?.durationMinutes || workout?.duration))
       ? Number(workout?.durationMinutes || workout?.duration)
       : null,

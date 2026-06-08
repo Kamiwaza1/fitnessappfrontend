@@ -35,7 +35,7 @@ describe("nutrition without API mocks", () => {
 
   it("uses the real food search endpoint", () => {
     cy.contains("button", "Foods").click();
-    cy.get('input[placeholder="Search foods database..."]').type("banana");
+    cy.get('input[aria-label="Search foods database"]').type("banana");
 
     cy.contains(/Searching foods|No matching foods found|kcal/i, { timeout: 15000 }).should("be.visible");
   });
