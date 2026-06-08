@@ -1,4 +1,4 @@
-export default function WorkoutListItem({ workout, onDelete, onEdit, onStart, onStartLive }) {
+export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) {
   return (
     <article className="rounded-xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-900/70">
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -51,16 +51,6 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart, on
           ))}
         </div>
       ) : null}
-
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <button
-          type="button"
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
-          onClick={() => onStartLive(workout)}
-        >
-          Start Live
-        </button>
-      </div>
     </article>
   );
 }

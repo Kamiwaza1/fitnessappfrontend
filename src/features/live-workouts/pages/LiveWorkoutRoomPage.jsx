@@ -7,9 +7,14 @@ import StatusMessage from "@/shared/components/StatusMessage";
 import { useAuth } from "@/context/AuthContext";
 import {
   closeLiveWorkoutRoom,
-  fetchLiveWorkoutRoomDetails,
+  fetchLiveWorkoutMessages,
+  fetchLiveWorkoutRoom,
 } from "@/features/live-workouts/api/liveWorkoutsApi";
 import { useLiveWorkoutSocket } from "@/features/live-workouts/hooks/useLiveWorkoutSocket";
+import {
+  clearActiveLiveWorkoutRoom,
+  setActiveLiveWorkoutRoom,
+} from "@/features/live-workouts/utils/activeLiveWorkoutRoom";
 
 function getParticipantLabel(participant) {
   return participant?.displayName || participant?.email || "User";
@@ -18,6 +23,10 @@ function getParticipantLabel(participant) {
 function normalizeRoomCode(value) {
   const rawValue = Array.isArray(value) ? value[0] : value;
   return String(rawValue || "").trim().toUpperCase();
+}
+
+function emailsMatch(first = "", second = "") {
+  return String(first).trim().toLowerCase() === String(second).trim().toLowerCase();
 }
 
 export default function LiveWorkoutRoomPage({ roomCode }) {
@@ -51,9 +60,10 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
       });
     }
     if (event?.type === "ROOM_CLOSED") {
+      clearActiveLiveWorkoutRoom(event.room?.roomCode || normalizedRoomCode);
       setError("This live workout room has ended.");
     }
-  }, []);
+  }, [normalizedRoomCode]);
 
   const { connectionState, sendProgress, sendMessage, leaveRoom } = useLiveWorkoutSocket({
     roomCode: normalizedRoomCode,
@@ -68,10 +78,10 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
       setIsLoading(true);
       setError("");
       try {
-        const details = await fetchLiveWorkoutRoomDetails(normalizedRoomCode);
+        const liveRoom = await fetchLiveWorkoutRoom(normalizedRoomCode);
         if (isMounted) {
-          setRoom(details.room);
-          setMessages(details.messages);
+          setRoom(liveRoom);
+          setMessages([]);
         }
       } catch (loadError) {
         if (isMounted) setError(loadError?.message || "Could not load live workout room.");
@@ -91,7 +101,37 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
 
   const participants = room?.participants || [];
   const currentUserEmail = user?.email || user?.username;
+  const isCurrentUserParticipant = Boolean(
+    currentUserEmail && participants.some((participant) => emailsMatch(participant.email, currentUserEmail))
+  );
   const isHost = Boolean(room?.hostEmail && currentUserEmail && room.hostEmail === currentUserEmail);
+
+  useEffect(() => {
+    if (room?.roomCode) {
+      setActiveLiveWorkoutRoom(room);
+    }
+  }, [room]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMessages() {
+      try {
+        const recentMessages = await fetchLiveWorkoutMessages(normalizedRoomCode);
+        if (isMounted) setMessages(recentMessages);
+      } catch (loadError) {
+        if (isMounted) setChatError(loadError?.message || "Could not load chat messages.");
+      }
+    }
+
+    if (normalizedRoomCode && isCurrentUserParticipant) {
+      loadMessages();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isCurrentUserParticipant, normalizedRoomCode]);
 
   const connectionLabel = useMemo(() => {
     switch (connectionState) {
@@ -116,6 +156,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
 
   const handleLeave = () => {
     leaveRoom();
+    clearActiveLiveWorkoutRoom(normalizedRoomCode);
     router.push("/workouts");
   };
 
@@ -123,6 +164,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
     setIsClosing(true);
     try {
       await closeLiveWorkoutRoom(normalizedRoomCode);
+      clearActiveLiveWorkoutRoom(normalizedRoomCode);
       router.push("/workouts");
     } catch (closeError) {
       setError(closeError?.message || "Could not close live workout room.");
@@ -156,6 +198,10 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
     if (!text) return;
     if (text.length > 500) {
       setChatError("Message cannot be longer than 500 characters.");
+      return;
+    }
+    if (!isCurrentUserParticipant) {
+      setChatError("Joining the live workout...");
       return;
     }
     const didSend = sendMessage(text);
@@ -357,7 +403,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
                   {chatError ? <p className="text-xs font-bold text-red-400">{chatError}</p> : null}
                   <button
                     type="submit"
-                    disabled={!chatText.trim() || connectionState !== "CONNECTED"}
+                    disabled={!chatText.trim() || connectionState !== "CONNECTED" || !isCurrentUserParticipant}
                     className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Send Message

@@ -146,6 +146,7 @@ export default function ActiveWorkoutSession({
   onDiscard,
   onRestDurationChange,
   onRestartRestTimer,
+  onStartLive,
 }) {
   const [drafts, setDrafts] = useState({});
 
@@ -251,6 +252,14 @@ export default function ActiveWorkoutSession({
       {saveError ? <p className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{saveError}</p> : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          className="min-h-11 rounded-lg border border-primary/30 bg-primary/10 px-4 font-bold text-primary hover:bg-primary/20"
+          onClick={onStartLive}
+          disabled={isSaving}
+        >
+          Start live room
+        </button>
         <button
           type="button"
           className="min-h-11 rounded-lg border border-slate-300 px-4 font-bold text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
