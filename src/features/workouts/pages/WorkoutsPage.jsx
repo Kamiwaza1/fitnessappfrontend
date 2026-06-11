@@ -15,6 +15,7 @@ import AppPageShell from "@/shared/components/AppPageShell";
 export default function WorkoutsPage() {
   const router = useRouter();
   const [joinRoomCode, setJoinRoomCode] = useState("");
+  const [workoutToStart, setWorkoutToStart] = useState(null);
   const { workouts, isLoading, error, upsertWorkout, removeWorkout } = useWorkoutList();
   const {
     isComposerOpen,
@@ -55,6 +56,12 @@ export default function WorkoutsPage() {
     const roomCode = joinRoomCode.trim().toUpperCase();
     if (!roomCode) return;
     router.push(`/live-workouts/${roomCode}`);
+  };
+
+  const handleConfirmStartWorkout = () => {
+    if (!workoutToStart) return;
+    workoutSession.startWorkout(workoutToStart);
+    setWorkoutToStart(null);
   };
 
   return (
@@ -146,10 +153,73 @@ export default function WorkoutsPage() {
             error={error}
             onDelete={handleDeleteWorkout}
             onEdit={openComposerForEdit}
-            onStart={workoutSession.startWorkout}
+            onStart={setWorkoutToStart}
           />
         </div>
       </section>
+
+      {workoutToStart ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="start-workout-title"
+            className="w-full max-w-md rounded-xl border border-primary/20 bg-background-light p-5 text-slate-900 shadow-2xl dark:bg-slate-950 dark:text-white"
+          >
+            <span className="rounded bg-primary/15 px-2 py-1 text-[11px] font-black uppercase tracking-widest text-primary">
+              Start workout
+            </span>
+            <h2 id="start-workout-title" className="mt-3 break-words text-2xl font-black">
+              {workoutToStart.title}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              Open this planned workout as your active session now. It will stay active for today until you finish or
+              discard it.
+            </p>
+            <div className="mt-4 grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+              <div className="flex items-center justify-between gap-3">
+                <span>Date</span>
+                <strong className="text-right text-slate-900 dark:text-white">{workoutToStart.date || "Not set"}</strong>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span>Exercises</span>
+                <strong className="text-right text-slate-900 dark:text-white">
+                  {(workoutToStart.exercises || []).length}
+                </strong>
+              </div>
+              {workoutToStart.durationMinutes ? (
+                <div className="flex items-center justify-between gap-3">
+                  <span>Duration</span>
+                  <strong className="text-right text-slate-900 dark:text-white">
+                    {workoutToStart.durationMinutes} min
+                  </strong>
+                </div>
+              ) : null}
+            </div>
+            {workoutSession.activeSession ? (
+              <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-700 dark:text-amber-200">
+                Starting this will replace your current active workout.
+              </p>
+            ) : null}
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="min-h-11 rounded-lg border border-slate-300 px-4 font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+                onClick={() => setWorkoutToStart(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="min-h-11 rounded-lg bg-primary px-5 font-black text-background hover:bg-primary/90"
+                onClick={handleConfirmStartWorkout}
+              >
+                Start active workout
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
     </AppPageShell>
   );
