@@ -48,9 +48,14 @@ export default function LoginForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
-              Password
-            </label>
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-xs font-bold uppercase tracking-[0.1em] text-primary/60">
+                Password
+              </label>
+              <Link href="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Input
               type="password"
               value={values.password}

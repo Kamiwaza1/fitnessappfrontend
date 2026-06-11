@@ -3,27 +3,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { getLiveWorkoutAuthHeader } from "@/features/live-workouts/api/liveWorkoutsApi";
 import { buildLiveWorkoutSocketUrl } from "@/features/live-workouts/utils/liveWorkoutSocketUrl";
+import { getAuthHeaders } from "@/shared/api/http";
 
 export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
   const clientRef = useRef(null);
   const [connectionState, setConnectionState] = useState("DISCONNECTED");
-  const authHeader = getLiveWorkoutAuthHeader();
-  const isUnauthorized = enabled && Boolean(roomCode) && !authHeader;
 
   useEffect(() => {
     if (!enabled || !roomCode) return undefined;
 
-    if (!authHeader) {
-      return undefined;
-    }
-
     const normalizedRoomCode = roomCode.toUpperCase();
     const client = new Client({
       webSocketFactory: () => new SockJS(buildLiveWorkoutSocketUrl()),
-      connectHeaders: {
-        Authorization: authHeader,
+      connectHeaders: getAuthHeaders(),
+      beforeConnect: () => {
+        client.connectHeaders = getAuthHeaders();
       },
       reconnectDelay: 3000,
       onConnect: () => {
@@ -55,7 +50,7 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
       client.deactivate();
       clientRef.current = null;
     };
-  }, [authHeader, enabled, onEvent, roomCode]);
+  }, [enabled, onEvent, roomCode]);
 
   const sendProgress = useCallback(
     (progress) => {
@@ -94,7 +89,7 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
   }, [roomCode]);
 
   return {
-    connectionState: isUnauthorized ? "UNAUTHORIZED" : connectionState,
+    connectionState,
     sendProgress,
     sendMessage,
     leaveRoom,

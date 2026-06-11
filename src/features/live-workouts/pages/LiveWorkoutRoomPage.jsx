@@ -101,10 +101,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
 
   const participants = room?.participants || [];
   const currentUserEmail = user?.email || user?.username;
-  const isCurrentUserParticipant = Boolean(
-    currentUserEmail && participants.some((participant) => emailsMatch(participant.email, currentUserEmail))
-  );
-  const isHost = Boolean(room?.hostEmail && currentUserEmail && room.hostEmail === currentUserEmail);
+  const isHost = Boolean(room?.hostEmail && currentUserEmail && emailsMatch(room.hostEmail, currentUserEmail));
 
   useEffect(() => {
     if (room?.roomCode) {
@@ -124,14 +121,14 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
       }
     }
 
-    if (normalizedRoomCode && isCurrentUserParticipant) {
+    if (normalizedRoomCode && room) {
       loadMessages();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [isCurrentUserParticipant, normalizedRoomCode]);
+  }, [normalizedRoomCode, room]);
 
   const connectionLabel = useMemo(() => {
     switch (connectionState) {
@@ -200,8 +197,12 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
       setChatError("Message cannot be longer than 500 characters.");
       return;
     }
-    if (!isCurrentUserParticipant) {
+    if (!room) {
       setChatError("Joining the live workout...");
+      return;
+    }
+    if (connectionState !== "CONNECTED") {
+      setChatError("Chat is not connected yet.");
       return;
     }
     const didSend = sendMessage(text);
@@ -357,7 +358,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
                     <p className="py-8 text-center text-sm text-slate-500">No messages yet.</p>
                   ) : (
                     messages.map((message) => {
-                      const isMine = message.senderEmail === currentUserEmail;
+                      const isMine = emailsMatch(message.senderEmail, currentUserEmail);
                       return (
                         <div
                           key={message.messageId || `${message.senderEmail}-${message.createdAt}`}
@@ -403,7 +404,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
                   {chatError ? <p className="text-xs font-bold text-red-400">{chatError}</p> : null}
                   <button
                     type="submit"
-                    disabled={!chatText.trim() || connectionState !== "CONNECTED" || !isCurrentUserParticipant}
+                    disabled={!chatText.trim() || !room}
                     className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Send Message

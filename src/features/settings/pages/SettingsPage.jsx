@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { fetchCurrentUser, updateCurrentUser } from "@/features/settings/api/userApi";
+import { deleteCurrentUser, fetchCurrentUser, updateCurrentUser } from "@/features/settings/api/userApi";
 import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 import AppPageShell from "@/shared/components/AppPageShell";
 import StatusMessage from "@/shared/components/StatusMessage";
@@ -37,7 +38,8 @@ function SettingsCard({ icon, title, description, children }) {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const savedCalorieTarget = useCalorieTarget();
   const [calorieTarget, setCalorieTarget] = useState("");
   const [hasEditedTarget, setHasEditedTarget] = useState(false);
@@ -48,6 +50,10 @@ export default function SettingsPage() {
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [deleteValues, setDeleteValues] = useState({ password: "", confirmation: "" });
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,6 +69,7 @@ export default function SettingsPage() {
           setHasEditedTarget(true);
           saveCalorieTarget(target);
         }
+
       } catch {
         // Keep the cached target visible if the profile endpoint is unavailable.
       }
@@ -129,6 +136,37 @@ export default function SettingsPage() {
       setPasswordError(error?.message || "Could not update password.");
     } finally {
       setIsSavingPassword(false);
+    }
+  };
+
+  const scheduleAccountDeletion = async (event) => {
+    event.preventDefault();
+    setDeleteMessage("");
+    setDeleteError("");
+
+    if (!deleteValues.password.trim()) {
+      setDeleteError("Enter your password to verify this deletion.");
+      return;
+    }
+
+    if (deleteValues.confirmation !== "DELETE") {
+      setDeleteError("Type DELETE to confirm account deletion.");
+      return;
+    }
+
+    setIsDeletingAccount(true);
+
+    try {
+      await deleteCurrentUser({ password: deleteValues.password });
+      setDeleteValues({ password: "", confirmation: "" });
+      setDeleteMessage("Account deletion scheduled. Check your email for recovery details.");
+      window.setTimeout(() => {
+        logout();
+        router.push("/login");
+      }, 1200);
+    } catch (error) {
+      setDeleteError(error?.message || "Could not schedule account deletion.");
+      setIsDeletingAccount(false);
     }
   };
 
@@ -201,6 +239,7 @@ export default function SettingsPage() {
                 </div>
               </form>
             </SettingsCard>
+
           </div>
 
           <div className="space-y-6">
@@ -250,6 +289,55 @@ export default function SettingsPage() {
 	                >
 	                  {isSavingPassword ? "Updating..." : "Update password"}
 	                </button>
+              </form>
+            </SettingsCard>
+
+            <SettingsCard
+              icon="warning"
+              title="Delete Account"
+              description="Schedule permanent deletion after a 7 day recovery window."
+            >
+              <form onSubmit={scheduleAccountDeletion} className="space-y-4">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm leading-relaxed text-red-700 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
+                  Your account can be recovered for 7 days. After that, your account and data are permanently deleted.
+                </div>
+
+                <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Current password
+                  <input
+                    autoComplete="current-password"
+                    type="password"
+                    value={deleteValues.password}
+                    onChange={(event) =>
+                      setDeleteValues((current) => ({ ...current, password: event.target.value }))
+                    }
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                  />
+                </label>
+
+                <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Type DELETE
+                  <input
+                    autoComplete="off"
+                    type="text"
+                    value={deleteValues.confirmation}
+                    onChange={(event) =>
+                      setDeleteValues((current) => ({ ...current, confirmation: event.target.value }))
+                    }
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                  />
+                </label>
+
+                {deleteError ? <StatusMessage tone="error" className="text-left">{deleteError}</StatusMessage> : null}
+                {deleteMessage ? <StatusMessage className="text-left text-primary">{deleteMessage}</StatusMessage> : null}
+
+                <button
+                  type="submit"
+                  disabled={isDeletingAccount || deleteValues.confirmation !== "DELETE"}
+                  className="flex w-full items-center justify-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition-opacity hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeletingAccount ? "Scheduling deletion..." : "Delete account"}
+                </button>
               </form>
             </SettingsCard>
           </div>

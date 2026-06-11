@@ -1,5 +1,5 @@
 import { buildApiUrl } from "@/shared/api/apiBase";
-import { fetchAuthenticatedJson, getAuthHeaders } from "@/shared/api/http";
+import { fetchAuthenticatedJson } from "@/shared/api/http";
 
 const LIVE_WORKOUTS_API_ENDPOINT = buildApiUrl("/api/v1/live-workouts");
 
@@ -62,8 +62,4 @@ export async function closeLiveWorkoutRoom(roomCode) {
   return fetchAuthenticatedJson(`${LIVE_WORKOUTS_API_ENDPOINT}/${encodeURIComponent(roomCode)}`, {
     method: "DELETE",
   });
-}
-
-export function getLiveWorkoutAuthHeader() {
-  return getAuthHeaders().Authorization || "";
 }
