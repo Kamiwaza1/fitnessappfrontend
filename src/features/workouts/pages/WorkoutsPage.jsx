@@ -58,6 +58,11 @@ export default function WorkoutsPage() {
     router.push(`/live-workouts/${roomCode}`);
   };
 
+  const handleFinishWorkout = async () => {
+    await workoutSession.finishWorkout();
+    router.push("/workout-histories");
+  };
+
   const handleConfirmStartWorkout = () => {
     if (!workoutToStart) return;
     workoutSession.startWorkout(workoutToStart);
@@ -138,7 +143,7 @@ export default function WorkoutsPage() {
               onUpdateSet={workoutSession.updateSet}
               onRemoveSet={workoutSession.removeSet}
               onToggleCompleted={workoutSession.toggleExerciseCompleted}
-              onFinish={workoutSession.finishWorkout}
+              onFinish={handleFinishWorkout}
               onDiscard={workoutSession.discardWorkout}
               onRestDurationChange={workoutSession.setRestDurationSeconds}
               onRestartRestTimer={workoutSession.restartRestTimer}
