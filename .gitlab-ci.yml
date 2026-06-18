@@ -55,13 +55,13 @@ sonarqube:
       sonar-scanner
       -Dsonar.projectKey=${SONAR_PROJECT_KEY}
       -Dsonar.projectName=${CI_PROJECT_NAME}
-      -Dsonar.sources=src
+      -Dsonar.sources=.
+      -Dsonar.exclusions=node_modules/**,.next/**,public/**
       -Dsonar.host.url=${SONAR_HOST_URL}
       -Dsonar.token=${SONAR_TOKEN}
   allow_failure: false
   rules:
-    - if: '$SONAR_HOST_URL && $SONAR_TOKEN && $SONAR_PROJECT_KEY'
-    - when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $SONAR_HOST_URL && $SONAR_TOKEN && $SONAR_PROJECT_KEY'
 
 deploy_docker:
   stage: deploy
@@ -84,6 +84,9 @@ deploy_docker:
     - docker push "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
     - docker push "$IMAGE_NAME:latest"
     - echo "Triggering Coolify deployment"
-    - 'curl -fsSL "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"'
+    - |
+      curl -fsSL \
+        -H "Authorization: Bearer $COOLIFY_TOKEN" \
+        "$COOLIFY_WEBHOOK"
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
