@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { clearStoredAuthToken, isTokenExpired, readStoredAuthToken } from "@/lib/authToken";
+import { readStoredAuthUserJson } from "@/shared/utils/authTokenStorage";
 
-const PUBLIC_ROUTES = new Set(["/login", "/register"]);
+const PUBLIC_ROUTES = new Set(["/login", "/register", "/forgot-password", "/reset-password"]);
 
 export default function AuthGate({ children }) {
   const pathname = usePathname();
@@ -13,19 +13,13 @@ export default function AuthGate({ children }) {
   useEffect(() => {
     if (!pathname) return;
 
-    const token = readStoredAuthToken();
+    const hasSession = Boolean(readStoredAuthUserJson());
     const isPublicRoute = PUBLIC_ROUTES.has(pathname);
 
-    if (!token) {
+    if (!hasSession) {
       if (!isPublicRoute) {
         router.replace("/login");
       }
-      return;
-    }
-
-    if (isTokenExpired(token)) {
-      clearStoredAuthToken();
-      router.replace("/login");
       return;
     }
 

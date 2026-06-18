@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isTokenExpired } from "@/shared/utils/authTokenStorage";
 
 function clearAuthCookies(response) {
+  response.cookies.set("ACCESS_TOKEN", "", { maxAge: 0, path: "/" });
+  response.cookies.set("REFRESH_TOKEN", "", { maxAge: 0, path: "/" });
   response.cookies.set("authToken", "", { maxAge: 0, path: "/" });
   response.cookies.set("token", "", { maxAge: 0, path: "/" });
   response.cookies.set("jwt", "", { maxAge: 0, path: "/" });
@@ -11,6 +13,7 @@ function clearAuthCookies(response) {
 
 export function middleware(request) {
   const authToken =
+    request.cookies.get("ACCESS_TOKEN")?.value ||
     request.cookies.get("authToken")?.value ||
     request.cookies.get("token")?.value ||
     request.cookies.get("jwt")?.value ||

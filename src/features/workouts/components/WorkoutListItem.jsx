@@ -1,6 +1,9 @@
 export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+    <article
+      className="cursor-pointer rounded-xl border border-slate-200 bg-slate-100 p-4 transition-colors hover:border-primary/40 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-900"
+      onClick={() => onStart(workout)}
+    >
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h4 className="break-words text-base font-bold">{workout.title}</h4>
@@ -15,7 +18,10 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) 
           <button
             type="button"
             className="flex h-7 items-center justify-center rounded-lg border border-primary/30 bg-primary px-2 text-xs font-bold text-background transition-colors hover:bg-primary/90"
-            onClick={() => onStart(workout)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onStart(workout);
+            }}
           >
             Start
           </button>
@@ -23,7 +29,10 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) 
             type="button"
             aria-label="Edit workout"
             className="flex h-7 items-center justify-center rounded-lg border border-primary/30 px-2 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
-            onClick={() => onEdit(workout)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEdit(workout);
+            }}
           >
             Edit
           </button>
@@ -31,7 +40,10 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) 
             type="button"
             aria-label="Delete workout"
             className="flex h-7 items-center justify-center rounded-lg border border-red-500/30 px-2 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/10"
-            onClick={() => onDelete(workout.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete(workout.id);
+            }}
           >
             Delete
           </button>

@@ -3,6 +3,7 @@ const REFRESH_TOKEN_KEYS = ["refreshToken"];
 const AUTH_USER_KEYS = ["user"];
 const AUTH_COOKIE_NAMES = ["authToken", "token", "jwt", "accessToken"];
 export const AUTH_SESSION_EVENT = "fitness:auth-session-updated";
+export const COOKIE_AUTH_SESSION = "cookie-session";
 
 function safeDecodeURIComponent(value) {
   try {
@@ -124,37 +125,13 @@ export function getClientAuthToken() {
   return readStoredAuthToken() || readAuthTokenFromCookies();
 }
 
-export function storeAuthToken(token) {
-  if (!token || typeof window === "undefined") return;
-
-  for (const key of ACCESS_TOKEN_KEYS) {
-    window.localStorage.setItem(key, token);
-  }
-
-  const cookieParts = ["path=/", "SameSite=Strict"];
-  if (window.location.protocol === "https:") {
-    cookieParts.push("Secure");
-  }
-
-  const expiryMs = getTokenExpiryMs(token);
-  if (expiryMs) {
-    const maxAge = Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
-    cookieParts.push(`Max-Age=${maxAge}`);
-  }
-
-  document.cookie = `authToken=${encodeURIComponent(token)};${cookieParts.join(";")}`;
+export function storeAuthToken() {
+  clearReadableAuthTokens();
 }
 
-export function storeAuthSession({ accessToken, refreshToken, user }) {
+export function storeAuthSession({ user }) {
   if (typeof window === "undefined") return;
-  if (accessToken) {
-    storeAuthToken(accessToken);
-  }
-  if (refreshToken) {
-    for (const key of REFRESH_TOKEN_KEYS) {
-      window.localStorage.setItem(key, refreshToken);
-    }
-  }
+  clearReadableAuthTokens();
   if (user) {
     for (const key of AUTH_USER_KEYS) {
       window.localStorage.setItem(key, JSON.stringify(user));
@@ -166,18 +143,26 @@ export function storeAuthSession({ accessToken, refreshToken, user }) {
 export function clearStoredAuthToken() {
   if (typeof window === "undefined") return;
 
+  clearReadableAuthTokens();
+  for (const key of AUTH_USER_KEYS) {
+    window.localStorage.removeItem(key);
+  }
+
+  window.dispatchEvent(new CustomEvent(AUTH_SESSION_EVENT));
+}
+
+function clearReadableAuthTokens() {
+  if (typeof window === "undefined") return;
+
   for (const key of ACCESS_TOKEN_KEYS) {
     window.localStorage.removeItem(key);
   }
   for (const key of REFRESH_TOKEN_KEYS) {
     window.localStorage.removeItem(key);
   }
-  for (const key of AUTH_USER_KEYS) {
-    window.localStorage.removeItem(key);
-  }
 
   document.cookie = "authToken=;path=/;max-age=0";
   document.cookie = "token=;path=/;max-age=0";
   document.cookie = "jwt=;path=/;max-age=0";
-  window.dispatchEvent(new CustomEvent(AUTH_SESSION_EVENT));
+  document.cookie = "accessToken=;path=/;max-age=0";
 }

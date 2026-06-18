@@ -2,20 +2,33 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AppPageShell from "@/shared/components/AppPageShell";
 import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
+import { useActiveWorkoutSession } from "@/features/workouts/hooks/useActiveWorkoutSession";
 import { useAuth } from "@/context/AuthContext";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchNutritionEntries } from "@/features/nutrition/api/nutritionApi";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
 import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
+import {
+  fetchRecommendations,
+  ignoreRecommendation,
+  startRecommendedWorkout,
+} from "@/features/recommendations/api/recommendationsApi";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { workouts, isLoading, error } = useWorkoutList();
+  const workoutSession = useActiveWorkoutSession();
   const [nutritionEntries, setNutritionEntries] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [recommendationError, setRecommendationError] = useState("");
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
+  const [busyRecommendationId, setBusyRecommendationId] = useState("");
   const calorieTarget = useCalorieTarget();
   const todayWorkout = workouts.find((workout) => workout.workoutDate === toIsoLocalDate());
   const displayName = user?.fullName;
@@ -75,6 +88,59 @@ export default function DashboardPage() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRecommendations() {
+      setIsLoadingRecommendations(true);
+      setRecommendationError("");
+      try {
+        const nextRecommendations = await fetchRecommendations();
+        if (isMounted) setRecommendations(nextRecommendations);
+      } catch (loadError) {
+        if (isMounted) {
+          setRecommendations([]);
+          setRecommendationError(loadError?.message || "Could not load recommendations.");
+        }
+      } finally {
+        if (isMounted) setIsLoadingRecommendations(false);
+      }
+    }
+
+    loadRecommendations();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleStartRecommendation = async (recommendation) => {
+    setBusyRecommendationId(recommendation.workoutId);
+    setRecommendationError("");
+    try {
+      const workout = await startRecommendedWorkout(recommendation.workoutId);
+      workoutSession.startWorkout(workout);
+      router.push("/workouts");
+    } catch (startError) {
+      setRecommendationError(startError?.message || "Could not start recommendation.");
+    } finally {
+      setBusyRecommendationId("");
+    }
+  };
+
+  const handleIgnoreRecommendation = async (recommendation) => {
+    setBusyRecommendationId(recommendation.workoutId);
+    setRecommendationError("");
+    try {
+      await ignoreRecommendation(recommendation.workoutId);
+      setRecommendations((current) => current.filter((item) => item.workoutId !== recommendation.workoutId));
+    } catch (ignoreError) {
+      setRecommendationError(ignoreError?.message || "Could not ignore recommendation.");
+    } finally {
+      setBusyRecommendationId("");
+    }
+  };
 
   const todayNutritionTotals = useMemo(() => {
     const today = toIsoLocalDate();
@@ -241,6 +307,74 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        <section className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">Recommended For You</h3>
+              <p className="mt-1 text-sm text-slate-500">Personalized from your goals, history, and training balance.</p>
+            </div>
+            <span className="material-icons text-primary">auto_awesome</span>
+          </div>
+
+          {recommendationError ? (
+            <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              {recommendationError}
+            </p>
+          ) : null}
+
+          {isLoadingRecommendations ? (
+            <p className="py-4 text-sm text-slate-400">Loading recommendations...</p>
+          ) : null}
+
+          {!isLoadingRecommendations && recommendations.length === 0 && !recommendationError ? (
+            <p className="py-4 text-sm text-slate-400">No recommendations available yet.</p>
+          ) : null}
+
+          {!isLoadingRecommendations && recommendations.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {recommendations.map((recommendation) => {
+                const isBusy = busyRecommendationId === recommendation.workoutId;
+                return (
+                  <article
+                    key={recommendation.workoutId}
+                    className="flex min-h-48 flex-col justify-between rounded-lg border border-primary/10 bg-black/10 p-4 dark:bg-black/20"
+                  >
+                    <div>
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <h4 className="min-w-0 break-words text-base font-bold">{recommendation.workoutName}</h4>
+                        <span className="shrink-0 rounded bg-primary/20 px-2 py-1 text-xs font-bold text-primary">
+                          {recommendation.score}
+                        </span>
+                      </div>
+                      <p className="text-sm leading-6 text-slate-400">{recommendation.reason}</p>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                      <button
+                        type="button"
+                        disabled={isBusy}
+                        onClick={() => handleStartRecommendation(recommendation)}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-background transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <span className="material-icons text-base">play_arrow</span>
+                        <span>Start Workout</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isBusy}
+                        onClick={() => handleIgnoreRecommendation(recommendation)}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-bold text-slate-300 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <span className="material-icons text-base">visibility_off</span>
+                        <span>Ignore Recommendation</span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : null}
+        </section>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5">

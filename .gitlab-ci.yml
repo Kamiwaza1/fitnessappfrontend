@@ -5,6 +5,7 @@ stages:
   - deploy
 
 variables:
+
   COOLIFY_WEBHOOK: "$COOLIFY_WEBHOOK"
 
 cache:

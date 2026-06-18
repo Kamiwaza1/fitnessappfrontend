@@ -13,7 +13,12 @@ export async function fetchCurrentUser() {
   }
 }
 
-export async function updateCurrentUser({ fullName, email, password, dailyCalorieTarget }) {
+export async function updateCurrentUser({
+  fullName,
+  email,
+  password,
+  dailyCalorieTarget,
+}) {
   const payload = {};
   if (typeof fullName === "string" && fullName.trim()) payload.fullName = fullName.trim();
   if (typeof email === "string" && email.trim()) payload.email = email.trim();
@@ -28,5 +33,17 @@ export async function updateCurrentUser({ fullName, email, password, dailyCalori
     });
   } catch (error) {
     throw new Error(error?.data?.message || error?.message || "Could not update user.");
+  }
+}
+
+export async function deleteCurrentUser({ password }) {
+  try {
+    await fetchAuthenticatedJson(USER_API_ENDPOINT, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+  } catch (error) {
+    throw new Error(error?.data?.message || error?.message || "Could not schedule account deletion.");
   }
 }

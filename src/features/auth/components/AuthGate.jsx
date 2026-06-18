@@ -3,12 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import {
-  clearStoredAuthToken,
-  isTokenExpired,
-  readAuthTokenFromCookies,
-  readStoredAuthToken,
-} from "@/shared/utils/authTokenStorage";
+import { readStoredAuthUserJson } from "@/shared/utils/authTokenStorage";
 
 export default function AuthGate({ children }) {
   const { token: contextToken } = useAuth();
@@ -16,19 +11,11 @@ export default function AuthGate({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    const publicRoutes = new Set(["/", "/login", "/register"]);
+    const publicRoutes = new Set(["/", "/login", "/register", "/forgot-password", "/reset-password"]);
     const isPublicRoute = publicRoutes.has(pathname);
-    const token = readStoredAuthToken() || readAuthTokenFromCookies() || contextToken;
+    const hasSession = Boolean(contextToken || readStoredAuthUserJson());
 
-    if (!token) {
-      if (!isPublicRoute) {
-        router.replace("/login");
-      }
-      return;
-    }
-
-    if (isTokenExpired(token)) {
-      clearStoredAuthToken();
+    if (!hasSession) {
       if (!isPublicRoute) {
         router.replace("/login");
       }

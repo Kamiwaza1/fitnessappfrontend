@@ -25,7 +25,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [activeRoom, setActiveRoom] = useState(() => getActiveLiveWorkoutRoom());
+  const [activeRoom, setActiveRoom] = useState(null);
   const initials = String(user?.fullName || user?.email || "U")
     .trim()
     .split(/\s+/)
@@ -37,6 +37,10 @@ export default function AppSidebar() {
   const isActiveRoomPage = useMemo(() => pathname === activeRoomHref, [activeRoomHref, pathname]);
 
   useEffect(() => {
+    const initialLoadId = window.setTimeout(() => {
+      setActiveRoom(getActiveLiveWorkoutRoom());
+    }, 0);
+
     const handleActiveRoomChanged = (event) => {
       setActiveRoom(event.detail ?? getActiveLiveWorkoutRoom());
     };
@@ -49,6 +53,7 @@ export default function AppSidebar() {
     window.addEventListener("storage", handleStorage);
 
     return () => {
+      window.clearTimeout(initialLoadId);
       window.removeEventListener(ACTIVE_LIVE_WORKOUT_ROOM_CHANGED, handleActiveRoomChanged);
       window.removeEventListener("storage", handleStorage);
     };
@@ -132,7 +137,7 @@ export default function AppSidebar() {
       {activeRoom?.roomCode && !isActiveRoomPage ? (
         <Link
           href={activeRoomHref}
-          className="fixed inset-x-3 bottom-[78px] z-50 flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary px-3 py-2 text-xs font-bold text-background shadow-xl shadow-slate-950/20 lg:hidden"
+          className="fixed inset-x-3 bottom-[78px] z-50 mx-auto flex max-w-md items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary px-3 py-2 text-xs font-bold text-background shadow-xl shadow-slate-950/20 lg:hidden"
         >
           <span className="material-symbols-outlined text-[18px]">sensors</span>
           <span className="truncate">{activeRoom.workoutName || "Live Workout"}</span>
@@ -140,7 +145,7 @@ export default function AppSidebar() {
         </Link>
       ) : null}
 
-      <nav className="fixed inset-x-3 bottom-3 z-50 flex gap-1 overflow-x-auto rounded-xl border border-primary/15 bg-background-light/95 p-1 shadow-2xl shadow-slate-950/20 backdrop-blur dark:bg-background-dark/95 lg:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-md gap-1 overflow-x-auto rounded-xl border border-primary/15 bg-background-light/95 p-1 shadow-2xl shadow-slate-950/20 backdrop-blur dark:bg-background-dark/95 lg:hidden">
         {NAV_ITEMS.map((item) => {
           const isActive = item.matchPrefix ? pathname.startsWith(item.matchPrefix) : pathname === item.path;
 
