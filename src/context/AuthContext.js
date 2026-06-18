@@ -1,16 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
 import {
   AUTH_SESSION_EVENT,
+  COOKIE_AUTH_SESSION,
   clearStoredAuthToken,
   decodeJwtPayload,
-  getTokenExpiryMs,
-  isTokenExpired,
   readStoredAuthUserJson,
-  readStoredAuthToken,
   storeAuthSession,
 } from "@/shared/utils/authTokenStorage";
+import { logoutUser } from "@/features/auth/api/authApi";
 
 const AuthContext = createContext();
 
@@ -36,14 +35,11 @@ function subscribeToAuthSession(callback) {
   };
 }
 
-function getAuthTokenSnapshot() {
-  const token = readStoredAuthToken();
-  return token && !isTokenExpired(token) ? token : null;
+function getAuthSessionSnapshot() {
+  return readStoredAuthUserJson() ? COOKIE_AUTH_SESSION : null;
 }
 
 function getAuthUserSnapshot() {
-  const token = getAuthTokenSnapshot();
-  if (!token) return "";
   return readStoredAuthUserJson();
 }
 
@@ -60,11 +56,12 @@ function parseAuthUser(userJson, token) {
 }
 
 export function AuthProvider({ children }) {
-  const token = useSyncExternalStore(subscribeToAuthSession, getAuthTokenSnapshot, () => null);
+  const token = useSyncExternalStore(subscribeToAuthSession, getAuthSessionSnapshot, () => null);
   const userJson = useSyncExternalStore(subscribeToAuthSession, getAuthUserSnapshot, () => "");
   const user = useMemo(() => parseAuthUser(userJson, token), [userJson, token]);
 
   const logout = useCallback(() => {
+    logoutUser().catch(() => {});
     clearStoredAuthToken();
   }, []);
 
@@ -74,7 +71,7 @@ export function AuthProvider({ children }) {
         authOrUsername && typeof authOrUsername === "object" && !Array.isArray(authOrUsername)
           ? authOrUsername
           : null;
-      const authUser = authPayload?.user || authPayload;
+      const authUser = authPayload?.user || null;
       const username =
         typeof authOrUsername === "string"
           ? authOrUsername
@@ -82,66 +79,18 @@ export function AuthProvider({ children }) {
       const nextToken = authPayload
         ? maybeToken || authPayload.accessToken || authPayload.token || authUser?.accessToken || authUser?.token || null
         : maybeToken || null;
-      const nextRefreshToken = authPayload?.refreshToken || null;
-
-      if (nextToken) {
-        if (isTokenExpired(nextToken)) {
-          logout();
-          return;
-        }
-
-        const parsedUser = getUserFromToken(nextToken);
-        const normalizedUser = {
-          ...authUser,
-          username: username || parsedUser.username,
-          fullName: authUser?.fullName || parsedUser.fullName || null,
-        };
-        storeAuthSession({
-          accessToken: nextToken,
-          refreshToken: nextRefreshToken,
-          user: normalizedUser,
-        });
-        return;
-      }
+      const parsedUser = nextToken ? getUserFromToken(nextToken) : null;
 
       storeAuthSession({
         user: {
+          ...authUser,
           username: username || "User",
-          fullName: authUser?.fullName || null,
+          fullName: authUser?.fullName || parsedUser?.fullName || null,
         },
       });
     },
-    [logout]
+    []
   );
-
-  useEffect(() => {
-    if (!token || typeof window === "undefined") return undefined;
-
-    const expiryMs = getTokenExpiryMs(token);
-    if (!expiryMs) return undefined;
-
-    const msUntilExpiry = expiryMs - Date.now();
-    const timeoutId = window.setTimeout(() => {
-      logout();
-      window.location.assign("/");
-    }, Math.max(msUntilExpiry, 0));
-
-    return () => window.clearTimeout(timeoutId);
-  }, [token, logout]);
-
-  useEffect(() => {
-    if (!token || typeof window === 'undefined') return;
-    const expiryMs = getTokenExpiryMs(token);
-    if (!expiryMs) return;
-
-    const msUntilExpiry = expiryMs - Date.now();
-    const timeoutId = window.setTimeout(() => {
-      logout();
-      window.location.assign('/login');
-    }, Math.max(msUntilExpiry, 0));
-
-    return () => window.clearTimeout(timeoutId);
-  }, [token, logout]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>

@@ -4,35 +4,8 @@ const testUserPassword = () => Cypress.env("testUserPassword");
 const testUserFullName = () => Cypress.env("testUserFullName");
 const testDataPrefix = () => Cypress.env("testDataPrefix") || "cypress-e2e";
 
-function normalizeToken(rawToken) {
-  if (typeof rawToken !== "string") return "";
-  return rawToken.trim().replace(/^"|"$/g, "").replace(/^Bearer\s+/i, "").trim();
-}
-
 function getNestedValue(source, path) {
   return path.split(".").reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), source);
-}
-
-function extractAccessToken(data = {}) {
-  const candidatePaths = [
-    "accessToken",
-    "token",
-    "jwt",
-    "access_token",
-    "data.accessToken",
-    "data.token",
-    "data.jwt",
-    "data.access_token",
-    "result.accessToken",
-    "result.token",
-    "result.jwt",
-    "user.accessToken",
-    "user.token",
-    "payload.accessToken",
-    "payload.token",
-  ];
-
-  return candidatePaths.map((path) => normalizeToken(getNestedValue(data, path))).find(Boolean) || "";
 }
 
 function extractUser(data = {}) {
@@ -57,16 +30,42 @@ function getNutritionId(entry) {
 }
 
 function storeAuthSession(win, auth) {
-  const token = auth.accessToken;
   const user = auth.user || {
     email: testUserEmail(),
     username: testUserEmail(),
     fullName: testUserFullName(),
   };
 
-  ["accessToken", "authToken", "token"].forEach((key) => win.localStorage.setItem(key, token));
   win.localStorage.setItem("user", JSON.stringify(user));
-  win.document.cookie = `authToken=${encodeURIComponent(token)};path=/;SameSite=Strict`;
+}
+
+function isUnsafeMethod(method = "GET") {
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(String(method).toUpperCase());
+}
+
+function getCsrfToken() {
+  return cy
+    .request({
+      method: "GET",
+      url: `${apiUrl()}/api/v1/auth/csrf`,
+    })
+    .then((response) => response.body?.token);
+}
+
+function requestWithCsrf(options) {
+  if (!isUnsafeMethod(options.method)) {
+    return cy.request(options);
+  }
+
+  return getCsrfToken().then((csrfToken) =>
+    cy.request({
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        "X-XSRF-TOKEN": csrfToken,
+      },
+    })
+  );
 }
 
 Cypress.Commands.add("clearAuthSession", () => {
@@ -82,33 +81,22 @@ Cypress.Commands.add("ensureTestUser", () => {
   };
 
   return cy
-    .request({
-      method: "POST",
-      url: `${apiUrl()}/api/v1/auth/register`,
-      body: user,
-      failOnStatusCode: false,
-    })
+    .then(() =>
+      requestWithCsrf({
+        method: "POST",
+        url: `${apiUrl()}/api/v1/auth/register`,
+        body: user,
+        failOnStatusCode: false,
+      })
+    )
     .then((registerResponse) => {
       if ([200, 201].includes(registerResponse.status)) {
         return registerResponse.body;
       }
 
       return cy
-        .request({
-          method: "POST",
-          url: `${apiUrl()}/api/v1/auth/login`,
-          body: {
-            email: user.email,
-            password: user.password,
-          },
-        })
-        .then((loginResponse) => loginResponse.body);
-    })
-    .then((body) => {
-      const accessToken = extractAccessToken(body);
-      if (!accessToken) {
-        return cy
-          .request({
+        .then(() =>
+          requestWithCsrf({
             method: "POST",
             url: `${apiUrl()}/api/v1/auth/login`,
             body: {
@@ -116,12 +104,25 @@ Cypress.Commands.add("ensureTestUser", () => {
               password: user.password,
             },
           })
+        )
+        .then((loginResponse) => loginResponse.body);
+    })
+    .then((body) => {
+      const userFromBody = extractUser(body);
+      if (!userFromBody) {
+        return cy
+          .then(() =>
+            requestWithCsrf({
+              method: "POST",
+              url: `${apiUrl()}/api/v1/auth/login`,
+              body: {
+                email: user.email,
+                password: user.password,
+              },
+            })
+          )
           .then((loginResponse) => {
-            const loginAccessToken = extractAccessToken(loginResponse.body);
-            expect(loginAccessToken, "test user access token").to.not.equal("");
             return {
-              accessToken: loginAccessToken,
-              refreshToken: loginResponse.body?.refreshToken || loginResponse.body?.data?.refreshToken || null,
               user: extractUser(loginResponse.body) || {
                 email: user.email,
                 username: user.email,
@@ -132,9 +133,7 @@ Cypress.Commands.add("ensureTestUser", () => {
       }
 
       return {
-        accessToken,
-        refreshToken: body?.refreshToken || body?.data?.refreshToken || null,
-        user: extractUser(body) || {
+        user: userFromBody || {
           email: user.email,
           username: user.email,
           fullName: user.fullName,
@@ -146,19 +145,18 @@ Cypress.Commands.add("ensureTestUser", () => {
 Cypress.Commands.add("apiLogin", () => {
   return cy.ensureTestUser().then(() =>
     cy
-      .request({
-        method: "POST",
-        url: `${apiUrl()}/api/v1/auth/login`,
-        body: {
-          email: testUserEmail(),
-          password: testUserPassword(),
-        },
-      })
+      .then(() =>
+        requestWithCsrf({
+          method: "POST",
+          url: `${apiUrl()}/api/v1/auth/login`,
+          body: {
+            email: testUserEmail(),
+            password: testUserPassword(),
+          },
+        })
+      )
       .then((response) => {
-        const accessToken = extractAccessToken(response.body);
-        expect(accessToken, "login access token").to.not.equal("");
         return {
-          accessToken,
           user: extractUser(response.body) || {
             email: testUserEmail(),
             username: testUserEmail(),
@@ -180,13 +178,10 @@ Cypress.Commands.add("loginAndVisit", (path = "/dashboard") => {
 });
 
 Cypress.Commands.add("apiRequest", ({ method = "GET", path, body, failOnStatusCode = true }) => {
-  return cy.apiLogin().then((auth) =>
-    cy.request({
+  return cy.apiLogin().then(() =>
+    requestWithCsrf({
       method,
       url: `${apiUrl()}${path}`,
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-      },
       body,
       failOnStatusCode,
     })

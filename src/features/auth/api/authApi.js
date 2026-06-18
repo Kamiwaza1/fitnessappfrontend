@@ -1,5 +1,6 @@
 import { parseAuthErrorResponse } from "@/lib/authError";
 import { buildApiUrl } from "@/shared/api/apiBase";
+import { prepareApiRequestOptions } from "@/shared/api/http";
 
 const AUTH_API_BASE = "/api/v1/auth";
 
@@ -10,10 +11,10 @@ async function authFetch(url, options = {}) {
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
-    return await fetch(url, {
+    return await fetch(url, await prepareApiRequestOptions({
       ...options,
       signal: controller.signal,
-    });
+    }));
   } catch (error) {
     if (error?.name === "AbortError") {
       throw new Error("The server did not respond. Please try again.");
@@ -75,10 +76,6 @@ function normalizeAuthResponse(data) {
     null;
   const user = getNestedValue(data, "user") || getNestedValue(data, "data.user") || null;
 
-  if (!token) {
-    throw new Error("Authentication succeeded but token is missing.");
-  }
-
   return {
     token,
     accessToken: token,
@@ -86,6 +83,12 @@ function normalizeAuthResponse(data) {
     user,
     payload: data,
   };
+}
+
+export async function logoutUser() {
+  await authFetch(buildApiUrl(`${AUTH_API_BASE}/logout`), {
+    method: "POST",
+  });
 }
 
 export async function loginUser({ email, password }) {
@@ -122,4 +125,38 @@ export async function registerUser({ fullName, email, password }) {
 
   const data = await response.json();
   return normalizeAuthResponse(data);
+}
+
+export async function requestPasswordReset({ email }) {
+  const response = await authFetch(buildApiUrl(`${AUTH_API_BASE}/forgot-password`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const parsed = await parseAuthErrorResponse(response, "Could not request password reset.");
+    const error = new Error(parsed.message || "Could not request password reset.");
+    error.fieldErrors = parsed.fieldErrors;
+    throw error;
+  }
+
+  return response.json();
+}
+
+export async function resetPassword({ token, code, newPassword }) {
+  const response = await authFetch(buildApiUrl(`${AUTH_API_BASE}/reset-password`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, code, newPassword }),
+  });
+
+  if (!response.ok) {
+    const parsed = await parseAuthErrorResponse(response, "Could not reset password.");
+    const error = new Error(parsed.message || "Could not reset password.");
+    error.fieldErrors = parsed.fieldErrors;
+    throw error;
+  }
+
+  return response.json();
 }

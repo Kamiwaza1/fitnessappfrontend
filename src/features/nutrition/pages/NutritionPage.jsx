@@ -43,6 +43,10 @@ function round(value) {
   return Number.isFinite(number) ? Math.round(number) : 0;
 }
 
+function isPastIsoDate(date) {
+  return Boolean(date) && date < getTodayIsoDate();
+}
+
 function getProductCalories(product) {
   return round(product.caloriesPerServing || product.caloriesPer100g);
 }
@@ -126,7 +130,17 @@ function SegmentedControl({ value, onChange }) {
   );
 }
 
-function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, onChange, onSubmit, onCancel }) {
+function NutritionForm({
+  formState,
+  editingEntryId,
+  isSubmitting,
+  submitError,
+  minDate,
+  isLocked,
+  onChange,
+  onSubmit,
+  onCancel,
+}) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -147,14 +161,15 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
 
       <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
         Food name
-        <input
-          required
-          minLength={2}
-          maxLength={255}
-          value={formState.mealName}
-          onChange={(event) => onChange("mealName", event.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
-        />
+          <input
+            required
+            minLength={2}
+            maxLength={255}
+            value={formState.mealName}
+            disabled={isLocked}
+            onChange={(event) => onChange("mealName", event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
+          />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -163,7 +178,9 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
           <input
             required
             type="date"
+            min={minDate}
             value={formState.mealDate}
+            disabled={isLocked}
             onChange={(event) => onChange("mealDate", event.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
           />
@@ -172,6 +189,7 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
           Meal
           <select
             value={formState.category}
+            disabled={isLocked}
             onChange={(event) => onChange("category", event.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
           >
@@ -200,6 +218,7 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
                 max={field === "calories" ? 10000 : 1000}
                 type="number"
                 value={formState[field]}
+                disabled={isLocked}
                 onChange={(event) => onChange(field, event.target.value)}
                 className="w-full min-w-0 bg-transparent px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none dark:text-white"
               />
@@ -217,6 +236,7 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
           maxLength={1000}
           rows={3}
           value={formState.notes}
+          disabled={isLocked}
           onChange={(event) => onChange("notes", event.target.value)}
           className="mt-1 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-background-dark dark:text-white"
         />
@@ -230,7 +250,7 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isLocked}
         className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? "Saving..." : editingEntryId ? "Update food" : "Add food"}
@@ -239,7 +259,7 @@ function NutritionForm({ formState, editingEntryId, isSubmitting, submitError, o
   );
 }
 
-function OcrScanner({ selectedDate, onApplyScan }) {
+function OcrScanner({ selectedDate, isLocked, onApplyScan }) {
   const [imagePreview, setImagePreview] = useState("");
   const [ocrText, setOcrText] = useState("");
   const [scanError, setScanError] = useState("");
@@ -263,6 +283,10 @@ function OcrScanner({ selectedDate, onApplyScan }) {
   };
 
   const scanImage = async () => {
+    if (isLocked) {
+      setScanError("Past days are locked.");
+      return;
+    }
     if (!selectedFile) {
       setScanError("Choose an image first.");
       return;
@@ -293,7 +317,9 @@ function OcrScanner({ selectedDate, onApplyScan }) {
         <p className="text-xs text-slate-500">Scan a nutrition label or receipt image, then review the filled form.</p>
       </div>
 
-      <label className="flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-primary dark:border-white/10 dark:bg-background-dark">
+      <label className={`flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors dark:border-white/10 dark:bg-background-dark ${
+        isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary"
+      }`}>
         {imagePreview ? (
           <Image
             src={imagePreview}
@@ -310,13 +336,20 @@ function OcrScanner({ selectedDate, onApplyScan }) {
             <span className="mt-1 text-xs text-slate-500">JPG, PNG, HEIC if your browser supports it</span>
           </>
         )}
-        <input accept="image/*" capture="environment" type="file" className="sr-only" onChange={handleFileChange} />
+        <input
+          accept="image/*"
+          capture="environment"
+          type="file"
+          className="sr-only"
+          disabled={isLocked}
+          onChange={handleFileChange}
+        />
       </label>
 
       <button
         type="button"
         onClick={scanImage}
-        disabled={isScanning || !selectedFile}
+        disabled={isLocked || isScanning || !selectedFile}
         className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isScanning ? "Scanning..." : "Scan image"}
@@ -336,7 +369,7 @@ function OcrScanner({ selectedDate, onApplyScan }) {
   );
 }
 
-function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchError, onSelectProduct }) {
+function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchError, isLocked, onSelectProduct }) {
   return (
     <div className="space-y-4">
       <div>
@@ -347,6 +380,7 @@ function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchErr
         <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">search</span>
         <input
           value={query}
+          disabled={isLocked}
           onChange={(event) => onQueryChange(event.target.value)}
           className="w-full rounded-lg border border-transparent bg-slate-100 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-background-dark"
           aria-label="Search foods database"
@@ -357,17 +391,19 @@ function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchErr
       <div className="space-y-3">
         {isSearching ? <StatusMessage>Searching foods...</StatusMessage> : null}
         {searchError ? <StatusMessage tone="error">{searchError}</StatusMessage> : null}
-        {!isSearching && !searchError && query.trim().length < 2 ? (
+        {isLocked ? <StatusMessage>Past days are locked.</StatusMessage> : null}
+        {!isLocked && !isSearching && !searchError && query.trim().length < 2 ? (
           <StatusMessage>Type at least 2 characters to search foods.</StatusMessage>
         ) : null}
-        {!isSearching && query.trim().length >= 2 && results.length === 0 && !searchError ? (
+        {!isLocked && !isSearching && query.trim().length >= 2 && results.length === 0 && !searchError ? (
           <StatusMessage>No matching foods found.</StatusMessage>
         ) : null}
         {results.map((product) => (
           <button
             key={`${product.code}-${product.name}`}
+            disabled={isLocked}
             onClick={() => onSelectProduct(product)}
-            className="flex w-full gap-3 rounded-lg border border-slate-200 p-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/5 dark:border-white/10 dark:hover:border-primary/60"
+            className="flex w-full gap-3 rounded-lg border border-slate-200 p-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:hover:border-primary/60"
           >
             <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-100 dark:bg-white/10">
               {product.imageUrl ? (
@@ -409,6 +445,8 @@ function InputPanel({
   searchResults,
   isSearching,
   searchError,
+  isLocked,
+  minDate,
   onFormChange,
   onSubmit,
   onCancel,
@@ -416,6 +454,14 @@ function InputPanel({
   onSearchChange,
   onSelectProduct,
 }) {
+  if (isLocked) {
+    return (
+      <aside className="sticky top-24 rounded-xl border border-slate-200 bg-white p-5 dark:border-white/5 dark:bg-slate-900/50">
+        <StatusMessage>Past days are view-only.</StatusMessage>
+      </aside>
+    );
+  }
+
   return (
     <aside className="sticky top-24 rounded-xl border border-slate-200 bg-white p-5 dark:border-white/5 dark:bg-slate-900/50">
       <SegmentedControl value={mode} onChange={setMode} />
@@ -426,13 +472,15 @@ function InputPanel({
             editingEntryId={editingEntryId}
             isSubmitting={isSubmitting}
             submitError={submitError}
+            minDate={minDate}
+            isLocked={isLocked}
             onChange={onFormChange}
             onSubmit={onSubmit}
             onCancel={onCancel}
           />
         ) : null}
 
-        {mode === "ocr" ? <OcrScanner selectedDate={selectedDate} onApplyScan={onApplyScan} /> : null}
+        {mode === "ocr" ? <OcrScanner selectedDate={selectedDate} isLocked={isLocked} onApplyScan={onApplyScan} /> : null}
 
         {mode === "database" ? (
           <FoodSearchPanel
@@ -441,6 +489,7 @@ function InputPanel({
             results={searchResults}
             isSearching={isSearching}
             searchError={searchError}
+            isLocked={isLocked}
             onSelectProduct={onSelectProduct}
           />
         ) : null}
@@ -449,7 +498,7 @@ function InputPanel({
   );
 }
 
-function FoodLogList({ entries, isLoading, error, onEdit, onDelete }) {
+function FoodLogList({ entries, isLoading, error, canChangeEntries, onEdit, onDelete }) {
   if (isLoading) return <StatusMessage className="py-12">Loading nutrition entries...</StatusMessage>;
   if (error) return <StatusMessage tone="error" className="py-12">{error}</StatusMessage>;
 
@@ -481,22 +530,24 @@ function FoodLogList({ entries, isLoading, error, onEdit, onDelete }) {
                 </div>
                 {entry.notes ? <div className="mt-1 line-clamp-2 text-xs text-slate-400">{entry.notes}</div> : null}
               </div>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  onClick={() => onEdit(entry)}
-                  aria-label={`Edit ${entry.mealName}`}
-                  className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDelete(entry.id)}
-                  aria-label={`Delete ${entry.mealName}`}
-                  className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-500/20"
-                >
-                  Delete
-                </button>
-              </div>
+              {canChangeEntries ? (
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => onEdit(entry)}
+                    aria-label={`Edit ${entry.mealName}`}
+                    className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDelete(entry)}
+                    aria-label={`Delete ${entry.mealName}`}
+                    className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-500/20"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ) : null}
             </div>
           ))
         )}
@@ -520,6 +571,8 @@ export default function NutritionPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const calorieTarget = useCalorieTarget();
+  const todayIsoDate = getTodayIsoDate();
+  const selectedDateIsPast = isPastIsoDate(selectedDate);
 
   useEffect(() => {
     let isMounted = true;
@@ -557,7 +610,7 @@ export default function NutritionPage() {
 
   useEffect(() => {
     const query = searchQuery.trim();
-    if (query.length < 2) return undefined;
+    if (selectedDateIsPast || query.length < 2) return undefined;
 
     let isMounted = true;
     const timeoutId = window.setTimeout(async () => {
@@ -581,7 +634,7 @@ export default function NutritionPage() {
       isMounted = false;
       window.clearTimeout(timeoutId);
     };
-  }, [searchQuery]);
+  }, [searchQuery, selectedDateIsPast]);
 
   const visibleEntries = useMemo(
     () => entries.filter((entry) => entry.mealDate === selectedDate),
@@ -609,6 +662,10 @@ export default function NutritionPage() {
   };
 
   const openEditEntryForm = (entry) => {
+    if (isPastIsoDate(entry.mealDate || selectedDate)) {
+      setSubmitError("Past nutrition entries cannot be changed.");
+      return;
+    }
     setEditingEntryId(entry.id);
     setFormState({
       mealName: entry.mealName,
@@ -625,6 +682,10 @@ export default function NutritionPage() {
   };
 
   const selectProduct = (product) => {
+    if (selectedDateIsPast) {
+      setSubmitError("Food cannot be added to a past day.");
+      return;
+    }
     setEditingEntryId(null);
     setFormState(getFormFromProduct(product, selectedDate));
     setSubmitError("");
@@ -632,6 +693,10 @@ export default function NutritionPage() {
   };
 
   const applyOcrScan = (nextFormState) => {
+    if (selectedDateIsPast) {
+      setSubmitError("Food cannot be added to a past day.");
+      return;
+    }
     setEditingEntryId(null);
     setFormState({
       ...emptyForm(selectedDate),
@@ -644,6 +709,10 @@ export default function NutritionPage() {
 
   const submitEntry = async (event) => {
     event.preventDefault();
+    if (isPastIsoDate(formState.mealDate)) {
+      setSubmitError(editingEntryId ? "Past nutrition entries cannot be changed." : "Food cannot be added to a past day.");
+      return;
+    }
     setIsSubmitting(true);
     setSubmitError("");
 
@@ -668,26 +737,42 @@ export default function NutritionPage() {
     }
   };
 
-  const deleteEntry = async (entryId) => {
+  const deleteEntry = async (entry) => {
+    if (isPastIsoDate(entry.mealDate || selectedDate)) {
+      window.alert("Past nutrition entries cannot be changed.");
+      return;
+    }
     try {
-      await deleteNutritionEntry(entryId);
-      setEntries((current) => current.filter((entry) => entry.id !== entryId));
+      await deleteNutritionEntry(entry.id);
+      setEntries((current) => current.filter((currentEntry) => currentEntry.id !== entry.id));
     } catch (error) {
       window.alert(error.message || "Could not delete nutrition entry.");
     }
   };
 
   const shiftDate = (days) => {
-    setSelectedDate((currentDate) => {
-      const date = new Date(`${currentDate}T00:00:00`);
-      date.setDate(date.getDate() + days);
-      const nextDate = toIsoLocalDate(date);
-      setFormState((current) => ({ ...current, mealDate: nextDate }));
-      return nextDate;
-    });
+    const date = new Date(`${selectedDate}T00:00:00`);
+    date.setDate(date.getDate() + days);
+    const nextDate = toIsoLocalDate(date);
+    setSelectedDate(nextDate);
+    setFormState((current) => ({ ...current, mealDate: nextDate }));
+
+    if (isPastIsoDate(nextDate)) {
+      setSearchQuery("");
+      setSearchResults([]);
+      setSearchError("");
+      setIsSearching(false);
+    }
   };
 
   const handleSearchChange = (nextQuery) => {
+    if (selectedDateIsPast) {
+      setSearchQuery("");
+      setSearchResults([]);
+      setSearchError("");
+      setIsSearching(false);
+      return;
+    }
     setSearchQuery(nextQuery);
     if (nextQuery.trim().length < 2) {
       setSearchResults([]);
@@ -761,6 +846,7 @@ export default function NutritionPage() {
               entries={visibleEntries}
               isLoading={isLoading}
               error={loadError}
+              canChangeEntries={!selectedDateIsPast}
               onEdit={openEditEntryForm}
               onDelete={deleteEntry}
             />
@@ -779,6 +865,8 @@ export default function NutritionPage() {
               searchResults={searchResults}
               isSearching={isSearching}
               searchError={searchError}
+              isLocked={selectedDateIsPast}
+              minDate={todayIsoDate}
               onFormChange={(field, value) => setFormState((current) => ({ ...current, [field]: value }))}
               onSubmit={submitEntry}
               onCancel={resetForm}

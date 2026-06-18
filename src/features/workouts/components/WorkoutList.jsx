@@ -6,7 +6,7 @@ export default function WorkoutList({ workouts, activeWorkoutId = null, isLoadin
   const today = toIsoLocalDate();
   const upcomingWorkouts = workouts.filter((workout) => {
     const workoutDate = String(workout?.workoutDate || workout?.date || "").slice(0, 10);
-    return workoutDate >= today && String(workout?.id) !== String(activeWorkoutId || "");
+    return workoutDate >= today && !workout?.completed && String(workout?.id) !== String(activeWorkoutId || "");
   });
 
   return (

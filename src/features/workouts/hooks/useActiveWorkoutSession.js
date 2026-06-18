@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { saveWorkoutSession } from "@/features/workouts/api/workoutsApi";
+import { toIsoLocalDate } from "@/shared/utils/date";
 
 const ACTIVE_SESSION_KEY = "darklift.activeWorkoutSession";
 const DEFAULT_REST_SECONDS = 90;
@@ -28,6 +29,33 @@ function createSession(workout) {
       loggedSets: [],
     })),
   };
+}
+
+function isSessionCurrent(session) {
+  if (!session?.startedAt) return false;
+  const startedAt = new Date(session.startedAt);
+  if (Number.isNaN(startedAt.getTime())) return false;
+  return toIsoLocalDate(startedAt) === toIsoLocalDate();
+}
+
+function readStoredSession() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const storedSession = window.localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (!storedSession) return null;
+
+    const parsedSession = JSON.parse(storedSession);
+    if (!isSessionCurrent(parsedSession)) {
+      window.localStorage.removeItem(ACTIVE_SESSION_KEY);
+      return null;
+    }
+
+    return parsedSession;
+  } catch {
+    window.localStorage.removeItem(ACTIVE_SESSION_KEY);
+    return null;
+  }
 }
 
 function toSessionPayload(session) {
@@ -61,17 +89,7 @@ function toSessionPayload(session) {
 }
 
 export function useActiveWorkoutSession() {
-  const [activeSession, setActiveSession] = useState(() => {
-    if (typeof window === "undefined") return null;
-
-    try {
-      const storedSession = window.localStorage.getItem(ACTIVE_SESSION_KEY);
-      return storedSession ? JSON.parse(storedSession) : null;
-    } catch {
-      window.localStorage.removeItem(ACTIVE_SESSION_KEY);
-      return null;
-    }
-  });
+  const [activeSession, setActiveSession] = useState(readStoredSession);
   const [restDurationSeconds, setRestDurationSeconds] = useState(DEFAULT_REST_SECONDS);
   const [restEndsAt, setRestEndsAt] = useState(null);
   const [timerTick, setTimerTick] = useState(0);

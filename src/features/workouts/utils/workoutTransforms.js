@@ -29,12 +29,13 @@ export function normalizeWorkout(workout, index = 0) {
     sets: Number.isFinite(Number(workout?.sets)) ? Number(workout?.sets) : null,
     reps: Number.isFinite(Number(workout?.reps)) ? Number(workout?.reps) : null,
     weightKg: Number.isFinite(Number(workout?.weightKg)) ? Number(workout?.weightKg) : null,
+    completed: Boolean(workout?.completed),
     notes: workout?.notes || "",
     description: workout?.description || "",
     category: workout?.category || "GENERAL",
     muscleType: workout?.muscleType || "FULL_BODY",
     exercises,
-    status: workout?.status || "Scheduled",
+    status: workout?.completed ? "Completed" : workout?.status || "Scheduled",
   };
 }
 
