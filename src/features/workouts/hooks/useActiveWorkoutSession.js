@@ -89,7 +89,8 @@ function toSessionPayload(session) {
 }
 
 export function useActiveWorkoutSession() {
-  const [activeSession, setActiveSession] = useState(readStoredSession);
+  const [activeSession, setActiveSession] = useState(null);
+  const [hasRestoredSession, setHasRestoredSession] = useState(false);
   const [restDurationSeconds, setRestDurationSeconds] = useState(DEFAULT_REST_SECONDS);
   const [restEndsAt, setRestEndsAt] = useState(null);
   const [timerTick, setTimerTick] = useState(0);
@@ -97,13 +98,24 @@ export function useActiveWorkoutSession() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    const restoreSessionTimeout = window.setTimeout(() => {
+      setActiveSession(readStoredSession());
+      setHasRestoredSession(true);
+    }, 0);
+
+    return () => window.clearTimeout(restoreSessionTimeout);
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestoredSession) return;
+
     if (!activeSession) {
       window.localStorage.removeItem(ACTIVE_SESSION_KEY);
       return;
     }
 
     window.localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(activeSession));
-  }, [activeSession]);
+  }, [activeSession, hasRestoredSession]);
 
   useEffect(() => {
     if (!restEndsAt) return undefined;
