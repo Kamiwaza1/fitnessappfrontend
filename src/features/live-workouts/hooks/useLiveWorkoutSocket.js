@@ -36,12 +36,12 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
       onWebSocketError: () => setConnectionState("ERROR"),
     });
 
-    const connectingTimeout = window.setTimeout(() => setConnectionState("CONNECTING"), 0);
+    const connectingTimeout = globalThis.setTimeout(() => setConnectionState("CONNECTING"), 0);
     clientRef.current = client;
     client.activate();
 
     return () => {
-      window.clearTimeout(connectingTimeout);
+      globalThis.clearTimeout(connectingTimeout);
       client.deactivate();
       clientRef.current = null;
     };

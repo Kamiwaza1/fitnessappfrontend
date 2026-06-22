@@ -742,6 +742,9 @@ export default function NutritionPage() {
       window.alert("Past nutrition entries cannot be changed.");
       return;
     }
+    if (!window.confirm(`Delete ${entry.mealName || "this nutrition entry"}?`)) {
+      return;
+    }
     try {
       await deleteNutritionEntry(entry.id);
       setEntries((current) => current.filter((currentEntry) => currentEntry.id !== entry.id));

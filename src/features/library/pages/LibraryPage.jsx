@@ -541,18 +541,7 @@ export default function LibraryPage() {
 
   return (
     <AppPageShell mainClassName="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-10 border-b border-primary/10 bg-background-light/80 px-4 py-5 backdrop-blur-md sm:px-6 lg:px-8 dark:bg-background-dark/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">
-          Exercise Library
-        </p>
-        <div className="mt-1 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Exercise Library</h1>
-            <p className="mt-1 text-sm text-primary/60">Browse exercises from the backend library controller.</p>
-          </div>
-          <Badge>{resultLabel}</Badge>
-        </div>
-      </header>
+      
 
       <div className="flex-1 p-4 sm:p-6 lg:p-8">
         {!hasMuscleSelected ? (

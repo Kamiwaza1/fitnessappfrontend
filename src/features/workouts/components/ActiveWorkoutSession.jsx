@@ -29,17 +29,7 @@ function ExerciseLogger({
           <p className="mt-1 text-sm text-slate-400">{targetText || "No planning target set"}</p>
           {exercise.notes ? <p className="mt-2 text-sm text-slate-500">{exercise.notes}</p> : null}
         </div>
-        <button
-          type="button"
-          className={`flex min-h-10 shrink-0 items-center rounded-lg border px-3 text-sm font-bold transition-colors ${
-            exercise.completed
-              ? "border-primary bg-primary text-background"
-              : "border-slate-300 text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          }`}
-          onClick={() => onToggleCompleted(exercise.id)}
-        >
-          {exercise.completed ? "Done" : "Mark done"}
-        </button>
+        
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
@@ -119,7 +109,11 @@ function ExerciseLogger({
               <button
                 type="button"
                 className="rounded-md px-2 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10"
-                onClick={() => onRemoveSet(exercise.id, set.id)}
+                onClick={() => {
+                  if (window.confirm(`Remove set ${index + 1}?`)) {
+                    onRemoveSet(exercise.id, set.id);
+                  }
+                }}
               >
                 Remove
               </button>
@@ -181,8 +175,8 @@ export default function ActiveWorkoutSession({
     setDrafts((current) => ({
       ...current,
       [exerciseId]: {
-        reps: String(reps),
-        weightKg: String(weightKg),
+        reps: "",
+        weightKg: "",
       },
     }));
   };
@@ -191,9 +185,7 @@ export default function ActiveWorkoutSession({
     <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-100 p-4 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <span className="rounded bg-primary/15 px-2 py-1 text-[11px] font-black uppercase tracking-widest text-primary">
-            Active workout
-          </span>
+          
           <h2 className="mt-3 break-words text-2xl font-black">{session.title}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {completionText} · {totals.sets} sets logged · {totals.reps} total reps
@@ -263,7 +255,11 @@ export default function ActiveWorkoutSession({
         <button
           type="button"
           className="min-h-11 rounded-lg border border-slate-300 px-4 font-bold text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          onClick={onDiscard}
+          onClick={() => {
+            if (window.confirm("Discard this active workout session?")) {
+              onDiscard();
+            }
+          }}
           disabled={isSaving}
         >
           Discard session

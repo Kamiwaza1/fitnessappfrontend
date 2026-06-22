@@ -1,6 +1,7 @@
 import { Lexend } from "next/font/google";
 import "./globals.css";
 import { Providers } from './providers';
+import ProTypes from 'prop-types';
 
 const lexend = Lexend({
   variable: "--font-display",
@@ -28,3 +29,8 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+RootLayout.propTypes = {
+  children: ProTypes.node.isRequired,
+};
+

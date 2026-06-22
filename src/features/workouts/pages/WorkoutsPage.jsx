@@ -107,10 +107,10 @@ export default function WorkoutsPage() {
                     ...(current.exercises || []),
                     {
                       name: "",
-                      muscleType: "FULL_BODY",
-                      sets: "3",
-                      reps: "10",
-                      weightKg: "20",
+                      muscleType: "",
+                      sets: "",
+                      reps: "",
+                      weightKg: "",
                       notes: "",
                     },
                   ],
@@ -151,15 +151,17 @@ export default function WorkoutsPage() {
             />
           ) : null}
 
-          <WorkoutList
-            workouts={workouts}
-            activeWorkoutId={workoutSession.activeSession?.workoutId}
-            isLoading={isLoading}
-            error={error}
-            onDelete={handleDeleteWorkout}
-            onEdit={openComposerForEdit}
-            onStart={setWorkoutToStart}
-          />
+          {!isComposerOpen && !workoutSession.activeSession ? (
+            <WorkoutList
+              workouts={workouts}
+              activeWorkoutId={workoutSession.activeSession?.workoutId}
+              isLoading={isLoading}
+              error={error}
+              onDelete={handleDeleteWorkout}
+              onEdit={openComposerForEdit}
+              onStart={setWorkoutToStart}
+            />
+          ) : null}
         </div>
       </section>
 
@@ -171,9 +173,7 @@ export default function WorkoutsPage() {
             aria-labelledby="start-workout-title"
             className="w-full max-w-md rounded-xl border border-primary/20 bg-background-light p-5 text-slate-900 shadow-2xl dark:bg-slate-950 dark:text-white"
           >
-            <span className="rounded bg-primary/15 px-2 py-1 text-[11px] font-black uppercase tracking-widest text-primary">
-              Start workout
-            </span>
+          
             <h2 id="start-workout-title" className="mt-3 break-words text-2xl font-black">
               {workoutToStart.title}
             </h2>
