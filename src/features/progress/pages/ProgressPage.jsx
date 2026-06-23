@@ -96,23 +96,23 @@ export default function ProgressPage() {
           
         </header>
 
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 flex flex-col gap-6 lg:col-span-5">
-            <div className="h-full rounded-xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+        <div className="grid grid-cols-12 gap-6 items-start">
+          <div className="col-span-12 flex flex-col gap-6 lg:col-span-7">
+            <div className="min-h-[440px] rounded-xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
               <h3 className="mb-6 flex items-center gap-2 text-lg font-bold">
                 <span className="material-icons text-sm text-primary">analytics</span> Volume Per
                 Muscle Group
               </h3>
               <ChartContainer
-                className="mx-auto aspect-square max-h-[260px] w-full"
+                className="mx-auto h-[360px] w-full max-w-[520px] aspect-auto"
                 config={{
                   volume: { label: "Volume" },
                   ...MUSCLE_TYPE_CONFIG,
                 }}
               >
-                <PieChart>
+                <PieChart margin={{ top: 8, right: 24, left: 24, bottom: 8 }}>
                   <ChartTooltip content={<ChartTooltipContent nameKey="muscleType" />} />
-                  <Pie data={muscleVolumeData} dataKey="volume" nameKey="muscleType" outerRadius={90}>
+                  <Pie data={muscleVolumeData} dataKey="volume" nameKey="muscleType" outerRadius={110}>
                     {muscleVolumeData.map((entry) => (
                       <Cell key={entry.muscleType} fill={entry.fill} />
                     ))}
@@ -125,7 +125,7 @@ export default function ProgressPage() {
           
           </div>
 
-          <div className="col-span-12 flex flex-col gap-6 lg:col-span-7">
+          <div className="col-span-12 flex flex-col gap-6 lg:col-span-5">
             <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
               <div className="mb-6 flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-lg font-bold">
@@ -152,33 +152,7 @@ export default function ProgressPage() {
               </ChartContainer>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5">
-              <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-white/10">
-                <h3 className="flex items-center gap-2 text-lg font-bold">
-                  <span className="material-icons text-sm text-primary">stars</span> Recent Personal
-                  Records
-                </h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                      <th className="px-6 py-4">Exercise</th>
-                      <th className="px-6 py-4">Max Weight</th>
-                      <th className="px-6 py-4">1RM Est.</th>
-                      <th className="px-6 py-4 text-right">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-white/10">
-                    <tr>
-                      <td colSpan="4" className="px-6 py-8 text-center text-xs text-slate-500">
-                        No personal records yet. Crush some weights!
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            {/* Recent Personal Records removed */}
           </div>
         </div>
       </div>
