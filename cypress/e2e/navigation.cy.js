@@ -1,12 +1,12 @@
 describe("app navigation without API mocks", () => {
   const pages = [
-    { label: "Dashboard", path: "/dashboard", content: /Dashboard|Welcome Back/i },
-    { label: "Workouts", path: "/workouts", content: /Plan a New Workout|Upcoming Workouts/i },
+    { label: "Dashboard", path: "/dashboard", content: /Recommended For You|Weekly Training Volume/i },
+    { label: "Workouts", path: "/workouts", content: /Upcoming Workouts|Add Workout/i },
     { label: "Exercise Library", path: "/library", content: /Choose a muscle group|Exercise Library/i },
     { label: "Live Workout", path: "/live-workouts", content: /Live Workout/i },
     { label: "History", path: "/workout-histories", content: /Workout History|History List/i },
     { label: "Nutrition", path: "/nutrition", content: /Food Diary/i },
-    { label: "Progress", path: "/progress", content: /Progress|Insights/i },
+    { label: "Progress", path: "/progress", content: /Volume Per|Workout Lengths/i },
     { label: "Settings", path: "/settings", content: /Settings/i },
   ];
 

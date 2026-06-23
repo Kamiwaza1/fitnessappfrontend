@@ -4,7 +4,7 @@ describe("workout history without API mocks", () => {
   });
 
   it("renders the real workout history response", () => {
-    cy.contains("Workout Histories", { timeout: 10000 }).should("be.visible");
+    cy.contains("History List", { timeout: 10000 }).should("be.visible");
     cy.contains(/records|No workout histories yet|Completed/i, { timeout: 10000 }).should("be.visible");
   });
 });

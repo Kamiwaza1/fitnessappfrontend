@@ -59,6 +59,7 @@ function readStoredSession() {
 }
 
 function toSessionPayload(session) {
+  const finishedAt = new Date();
   const loggedSets = session.exercises.flatMap((exercise) =>
     exercise.loggedSets.map((set) => ({
       exerciseId: exercise.id,
@@ -72,9 +73,9 @@ function toSessionPayload(session) {
   return {
     workoutId: session.workoutId,
     workoutName: session.title,
-    workoutDate: new Date().toISOString().slice(0, 10),
+    workoutDate: finishedAt.toISOString().slice(0, 10),
     startedAt: session.startedAt,
-    finishedAt: new Date().toISOString(),
+    finishedAt: finishedAt.toISOString(),
     sets: loggedSets.length,
     reps: loggedSets.reduce((sum, set) => sum + set.reps, 0),
     weightKg: loggedSets.reduce((max, set) => Math.max(max, set.weightKg), 0),
@@ -89,7 +90,8 @@ function toSessionPayload(session) {
 }
 
 export function useActiveWorkoutSession() {
-  const [activeSession, setActiveSession] = useState(readStoredSession);
+  const [activeSession, setActiveSession] = useState(null);
+  const [hasRestoredSession, setHasRestoredSession] = useState(false);
   const [restDurationSeconds, setRestDurationSeconds] = useState(DEFAULT_REST_SECONDS);
   const [restEndsAt, setRestEndsAt] = useState(null);
   const [timerTick, setTimerTick] = useState(0);
@@ -97,13 +99,24 @@ export function useActiveWorkoutSession() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    const restoreSessionTimeout = window.setTimeout(() => {
+      setActiveSession(readStoredSession());
+      setHasRestoredSession(true);
+    }, 0);
+
+    return () => window.clearTimeout(restoreSessionTimeout);
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestoredSession) return;
+
     if (!activeSession) {
       window.localStorage.removeItem(ACTIVE_SESSION_KEY);
       return;
     }
 
     window.localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(activeSession));
-  }, [activeSession]);
+  }, [activeSession, hasRestoredSession]);
 
   useEffect(() => {
     if (!restEndsAt) return undefined;

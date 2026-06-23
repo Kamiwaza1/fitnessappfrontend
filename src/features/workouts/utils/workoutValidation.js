@@ -16,6 +16,10 @@ export function validateWorkoutForm(formState) {
     return "Workout date is required.";
   }
 
+  if (!formState.category) {
+    return "Workout category is required.";
+  }
+
   const selectedDate = new Date(`${formState.date}T00:00:00`);
   const today = new Date();
   today.setHours(0, 0, 0, 0);

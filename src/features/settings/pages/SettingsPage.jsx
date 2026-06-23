@@ -1,8 +1,10 @@
 "use client";
 
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import PushNotificationsCard from "@/features/settings/components/PushNotificationsCard";
 import { deleteCurrentUser, fetchCurrentUser, updateCurrentUser } from "@/features/settings/api/userApi";
 import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
 import AppPageShell from "@/shared/components/AppPageShell";
@@ -36,6 +38,13 @@ function SettingsCard({ icon, title, description, children }) {
     </section>
   );
 }
+
+SettingsCard.propTypes = {
+  icon: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  children: PropTypes.node,
+};
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -160,7 +169,7 @@ export default function SettingsPage() {
       await deleteCurrentUser({ password: deleteValues.password });
       setDeleteValues({ password: "", confirmation: "" });
       setDeleteMessage("Account deletion scheduled. Check your email for recovery details.");
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         logout();
         router.push("/login");
       }, 1200);
@@ -172,12 +181,7 @@ export default function SettingsPage() {
 
   return (
     <AppPageShell mainClassName="flex h-screen flex-col overflow-hidden">
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-primary/10 bg-background-light/80 px-8 backdrop-blur-md dark:bg-background-dark/80">
-        <div>
-          <h2 className="text-xl font-bold">Settings</h2>
-          <p className="text-xs text-slate-500">Account security and nutrition preferences</p>
-        </div>
-      </header>
+      
 
       <section className="custom-scrollbar flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -229,15 +233,23 @@ export default function SettingsPage() {
                 {targetMessage ? <StatusMessage className="text-left text-primary">{targetMessage}</StatusMessage> : null}
 
                 <div className="flex flex-col gap-3 sm:flex-row">
-	                  <button
-	                    type="submit"
-	                    disabled={isSavingTarget}
-	                    className="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-	                  >
-	                    {isSavingTarget ? "Saving..." : "Save target"}
-	                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingTarget}
+                    className="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSavingTarget ? "Saving..." : "Save target"}
+                  </button>
                 </div>
               </form>
+            </SettingsCard>
+
+            <SettingsCard
+              icon="notifications"
+              title="Push Notifications"
+              description="Receive live workout message alerts even when the tab is closed."
+            >
+              <PushNotificationsCard />
             </SettingsCard>
 
           </div>
@@ -250,7 +262,7 @@ export default function SettingsPage() {
             >
               <form onSubmit={savePassword} className="space-y-4">
                 <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  New password
+                  <span>New password</span>
                   <input
                     autoComplete="new-password"
                     type="password"
@@ -263,7 +275,7 @@ export default function SettingsPage() {
                 </label>
 
                 <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Confirm password
+                  <span>Confirm password</span>
                   <input
                     autoComplete="new-password"
                     type="password"
@@ -282,13 +294,13 @@ export default function SettingsPage() {
                 {passwordError ? <StatusMessage tone="error" className="text-left">{passwordError}</StatusMessage> : null}
                 {passwordMessage ? <StatusMessage className="text-left text-primary">{passwordMessage}</StatusMessage> : null}
 
-	                <button
-	                  type="submit"
-	                  disabled={isSavingPassword}
-	                  className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-	                >
-	                  {isSavingPassword ? "Updating..." : "Update password"}
-	                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingPassword}
+                  className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSavingPassword ? "Updating..." : "Update password"}
+                </button>
               </form>
             </SettingsCard>
 
@@ -303,7 +315,7 @@ export default function SettingsPage() {
                 </div>
 
                 <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Current password
+                  <span>Current password</span>
                   <input
                     autoComplete="current-password"
                     type="password"
@@ -316,7 +328,7 @@ export default function SettingsPage() {
                 </label>
 
                 <label className="block space-y-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Type DELETE
+                  <span>Type DELETE</span>
                   <input
                     autoComplete="off"
                     type="text"

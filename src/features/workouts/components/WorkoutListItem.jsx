@@ -42,7 +42,9 @@ export default function WorkoutListItem({ workout, onDelete, onEdit, onStart }) 
             className="flex h-7 items-center justify-center rounded-lg border border-red-500/30 px-2 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/10"
             onClick={(event) => {
               event.stopPropagation();
-              onDelete(workout.id);
+              if (window.confirm(`Delete ${workout.title || "this workout"}?`)) {
+                onDelete(workout.id);
+              }
             }}
           >
             Delete
