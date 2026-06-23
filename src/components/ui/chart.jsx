@@ -4,12 +4,6 @@ import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
-// Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = {
-  light: "",
-  dark: ".dark"
-}
-
 const INITIAL_DIMENSION = {
   width: 320,
   height: 200
@@ -33,10 +27,15 @@ function ChartContainer({
   children,
   config,
   initialDimension = INITIAL_DIMENSION,
+  style,
   ...props
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
+  const chartStyle = React.useMemo(() => ({
+    ...getChartColorVariables(config),
+    ...style
+  }), [config, style])
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -47,8 +46,8 @@ function ChartContainer({
           "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className
         )}
+        style={chartStyle}
         {...props}>
-        <ChartStyle id={chartId} config={config} />
         <RechartsPrimitive.ResponsiveContainer initialDimension={initialDimension}>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
@@ -57,35 +56,13 @@ function ChartContainer({
   );
 }
 
-const ChartStyle = ({
-  id,
-  config
-}) => {
-  const colorConfig = Object.entries(config).filter(([, config]) => config.theme ?? config.color)
-
-  if (!colorConfig.length) {
-    return null
-  }
-
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-.map(([key, itemConfig]) => {
-const color =
-  itemConfig.theme?.[theme] ??
-  itemConfig.color
-return color ? `  --color-${key}: ${color};` : null
-})
-.join("\n")}
-}
-`)
-          .join("\n"),
-      }} />
-  );
+function getChartColorVariables(config) {
+  return Object.fromEntries(
+    Object.entries(config)
+      .map(([key, itemConfig]) => [key, itemConfig.color ?? itemConfig.theme?.light])
+      .filter(([, color]) => Boolean(color))
+      .map(([key, color]) => [`--color-${key}`, color])
+  )
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
@@ -315,5 +292,4 @@ export {
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-  ChartStyle,
 }

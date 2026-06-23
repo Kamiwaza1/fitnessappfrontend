@@ -192,14 +192,6 @@ export default function WorkoutsPage() {
                   {(workoutToStart.exercises || []).length}
                 </strong>
               </div>
-              {workoutToStart.durationMinutes ? (
-                <div className="flex items-center justify-between gap-3">
-                  <span>Duration</span>
-                  <strong className="text-right text-slate-900 dark:text-white">
-                    {workoutToStart.durationMinutes} min
-                  </strong>
-                </div>
-              ) : null}
             </div>
             {workoutSession.activeSession ? (
               <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-700 dark:text-amber-200">

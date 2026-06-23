@@ -22,6 +22,10 @@ export function isWebPushSupported() {
   );
 }
 
+export function isWebPushConfigured() {
+  return Boolean((process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || "").trim());
+}
+
 export function getBrowserNotificationPermission() {
   if (globalThis.window === undefined || !("Notification" in globalThis)) return "unsupported";
   return Notification.permission;
@@ -57,7 +61,7 @@ export async function subscribeToWebPush() {
 
   const publicKey = (process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || "").trim();
   if (!publicKey) {
-    throw new Error("NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY is not configured.");
+    throw new Error("Push notifications are not configured for this deployment.");
   }
 
   const permission = await requestNotificationPermission();

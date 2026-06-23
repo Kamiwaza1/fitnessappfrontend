@@ -6,6 +6,31 @@ import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { CartesianGrid, Cell, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 
+const MUSCLE_TYPE_CONFIG = {
+  CHEST: { label: "Chest", color: "#ef4444" },
+  BACK: { label: "Back", color: "#3b82f6" },
+  SHOULDERS: { label: "Shoulders", color: "#f59e0b" },
+  BICEPS: { label: "Biceps", color: "#a855f7" },
+  TRICEPS: { label: "Triceps", color: "#ec4899" },
+  LEGS: { label: "Legs", color: "#22c55e" },
+  GLUTES: { label: "Glutes", color: "#14b8a6" },
+  CORE: { label: "Core", color: "#06b6d4" },
+  CALVES: { label: "Calves", color: "#84cc16" },
+  FULL_BODY: { label: "Full Body", color: "#6366f1" },
+};
+
+function getExerciseVolume(exercise) {
+  const sets = Number(exercise?.sets || 0);
+  const reps = Number(exercise?.reps || 0);
+  const weight = Number(exercise?.weightKg || 0);
+
+  if (sets > 0 && reps > 0 && weight > 0) {
+    return sets * reps * weight;
+  }
+
+  return sets;
+}
+
 export default function ProgressPage() {
   const { workouts } = useWorkoutList();
   const totalVolume = useMemo(
@@ -15,10 +40,7 @@ export default function ProgressPage() {
           return (
             sum +
             workout.exercises.reduce((exerciseSum, exercise) => {
-              const sets = Number(exercise?.sets || 0);
-              const reps = Number(exercise?.reps || 0);
-              const weight = Number(exercise?.weightKg || 0);
-              return exerciseSum + sets * reps * weight;
+              return exerciseSum + getExerciseVolume(exercise);
             }, 0)
           );
         }
@@ -30,17 +52,27 @@ export default function ProgressPage() {
     [workouts]
   );
 
-  const categoryData = useMemo(() => {
+  const muscleVolumeData = useMemo(() => {
     const grouped = workouts.reduce((acc, workout) => {
-      const key = workout?.category || "GENERAL";
-      acc[key] = (acc[key] || 0) + 1;
+      const exercises = Array.isArray(workout?.exercises) && workout.exercises.length > 0
+        ? workout.exercises
+        : [{ muscleType: workout?.muscleType, sets: workout?.sets, reps: workout?.reps, weightKg: workout?.weightKg }];
+
+      exercises.forEach((exercise) => {
+        const muscleType = exercise?.muscleType || "FULL_BODY";
+        acc[muscleType] = (acc[muscleType] || 0) + getExerciseVolume(exercise);
+      });
+
       return acc;
     }, {});
 
-    return Object.entries(grouped).map(([category, count]) => ({
-      category,
-      count,
-    }));
+    return Object.entries(grouped)
+      .filter(([, volume]) => volume > 0)
+      .map(([muscleType, volume]) => ({
+        muscleType,
+        volume,
+        fill: MUSCLE_TYPE_CONFIG[muscleType]?.color || "#64748b",
+      }));
   }, [workouts]);
 
   const durationTrendData = useMemo(
@@ -59,32 +91,9 @@ export default function ProgressPage() {
       <div className="mx-auto max-w-7xl flex-1 p-8">
         <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <h1 className="mb-2 text-4xl font-bold tracking-tight">
-              Progress &amp; <span className="text-primary">Insights</span>
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400">
-              Long-term performance analysis and physical metrics.
-            </p>
+
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex rounded-lg bg-slate-200 p-1 dark:bg-white/5">
-              {["7D", "30D", "3M", "1Y"].map((range) => (
-                <button
-                  key={range}
-                  className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
-                    range === "30D"
-                      ? "bg-primary text-background"
-                      : "hover:bg-white/10"
-                  }`}
-                >
-                  {range}
-                </button>
-              ))}
-            </div>
-            <button className="rounded-lg border border-primary/30 bg-primary/20 px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/30">
-              Export
-            </button>
-          </div>
+          
         </header>
 
         <div className="grid grid-cols-12 gap-6">
@@ -97,34 +106,18 @@ export default function ProgressPage() {
               <ChartContainer
                 className="mx-auto aspect-square max-h-[260px] w-full"
                 config={{
-                  count: { label: "Workouts" },
-                  GENERAL: { label: "General", color: "#0df259" },
-                  STRENGTH: { label: "Strength", color: "#22c55e" },
-                  CARDIO: { label: "Cardio", color: "#84cc16" },
-                  MOBILITY: { label: "Mobility", color: "#16a34a" },
-                  RECOVERY: { label: "Recovery", color: "#15803d" },
+                  volume: { label: "Volume" },
+                  ...MUSCLE_TYPE_CONFIG,
                 }}
               >
                 <PieChart>
-                  <ChartTooltip content={<ChartTooltipContent nameKey="category" />} />
-                  <Pie data={categoryData} dataKey="count" nameKey="category" outerRadius={90}>
-                    {categoryData.map((entry) => (
-                      <Cell
-                        key={entry.category}
-                        fill={
-                          {
-                            Chest: "#0df259",
-                            Back: "#22c55e",
-                            Legs: "#84cc16",
-                            Arms: "#16a34a",
-                            Shoulders: "#15803d",
-                            Core: "#15803d" 
-                          }[entry.category] || "#0df259"
-                        }
-                      />
+                  <ChartTooltip content={<ChartTooltipContent nameKey="muscleType" />} />
+                  <Pie data={muscleVolumeData} dataKey="volume" nameKey="muscleType" outerRadius={90}>
+                    {muscleVolumeData.map((entry) => (
+                      <Cell key={entry.muscleType} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <ChartLegend content={<ChartLegendContent nameKey="category" />} />
+                  <ChartLegend content={<ChartLegendContent nameKey="muscleType" />} />
                 </PieChart>
               </ChartContainer>
             </div>

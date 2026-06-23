@@ -40,7 +40,6 @@ export async function createWorkout({ formState }) {
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
-    durationMinutes: 1,
     sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
     reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
     weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),
@@ -91,7 +90,6 @@ export async function updateWorkout({ workoutId, formState }) {
   const payload = {
     workoutName: trimmedTitle,
     workoutDate: formState.date,
-    durationMinutes: 1,
     sets: exercises.reduce((sum, exercise) => sum + exercise.sets, 0),
     reps: exercises.reduce((sum, exercise) => sum + exercise.reps, 0),
     weightKg: exercises.reduce((max, exercise) => Math.max(max, exercise.weightKg), 0),

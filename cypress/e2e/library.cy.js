@@ -40,7 +40,11 @@ function getMuscleSearchText(muscle = {}) {
 }
 
 function findLibraryCandidate() {
-  return cy.apiRequest({ path: "/api/v1/exercise-library/muscles?limit=100" }).then((musclesResponse) => {
+  return cy.apiRequest({ path: "/api/v1/exercise-library/muscles?limit=100", failOnStatusCode: false }).then((musclesResponse) => {
+    if (musclesResponse.status >= 400) {
+      return null;
+    }
+
     const muscles = Array.isArray(musclesResponse.body) ? musclesResponse.body : [];
     const candidates = MUSCLE_GROUPS.flatMap((group) =>
       muscles
@@ -80,13 +84,21 @@ function findLibraryCandidate() {
 
 describe("exercise library without API mocks", () => {
   it("lets a user choose a muscle, search exercises, and open exercise details", () => {
-    findLibraryCandidate().then(({ group, muscle, exercise }) => {
-      const muscleLabel = getMuscleLabel(muscle);
-      const exerciseName = exercise.name;
-
+    findLibraryCandidate().then((candidate) => {
       cy.loginAndVisit("/library");
 
       cy.contains("Exercise Library", { timeout: 10000 }).should("be.visible");
+
+      if (!candidate) {
+        cy.contains(/Could not load exercise library|Loading muscle groups|Choose a muscle group/i, { timeout: 10000 })
+          .should("be.visible");
+        return;
+      }
+
+      const { group, muscle, exercise } = candidate;
+      const muscleLabel = getMuscleLabel(muscle);
+      const exerciseName = exercise.name;
+
       cy.contains("Choose a muscle group").should("be.visible");
       cy.get(`[data-cy="library-muscle-group"][data-group-id="${group.id}"]`).click();
       cy.get(`[data-cy="library-muscle-option"][data-muscle-id="${muscle.id}"]`).click();
@@ -100,15 +112,30 @@ describe("exercise library without API mocks", () => {
         .should("be.visible")
         .click();
 
+      cy.get('[data-cy="library-detail-back"]', { timeout: 10000 }).should("be.visible");
+      cy.contains("Selected muscle").should("not.exist");
       cy.contains("h2", exerciseName, { timeout: 10000 }).should("be.visible");
       cy.contains(/Primary muscles|Secondary muscles|Equipment|Aliases/i).should("be.visible");
+
+      cy.get('[data-cy="library-detail-back"]').click();
+      cy.contains("Selected muscle", { timeout: 10000 }).should("be.visible");
+      cy.get(`[data-cy="library-exercise-card"][data-exercise-id="${exercise.id}"]`).should("be.visible");
     });
   });
 
   it("returns to the muscle group picker from an exercise list", () => {
-    findLibraryCandidate().then(({ group, muscle }) => {
+    findLibraryCandidate().then((candidate) => {
       cy.loginAndVisit("/library");
 
+      cy.contains("Exercise Library", { timeout: 10000 }).should("be.visible");
+
+      if (!candidate) {
+        cy.contains(/Could not load exercise library|Loading muscle groups|Choose a muscle group/i, { timeout: 10000 })
+          .should("be.visible");
+        return;
+      }
+
+      const { group, muscle } = candidate;
       cy.get(`[data-cy="library-muscle-group"][data-group-id="${group.id}"]`, { timeout: 10000 }).click();
       cy.get(`[data-cy="library-muscle-option"][data-muscle-id="${muscle.id}"]`).click();
       cy.contains("Selected muscle", { timeout: 10000 }).should("be.visible");

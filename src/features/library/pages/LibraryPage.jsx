@@ -230,7 +230,7 @@ function ExerciseCard({ exercise, isSelected, onSelect }) {
   );
 }
 
-function ExerciseDetail({ exercise }) {
+function ExerciseDetail({ exercise, isLoading, error, onBack }) {
   if (!exercise) {
     return null;
   }
@@ -246,8 +246,24 @@ function ExerciseDetail({ exercise }) {
   const licenseLabel = [exercise.license?.shortName, exercise.licenseAuthor].filter(Boolean).join(" - ");
 
   return (
-    <Card className="border-primary/10 bg-card py-5">
-      <CardContent className="px-5">
+    <section className="min-h-[calc(100dvh-5rem)]">
+      <div className="sticky top-0 z-20 -mx-4 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <Button
+          type="button"
+          data-cy="library-detail-back"
+          onClick={onBack}
+          variant="secondary"
+          className="min-h-11 gap-2"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">←</span>
+          Back
+        </Button>
+      </div>
+
+      <div className="mx-auto max-w-5xl py-5 sm:py-6">
+      {isLoading ? <StatusMessage className="mb-4">Loading exercise details...</StatusMessage> : null}
+      {error ? <StatusMessage tone="error" className="mb-4">{error}</StatusMessage> : null}
+
       <div className="overflow-hidden rounded-xl border border-primary/10 bg-primary/5">
         {exercise.mainImage ? (
           <Image
@@ -364,22 +380,9 @@ function ExerciseDetail({ exercise }) {
         </div>
       ) : null}
 
-      {licenseLabel ? (
-        <div className="mt-5 rounded-lg border border-primary/10 bg-primary/5 p-3 text-xs text-primary/70">
-          <span className="font-bold uppercase tracking-wider">License</span>
-          <p className="mt-1">
-            {exercise.license?.url ? (
-              <a href={exercise.license.url} target="_blank" rel="noreferrer" className="underline decoration-primary/40">
-                {licenseLabel}
-              </a>
-            ) : (
-              licenseLabel
-            )}
-          </p>
-        </div>
-      ) : null}
-      </CardContent>
-    </Card>
+
+      </div>
+    </section>
   );
 }
 
@@ -396,6 +399,7 @@ export default function LibraryPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(true);
   const [error, setError] = useState("");
+  const [filterError, setFilterError] = useState("");
   const [detailError, setDetailError] = useState("");
 
   useEffect(() => {
@@ -407,8 +411,11 @@ export default function LibraryPage() {
         const muscles = await fetchExerciseLibraryReferences("muscles");
         if (!isMounted) return;
         setReferences({ muscles });
-      } catch {
-        if (isMounted) setReferences({ muscles: [] });
+        setFilterError("");
+      } catch (loadError) {
+        if (!isMounted) return;
+        setReferences({ muscles: [] });
+        setFilterError(loadError.message || "Could not load exercise filters.");
       } finally {
         if (isMounted) setIsLoadingFilters(false);
       }
@@ -530,8 +537,13 @@ export default function LibraryPage() {
         offset: exercises.length,
         muscleId: filters.muscleId,
       });
-      setExercises((current) => [...current, ...payload.results]);
-      setResultMeta({ count: exercises.length + payload.results.length, total: payload.total });
+      setExercises((current) => {
+        const existingIds = new Set(current.map((e) => e.id));
+        const newResults = payload.results.filter((e) => !existingIds.has(e.id));
+        const merged = [...current, ...newResults];
+        setResultMeta({ count: merged.length, total: payload.total });
+        return merged;
+      });
     } catch (loadError) {
       setError(loadError.message || "Could not load more exercises.");
     } finally {
@@ -547,6 +559,11 @@ export default function LibraryPage() {
         {!hasMuscleSelected ? (
           <Card className="mx-auto max-w-6xl border-primary/10 bg-card py-5">
             <CardContent className="px-5">
+              {filterError ? (
+                <StatusMessage tone="error" className="mb-4">
+                  {filterError}
+                </StatusMessage>
+              ) : null}
               <MuscleGroupPicker
                 muscles={references.muscles}
                 selectedMuscleId={filters.muscleId}
@@ -558,6 +575,13 @@ export default function LibraryPage() {
               />
             </CardContent>
           </Card>
+        ) : selectedExercise ? (
+          <ExerciseDetail
+            exercise={selectedExercise}
+            isLoading={isLoadingDetail}
+            error={detailError}
+            onBack={() => setSelectedExercise(null)}
+          />
         ) : (
           <div className="space-y-5">
             <Card className="border-primary/10 bg-card py-4">
@@ -574,6 +598,7 @@ export default function LibraryPage() {
                     <span className="text-xs font-bold uppercase tracking-wider text-primary/60">Search within this muscle</span>
                     <Input
                       value={query}
+                      maxLength={100}
                       onChange={(event) => {
                         setQuery(event.target.value);
                         setSelectedExercise(null);
@@ -590,7 +615,7 @@ export default function LibraryPage() {
               </CardContent>
             </Card>
 
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,440px)]">
+            <div>
               <section className="space-y-4">
                 {isLoading ? <StatusMessage>Loading exercise library...</StatusMessage> : null}
                 {error ? <StatusMessage tone="error">{error}</StatusMessage> : null}
@@ -620,12 +645,6 @@ export default function LibraryPage() {
                     {isLoadingMore ? "Loading..." : "Load More"}
                   </Button>
                 ) : null}
-              </section>
-
-              <section className="xl:sticky xl:top-28 xl:self-start">
-                {isLoadingDetail ? <StatusMessage className="mb-3">Loading exercise details...</StatusMessage> : null}
-                {detailError ? <StatusMessage tone="error" className="mb-3">{detailError}</StatusMessage> : null}
-                {selectedExercise ? <ExerciseDetail exercise={selectedExercise} /> : null}
               </section>
             </div>
           </div>

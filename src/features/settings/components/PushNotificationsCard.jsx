@@ -5,6 +5,7 @@ import { deleteWebPushSubscription, saveWebPushSubscription } from "@/features/n
 import {
   getBrowserNotificationPermission,
   getExistingWebPushSubscription,
+  isWebPushConfigured,
   isWebPushSupported,
   subscribeToWebPush,
   unsubscribeFromWebPush,
@@ -30,13 +31,18 @@ export default function PushNotificationsCard() {
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationError, setNotificationError] = useState("");
   const [isUpdatingNotifications, setIsUpdatingNotifications] = useState(false);
-  const pushSupported = isWebPushSupported();
+  const [pushSupported, setPushSupported] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPushState() {
-      if (!pushSupported) {
+      const nextPushSupported = isWebPushSupported();
+      if (!isMounted) return;
+
+      setPushSupported(nextPushSupported);
+
+      if (!nextPushSupported) {
         if (isMounted) {
           setNotificationPermission(getBrowserNotificationPermission());
           setPushSubscription(null);
@@ -62,11 +68,12 @@ export default function PushNotificationsCard() {
     return () => {
       isMounted = false;
     };
-  }, [pushSupported]);
+  }, []);
 
   const enableButtonLabel = (() => {
     if (isUpdatingNotifications) return "Updating...";
     if (pushSubscription) return "Notifications enabled";
+    if (!isWebPushConfigured()) return "Notifications unavailable";
     return "Enable push notifications";
   })();
 
@@ -144,7 +151,9 @@ export default function PushNotificationsCard() {
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-500 dark:border-white/10 dark:bg-background-dark dark:text-slate-400">
-        This uses web push for new live workout messages. Your server must also store and send push subscriptions for delivery to work.
+        {isWebPushConfigured()
+          ? "This uses web push for new live workout messages. Your server must also store and send push subscriptions for delivery to work."
+          : "Push notifications are disabled because this deployment does not define a web push public key."}
       </div>
 
       {notificationError ? <StatusMessage tone="error" className="text-left">{notificationError}</StatusMessage> : null}
@@ -154,7 +163,7 @@ export default function PushNotificationsCard() {
         <button
           type="button"
           onClick={enablePushNotifications}
-          disabled={isUpdatingNotifications || pushSubscription !== null || !pushSupported}
+          disabled={isUpdatingNotifications || pushSubscription !== null || !pushSupported || !isWebPushConfigured()}
           className="flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {enableButtonLabel}
