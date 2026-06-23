@@ -29,6 +29,32 @@ function emailsMatch(first = "", second = "") {
   return String(first).trim().toLowerCase() === String(second).trim().toLowerCase();
 }
 
+function mergeParticipants(currentParticipants = [], nextParticipants = []) {
+  const participantsByEmail = new Map();
+  currentParticipants.forEach((participant) => {
+    if (participant?.email) {
+      participantsByEmail.set(String(participant.email).toLowerCase(), participant);
+    }
+  });
+  nextParticipants.forEach((participant) => {
+    if (participant?.email) {
+      participantsByEmail.set(String(participant.email).toLowerCase(), participant);
+    }
+  });
+  return Array.from(participantsByEmail.values());
+}
+
+function mergeRoomEvent(currentRoom, event) {
+  if (!event?.room) return currentRoom;
+  if (!currentRoom || event.type === "USER_LEFT" || event.type === "ROOM_CLOSED") {
+    return event.room;
+  }
+  return {
+    ...event.room,
+    participants: mergeParticipants(currentRoom.participants, event.room.participants),
+  };
+}
+
 export default function LiveWorkoutRoomPage({ roomCode }) {
   const router = useRouter();
   const routeParams = useParams();
@@ -51,7 +77,7 @@ export default function LiveWorkoutRoomPage({ roomCode }) {
 
   const handleSocketEvent = useCallback((event) => {
     if (event?.room) {
-      setRoom(event.room);
+      setRoom((currentRoom) => mergeRoomEvent(currentRoom, event));
     }
     if (event?.type === "MESSAGE_SENT" && event.message) {
       setMessages((current) => {
