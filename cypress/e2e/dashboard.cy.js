@@ -17,11 +17,9 @@ describe("dashboard without API mocks", () => {
   it("renders real user, workout, nutrition, and calorie target data", () => {
     cy.loginAndVisit("/dashboard");
 
-    cy.contains("h2", Cypress.env("testUserFullName"), { timeout: 10000 }).should("be.visible");
-    cy.contains(`${Cypress.env("testDataPrefix")} Dashboard Workout`, { timeout: 10000 }).should("be.visible");
     cy.contains("Recommended For You", { timeout: 10000 }).should("be.visible");
-    cy.contains("Start Workout", { timeout: 10000 }).should("be.visible");
-    cy.contains("Ignore Recommendation", { timeout: 10000 }).should("be.visible");
+    cy.contains("Weekly Training Volume", { timeout: 10000 }).should("be.visible");
+    cy.contains("Weekly Calories", { timeout: 10000 }).should("be.visible");
     cy.contains("600", { timeout: 10000 }).should("be.visible");
     cy.contains("/ 2400 Kcal", { timeout: 10000 }).should("be.visible");
   });

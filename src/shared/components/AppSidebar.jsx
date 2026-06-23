@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
+import { RadioTower } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   ACTIVE_LIVE_WORKOUT_ROOM_CHANGED,
@@ -82,7 +83,7 @@ export default function AppSidebar() {
                   : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
               )}
             >
-              <span className="material-symbols-outlined text-[22px]">sensors</span>
+              <RadioTower className="size-[22px] shrink-0" aria-hidden="true" />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{activeRoom.workoutName || "Live Workout"}</span>
                 <span className="block text-xs font-semibold opacity-75">Room {activeRoom.roomCode}</span>
@@ -139,7 +140,7 @@ export default function AppSidebar() {
           href={activeRoomHref}
           className="fixed inset-x-3 bottom-[78px] z-50 mx-auto flex max-w-md items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary px-3 py-2 text-xs font-bold text-background shadow-xl shadow-slate-950/20 lg:hidden"
         >
-          <span className="material-symbols-outlined text-[18px]">sensors</span>
+          <RadioTower className="size-[18px] shrink-0" aria-hidden="true" />
           <span className="truncate">{activeRoom.workoutName || "Live Workout"}</span>
           <span className="shrink-0 opacity-80">{activeRoom.roomCode}</span>
         </Link>

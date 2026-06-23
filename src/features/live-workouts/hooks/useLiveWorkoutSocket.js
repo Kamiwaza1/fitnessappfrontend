@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { buildLiveWorkoutSocketUrl } from "@/features/live-workouts/utils/liveWorkoutSocketUrl";
-import { getAuthHeaders } from "@/shared/api/http";
 
 export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
   const clientRef = useRef(null);
@@ -16,10 +15,6 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
     const normalizedRoomCode = roomCode.toUpperCase();
     const client = new Client({
       webSocketFactory: () => new SockJS(buildLiveWorkoutSocketUrl()),
-      connectHeaders: getAuthHeaders(),
-      beforeConnect: () => {
-        client.connectHeaders = getAuthHeaders();
-      },
       reconnectDelay: 3000,
       onConnect: () => {
         setConnectionState("CONNECTED");
@@ -41,12 +36,12 @@ export function useLiveWorkoutSocket({ roomCode, enabled = true, onEvent }) {
       onWebSocketError: () => setConnectionState("ERROR"),
     });
 
-    const connectingTimeout = window.setTimeout(() => setConnectionState("CONNECTING"), 0);
+    const connectingTimeout = globalThis.setTimeout(() => setConnectionState("CONNECTING"), 0);
     clientRef.current = client;
     client.activate();
 
     return () => {
-      window.clearTimeout(connectingTimeout);
+      globalThis.clearTimeout(connectingTimeout);
       client.deactivate();
       clientRef.current = null;
     };

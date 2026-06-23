@@ -2,6 +2,10 @@ import { fetchAuthenticatedJson } from "@/shared/api/http";
 import { buildApiUrl } from "@/shared/api/apiBase";
 
 const NUTRITION_API_ENDPOINT = buildApiUrl("/api/v1/nutrition");
+const MAX_LIMIT = 100;
+const MAX_SEARCH_LENGTH = 100;
+const MAX_NOTES_LENGTH = 1000;
+const MAX_MEAL_NAME_LENGTH = 255;
 
 function getNutritionErrorMessage(error, fallbackMessage) {
   if (error?.status === 401 || error?.status === 403) {
@@ -18,6 +22,66 @@ function toNumber(value, fallback = 0) {
 
 function roundMacro(value) {
   return Math.max(0, Math.round(toNumber(value)));
+}
+
+function boundedInteger(value, fieldName, min, max) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    throw new Error(`${fieldName} must be between ${min} and ${max}.`);
+  }
+  return number;
+}
+
+function optionalBoundedInteger(value, fieldName, min, max) {
+  if (value === undefined || value === null || String(value).trim() === "") return undefined;
+  return boundedInteger(value, fieldName, min, max);
+}
+
+function boundedText(value, fieldName, min, max) {
+  const normalized = String(value ?? "").trim();
+  if (normalized.length < min || normalized.length > max) {
+    throw new Error(`${fieldName} must be between ${min} and ${max} characters.`);
+  }
+  return normalized;
+}
+
+function optionalText(value, fieldName, max) {
+  const normalized = String(value ?? "").trim();
+  if (normalized.length > max) {
+    throw new Error(`${fieldName} cannot be longer than ${max} characters.`);
+  }
+  return normalized;
+}
+
+function languageCode(value) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return undefined;
+  if (!/^[a-zA-Z]{2}$/.test(normalized)) {
+    throw new Error("Language must be a two-letter code.");
+  }
+  return normalized.toLowerCase();
+}
+
+function validateFoodSearchParams(query, { limit = 10, offset = 0, lang = "en" } = {}) {
+  return {
+    q: boundedText(query, "Search query", 2, MAX_SEARCH_LENGTH),
+    limit: optionalBoundedInteger(limit, "Limit", 1, MAX_LIMIT) ?? 10,
+    offset: optionalBoundedInteger(offset, "Offset", 0, Number.MAX_SAFE_INTEGER) ?? 0,
+    lang: languageCode(lang) || "en",
+  };
+}
+
+function validateNutritionPayload(formState) {
+  return {
+    mealName: boundedText(formState.mealName, "Meal name", 2, MAX_MEAL_NAME_LENGTH),
+    mealDate: boundedText(formState.mealDate, "Meal date", 1, 20),
+    calories: boundedInteger(roundMacro(formState.calories), "Calories", 1, 10000),
+    proteinGrams: boundedInteger(roundMacro(formState.proteinGrams), "Protein", 0, 1000),
+    carbsGrams: boundedInteger(roundMacro(formState.carbsGrams), "Carbs", 0, 1000),
+    fatGrams: boundedInteger(roundMacro(formState.fatGrams), "Fat", 0, 1000),
+    notes: optionalText(formState.notes, "Notes", MAX_NOTES_LENGTH),
+    category: formState.category,
+  };
 }
 
 export function normalizeNutritionEntry(entry = {}) {
@@ -71,11 +135,12 @@ export async function fetchNutritionEntries() {
 }
 
 export async function searchFoodProducts(query, { limit = 10, offset = 0, lang = "en" } = {}) {
+  const validParams = validateFoodSearchParams(query, { limit, offset, lang });
   const params = new URLSearchParams({
-    q: query,
-    limit: String(limit),
-    offset: String(offset),
-    lang,
+    q: validParams.q,
+    limit: String(validParams.limit),
+    offset: String(validParams.offset),
+    lang: validParams.lang,
     hasNutrition: "true",
   });
 
@@ -96,16 +161,7 @@ export async function searchFoodProducts(query, { limit = 10, offset = 0, lang =
 }
 
 function buildNutritionPayload(formState) {
-  return {
-    mealName: formState.mealName.trim(),
-    mealDate: formState.mealDate,
-    calories: roundMacro(formState.calories),
-    proteinGrams: roundMacro(formState.proteinGrams),
-    carbsGrams: roundMacro(formState.carbsGrams),
-    fatGrams: roundMacro(formState.fatGrams),
-    notes: formState.notes.trim(),
-    category: formState.category,
-  };
+  return validateNutritionPayload(formState);
 }
 
 export async function createNutritionEntry(formState) {
@@ -131,10 +187,7 @@ export async function updateNutritionEntry(entryId, formState) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        nutritionId: entryId,
-        ...buildNutritionPayload(formState),
-      }),
+      body: JSON.stringify(buildNutritionPayload(formState)),
     });
 
     return normalizeNutritionEntry(data?.nutrition || data?.data || data);

@@ -80,6 +80,9 @@ export default function WorkoutComposerForm({
                 value={formState.category}
                 onChange={(event) => onChange("category", event.target.value)}
               >
+                <option value="" disabled>
+                  Select category
+                </option>
                 <option value="GENERAL">General</option>
                 <option value="STRENGTH">Strength</option>
                 <option value="CARDIO">Cardio</option>
@@ -133,7 +136,11 @@ export default function WorkoutComposerForm({
                   <button
                     type="button"
                     className="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => onRemoveExercise(index)}
+                    onClick={() => {
+                      if (window.confirm(`Remove exercise ${index + 1}?`)) {
+                        onRemoveExercise(index);
+                      }
+                    }}
                     disabled={exercises.length <= 1}
                   >
                     Remove
@@ -156,6 +163,9 @@ export default function WorkoutComposerForm({
 	                      value={exercise.muscleType}
 	                      onChange={(event) => onExerciseChange(index, "muscleType", event.target.value)}
 	                    >
+                        <option value="" disabled>
+                          Select muscle type
+                        </option>
 	                      {muscleOptions.map(([value, label]) => (
 	                        <option key={value} value={value}>
 	                          {label}

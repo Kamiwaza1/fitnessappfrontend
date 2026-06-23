@@ -2,6 +2,8 @@ import { buildApiUrl } from "@/shared/api/apiBase";
 import { fetchAuthenticatedJson } from "@/shared/api/http";
 
 const EXERCISE_LIBRARY_ENDPOINT = buildApiUrl("/api/v1/exercise-library");
+const MAX_QUERY_LENGTH = 100;
+const MAX_LIMIT = 100;
 
 function getExerciseLibraryErrorMessage(error, fallbackMessage) {
   if (error?.status === 401 || error?.status === 403) {
@@ -9,6 +11,60 @@ function getExerciseLibraryErrorMessage(error, fallbackMessage) {
   }
 
   return error?.data?.message || error?.message || fallbackMessage;
+}
+
+function optionalTrimmedText(value, fieldName, maxLength = MAX_QUERY_LENGTH) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return "";
+  if (normalized.length > maxLength) {
+    throw new Error(`${fieldName} cannot be longer than ${maxLength} characters.`);
+  }
+  return normalized;
+}
+
+function positiveInteger(value, fieldName, { required = false, min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  if (value === undefined || value === null || String(value).trim() === "") {
+    if (required) throw new Error(`${fieldName} is required.`);
+    return undefined;
+  }
+
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    throw new Error(`${fieldName} must be between ${min} and ${max}.`);
+  }
+  return number;
+}
+
+function nonNegativeInteger(value, fieldName) {
+  if (value === undefined || value === null || String(value).trim() === "") return undefined;
+
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 0) {
+    throw new Error(`${fieldName} must be at least 0.`);
+  }
+  return number;
+}
+
+function validateSearchParams(params = {}) {
+  return {
+    q: optionalTrimmedText(params.q, "Search query"),
+    limit: positiveInteger(params.limit, "Limit", { max: MAX_LIMIT }),
+    offset: nonNegativeInteger(params.offset, "Offset"),
+    muscleId: positiveInteger(params.muscleId, "Muscle ID"),
+    equipmentId: positiveInteger(params.equipmentId, "Equipment ID"),
+    categoryId: positiveInteger(params.categoryId, "Category ID"),
+  };
+}
+
+function validateReferenceParams(params = {}) {
+  return {
+    limit: positiveInteger(params.limit, "Limit", { max: MAX_LIMIT }),
+    offset: nonNegativeInteger(params.offset, "Offset"),
+  };
+}
+
+function validateExerciseId(exerciseId) {
+  return positiveInteger(exerciseId, "Exercise ID", { required: true });
 }
 
 function normalizeReference(reference = null) {
@@ -95,7 +151,7 @@ function buildQuery(params = {}) {
 }
 
 export async function searchExerciseLibrary(params = {}) {
-  const query = buildQuery({ limit: undefined, ...params });
+  const query = buildQuery(validateSearchParams({ limit: undefined, ...params }));
 
   try {
     const payload = await fetchAuthenticatedJson(
@@ -115,7 +171,7 @@ export async function searchExerciseLibrary(params = {}) {
 }
 
 export async function fetchExerciseLibraryReferences(type, params = {}) {
-  const query = buildQuery({ limit: 100, ...params });
+  const query = buildQuery(validateReferenceParams({ limit: 100, ...params }));
 
   try {
     const payload = await fetchAuthenticatedJson(
@@ -132,8 +188,9 @@ export async function fetchExerciseLibraryReferences(type, params = {}) {
 }
 
 export async function fetchExerciseLibraryItem(exerciseId) {
+  const validExerciseId = validateExerciseId(exerciseId);
   try {
-    const payload = await fetchAuthenticatedJson(`${EXERCISE_LIBRARY_ENDPOINT}/exercises/${exerciseId}`, {
+    const payload = await fetchAuthenticatedJson(`${EXERCISE_LIBRARY_ENDPOINT}/exercises/${validExerciseId}`, {
       method: "GET",
     });
 

@@ -15,7 +15,8 @@ describe("auth without API mocks", () => {
     cy.contains("button", /Login|Sign In/).click();
 
     cy.location("pathname", { timeout: 10000 }).should("eq", "/dashboard");
-    cy.contains("h2", Cypress.env("testUserFullName"), { timeout: 10000 }).should("be.visible");
+    cy.contains("Recommended For You", { timeout: 10000 }).should("be.visible");
+    cy.contains("Weekly Training Volume", { timeout: 10000 }).should("be.visible");
   });
 
   it("shows an error for invalid credentials", () => {

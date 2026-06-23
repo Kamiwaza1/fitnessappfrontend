@@ -8,13 +8,13 @@ import { validateWorkoutForm } from "@/features/workouts/utils/workoutValidation
 const initialFormState = () => ({
   title: "",
   description: "",
-  category: "GENERAL",
+  category: "",
   date: getTodayIsoDate(),
   exercises: [
     {
       name: "",
-      muscleType: "FULL_BODY",
-      sets: "3",
+      muscleType: "",
+      sets: "",
     },
   ],
 });
@@ -37,20 +37,20 @@ export function useWorkoutComposer({ onWorkoutCreated }) {
     setFormState({
       title: workout.title || "",
       description: workout.description || workout.goal || "",
-      category: workout.category || "GENERAL",
+      category: workout.category || "",
       date: workout.workoutDate || workout.date || getTodayIsoDate(),
       exercises:
         Array.isArray(workout.exercises) && workout.exercises.length > 0
           ? workout.exercises.map((exercise) => ({
               name: exercise.name || "",
-              muscleType: exercise.muscleType || "FULL_BODY",
-              sets: String(exercise.sets ?? "3"),
+              muscleType: exercise.muscleType || "",
+              sets: String(exercise.sets ?? ""),
             }))
           : [
               {
                 name: workout.title || "",
-                muscleType: workout.muscleType || "FULL_BODY",
-                sets: String(workout.sets || "3"),
+                muscleType: workout.muscleType || "",
+                sets: String(workout.sets || ""),
               },
             ],
     });

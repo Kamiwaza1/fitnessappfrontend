@@ -66,53 +66,11 @@ function getFormFromProduct(product, date, category = "GENERAL") {
   };
 }
 
-function extractNumber(text, patterns) {
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match?.[1]) return String(round(match[1].replace(",", ".")));
-  }
-
-  return "";
-}
-
-function getFormFromOcrText(text, date) {
-  const normalizedText = text.replace(/\s+/g, " ").trim();
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const likelyName = lines.find((line) => /[a-zA-Z]{3,}/.test(line) && !/\d/.test(line)) || lines[0] || "";
-
-  return {
-    mealName: likelyName.slice(0, 80),
-    mealDate: date,
-    calories: extractNumber(normalizedText, [
-      /(?:calories|kcal|energy)\D{0,16}(\d+(?:[.,]\d+)?)/i,
-      /(\d+(?:[.,]\d+)?)\s*(?:kcal|calories)/i,
-    ]),
-    proteinGrams: extractNumber(normalizedText, [
-      /protein\D{0,16}(\d+(?:[.,]\d+)?)/i,
-      /(\d+(?:[.,]\d+)?)\s*g\s*protein/i,
-    ]),
-    carbsGrams: extractNumber(normalizedText, [
-      /(?:carbohydrate|carbs?)\D{0,16}(\d+(?:[.,]\d+)?)/i,
-      /(\d+(?:[.,]\d+)?)\s*g\s*(?:carbohydrate|carbs?)/i,
-    ]),
-    fatGrams: extractNumber(normalizedText, [
-      /(?:total\s+fat|fat)\D{0,16}(\d+(?:[.,]\d+)?)/i,
-      /(\d+(?:[.,]\d+)?)\s*g\s*(?:total\s+fat|fat)/i,
-    ]),
-    notes: normalizedText,
-    category: "GENERAL",
-  };
-}
-
 function SegmentedControl({ value, onChange }) {
   return (
-    <div className="grid grid-cols-3 rounded-lg bg-slate-100 p-1 text-xs font-bold uppercase tracking-wider dark:bg-background-dark">
+    <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-xs font-bold uppercase tracking-wider dark:bg-background-dark">
       {[
         ["manual", "Manual", "edit_note"],
-        ["ocr", "OCR", "document_scanner"],
         ["database", "Foods", "search"],
       ].map(([mode, label]) => (
         <button
@@ -146,7 +104,6 @@ function NutritionForm({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold">{editingEntryId ? "Edit food" : "Manual input"}</h2>
-          <p className="text-xs text-slate-500">Enter nutrition values and save them to the diary.</p>
         </div>
         {editingEntryId ? (
           <button
@@ -259,128 +216,19 @@ function NutritionForm({
   );
 }
 
-function OcrScanner({ selectedDate, isLocked, onApplyScan }) {
-  const [imagePreview, setImagePreview] = useState("");
-  const [ocrText, setOcrText] = useState("");
-  const [scanError, setScanError] = useState("");
-  const [isScanning, setIsScanning] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  const handleFileChange = (event) => {
-    const file = event.target.files?.[0];
-    setSelectedFile(file || null);
-    setOcrText("");
-    setScanError("");
-
-    if (!file) {
-      setImagePreview("");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => setImagePreview(typeof reader.result === "string" ? reader.result : "");
-    reader.readAsDataURL(file);
-  };
-
-  const scanImage = async () => {
-    if (isLocked) {
-      setScanError("Past days are locked.");
-      return;
-    }
-    if (!selectedFile) {
-      setScanError("Choose an image first.");
-      return;
-    }
-
-    setIsScanning(true);
-    setScanError("");
-
-    try {
-      const { recognize } = await import("tesseract.js");
-      const result = await recognize(selectedFile, "eng");
-      const text = result?.data?.text?.trim() || "";
-      setOcrText(text);
-
-      const parsedForm = getFormFromOcrText(text, selectedDate);
-      onApplyScan(parsedForm);
-    } catch (error) {
-      setScanError(error?.message || "Could not read this image.");
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">OCR scanner</h2>
-        <p className="text-xs text-slate-500">Scan a nutrition label or receipt image, then review the filled form.</p>
-      </div>
-
-      <label className={`flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors dark:border-white/10 dark:bg-background-dark ${
-        isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary"
-      }`}>
-        {imagePreview ? (
-          <Image
-            src={imagePreview}
-            alt=""
-            width={320}
-            height={176}
-            unoptimized
-            className="max-h-44 rounded-lg object-contain"
-          />
-        ) : (
-          <>
-            <span className="material-icons text-4xl text-primary">document_scanner</span>
-            <span className="mt-2 text-sm font-bold">Choose or capture image</span>
-            <span className="mt-1 text-xs text-slate-500">JPG, PNG, HEIC if your browser supports it</span>
-          </>
-        )}
-        <input
-          accept="image/*"
-          capture="environment"
-          type="file"
-          className="sr-only"
-          disabled={isLocked}
-          onChange={handleFileChange}
-        />
-      </label>
-
-      <button
-        type="button"
-        onClick={scanImage}
-        disabled={isLocked || isScanning || !selectedFile}
-        className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isScanning ? "Scanning..." : "Scan image"}
-      </button>
-
-      {scanError ? <StatusMessage tone="error">{scanError}</StatusMessage> : null}
-
-      {ocrText ? (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-background-dark">
-          <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Detected text</div>
-          <p className="max-h-36 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-            {ocrText}
-          </p>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function FoodSearchPanel({ query, onQueryChange, results, isSearching, searchError, isLocked, onSelectProduct }) {
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-bold">Food database</h2>
-        <p className="text-xs text-slate-500">Search products and use their nutrition values as an entry.</p>
       </div>
       <div className="relative">
         <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">search</span>
         <input
           value={query}
           disabled={isLocked}
+          minLength={2}
+          maxLength={100}
           onChange={(event) => onQueryChange(event.target.value)}
           className="w-full rounded-lg border border-transparent bg-slate-100 py-3 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-background-dark"
           aria-label="Search foods database"
@@ -440,7 +288,6 @@ function InputPanel({
   editingEntryId,
   isSubmitting,
   submitError,
-  selectedDate,
   searchQuery,
   searchResults,
   isSearching,
@@ -450,7 +297,6 @@ function InputPanel({
   onFormChange,
   onSubmit,
   onCancel,
-  onApplyScan,
   onSearchChange,
   onSelectProduct,
 }) {
@@ -479,8 +325,6 @@ function InputPanel({
             onCancel={onCancel}
           />
         ) : null}
-
-        {mode === "ocr" ? <OcrScanner selectedDate={selectedDate} isLocked={isLocked} onApplyScan={onApplyScan} /> : null}
 
         {mode === "database" ? (
           <FoodSearchPanel
@@ -692,21 +536,6 @@ export default function NutritionPage() {
     setInputMode("manual");
   };
 
-  const applyOcrScan = (nextFormState) => {
-    if (selectedDateIsPast) {
-      setSubmitError("Food cannot be added to a past day.");
-      return;
-    }
-    setEditingEntryId(null);
-    setFormState({
-      ...emptyForm(selectedDate),
-      ...nextFormState,
-      mealDate: selectedDate,
-    });
-    setSubmitError("");
-    setInputMode("manual");
-  };
-
   const submitEntry = async (event) => {
     event.preventDefault();
     if (isPastIsoDate(formState.mealDate)) {
@@ -740,6 +569,9 @@ export default function NutritionPage() {
   const deleteEntry = async (entry) => {
     if (isPastIsoDate(entry.mealDate || selectedDate)) {
       window.alert("Past nutrition entries cannot be changed.");
+      return;
+    }
+    if (!window.confirm(`Delete ${entry.mealName || "this nutrition entry"}?`)) {
       return;
     }
     try {
@@ -791,9 +623,9 @@ export default function NutritionPage() {
             <button
               onClick={() => shiftDate(-1)}
               aria-label="Previous day"
-              className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-primary/10 px-3 py-2 text-xl font-bold text-primary transition-colors hover:bg-primary/20"
             >
-              Previous
+              <span aria-hidden="true">&lt;</span>
             </button>
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold leading-none text-slate-900 dark:text-white">Food Diary</h1>
@@ -804,9 +636,9 @@ export default function NutritionPage() {
             <button
               onClick={() => shiftDate(1)}
               aria-label="Next day"
-              className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-primary/10 px-3 py-2 text-xl font-bold text-primary transition-colors hover:bg-primary/20"
             >
-              Next
+              <span aria-hidden="true">&gt;</span>
             </button>
           </div>
 
@@ -860,7 +692,6 @@ export default function NutritionPage() {
               editingEntryId={editingEntryId}
               isSubmitting={isSubmitting}
               submitError={submitError}
-              selectedDate={selectedDate}
               searchQuery={searchQuery}
               searchResults={searchResults}
               isSearching={isSearching}
@@ -870,7 +701,6 @@ export default function NutritionPage() {
               onFormChange={(field, value) => setFormState((current) => ({ ...current, [field]: value }))}
               onSubmit={submitEntry}
               onCancel={resetForm}
-              onApplyScan={applyOcrScan}
               onSearchChange={handleSearchChange}
               onSelectProduct={selectProduct}
             />

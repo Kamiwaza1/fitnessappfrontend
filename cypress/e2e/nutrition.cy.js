@@ -29,8 +29,21 @@ describe("nutrition without API mocks", () => {
     cy.contains("button", "Update food").click();
     cy.contains(updatedMeal, { timeout: 10000 }).should("be.visible");
 
+    cy.on("window:confirm", (message) => {
+      expect(message).to.contain(updatedMeal);
+      return true;
+    });
     cy.findByAriaLabelFallback(`Delete ${updatedMeal}`).click();
     cy.contains(updatedMeal).should("not.exist");
+  });
+
+  it("does not render the removed OCR input panel", () => {
+    cy.contains("button", "Manual").should("be.visible");
+    cy.contains("button", "Foods").should("be.visible");
+    cy.contains("button", "OCR").should("not.exist");
+    cy.contains("OCR scanner").should("not.exist");
+    cy.contains("Scan image").should("not.exist");
+    cy.get('input[type="file"]').should("not.exist");
   });
 
   it("uses the real food search endpoint", () => {

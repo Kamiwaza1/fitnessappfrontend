@@ -11,15 +11,7 @@ export default function WorkoutHistoriesPage() {
     <AppPageShell mainClassName="relative flex min-h-dvh flex-col">
       <section className="custom-scrollbar flex-1 p-4 pb-6 sm:p-8">
         <div className="mx-auto max-w-5xl">
-          <header className="mb-6 rounded-2xl border border-primary/10 bg-background-light p-5 sm:p-6 dark:bg-background-dark/40">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">
-              Workout History
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight">Workout Histories</h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Completed sessions from your backend history will appear here.
-            </p>
-          </header>
+          
 
           <div className="rounded-2xl border border-primary/10 bg-background-light p-5 sm:p-6 dark:bg-background-dark/40">
             <div className="mb-5 flex items-center justify-between">
@@ -52,7 +44,7 @@ export default function WorkoutHistoriesPage() {
             {!isLoading && !error && workoutHistories.length > 0 ? (
               <div className="space-y-3">
                 {workoutHistories.map((history) => (
-                  <article key={history.id} className="rounded-xl border border-primary/15 bg-slate-950/40 p-4">
+                  <article key={history.id} className="rounded-xl border border-primary/15 bg-slate-959/40 p-4">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                       <h3 className="text-base font-bold">{history.title}</h3>
                       <span className="rounded bg-primary/15 px-2 py-1 text-[11px] uppercase tracking-widest text-primary">

@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import AppPageShell from "@/shared/components/AppPageShell";
-import { formatLongDate, toIsoLocalDate } from "@/shared/utils/date";
+import { toIsoLocalDate } from "@/shared/utils/date";
 import { useWorkoutList } from "@/features/workouts/hooks/useWorkoutList";
 import { useActiveWorkoutSession } from "@/features/workouts/hooks/useActiveWorkoutSession";
-import { useAuth } from "@/context/AuthContext";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { fetchNutritionEntries } from "@/features/nutrition/api/nutritionApi";
 import { fetchCurrentUser } from "@/features/settings/api/userApi";
 import { saveCalorieTarget, useCalorieTarget } from "@/features/settings/utils/calorieTargetStorage";
@@ -19,10 +16,19 @@ import {
   startRecommendedWorkout,
 } from "@/features/recommendations/api/recommendationsApi";
 
+const DashboardCharts = dynamic(() => import("@/features/dashboard/components/DashboardCharts"), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="h-56 animate-pulse rounded-xl border border-primary/10 bg-background-light dark:bg-white/5" />
+      <div className="h-56 animate-pulse rounded-xl border border-primary/10 bg-background-light dark:bg-white/5" />
+    </div>
+  ),
+});
+
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { workouts, isLoading, error } = useWorkoutList();
+  const { workouts } = useWorkoutList();
   const workoutSession = useActiveWorkoutSession();
   const [nutritionEntries, setNutritionEntries] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -30,17 +36,6 @@ export default function DashboardPage() {
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
   const [busyRecommendationId, setBusyRecommendationId] = useState("");
   const calorieTarget = useCalorieTarget();
-  const todayWorkout = workouts.find((workout) => workout.workoutDate === toIsoLocalDate());
-  const displayName = user?.fullName;
-
-  const goalTitle = isLoading ? "SYNCING..." : todayWorkout ? "WORKOUT DAY" : "REST DAY";
-  const goalSubtitle = isLoading
-    ? "Checking your workout schedule..."
-    : error
-      ? error
-      : todayWorkout
-        ? `Today: ${todayWorkout.name}`
-        : "No active workout scheduled.";
   const weeklyDurationData = useMemo(() => {
     const now = new Date();
     const days = Array.from({ length: 7 }, (_, index) => {
@@ -182,26 +177,9 @@ export default function DashboardPage() {
 
   return (
     <AppPageShell mainClassName="min-h-dvh">
-      <header className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="min-w-0">
-          <h2 className="text-2xl font-bold sm:text-3xl">
-            Welcome back, <span className="text-primary">{displayName}</span>
-          </h2>
-          <p className="mt-1 text-slate-400">Ready to crush your session today?</p>
-        </div>
-        <div className="flex items-center justify-between gap-4 sm:justify-end">
-          <div className="hidden text-right sm:block">
-            <p suppressHydrationWarning className="text-xs uppercase tracking-widest text-slate-400">
-              {new Date().toLocaleDateString("en-US", { weekday: "long" })}
-            </p>
-            <p suppressHydrationWarning className="font-bold">{formatLongDate(new Date())}</p>
-          </div>
-        </div>
-      </header>
-
       <div className="space-y-4 px-4 pb-6 sm:px-5">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="grid grid-cols-1 gap-3 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5 md:grid-cols-2 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3 rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5 md:grid-cols-2">
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="relative h-32 w-32">
                 <svg className="h-full w-full -rotate-90 transform">
@@ -266,45 +244,6 @@ export default function DashboardPage() {
               </div>
               <p className="text-center font-bold">Daily Protein</p>
             </div>
-          </div>
-
-          <div className="relative flex flex-col justify-between overflow-hidden rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
-            <div className="pointer-events-none absolute -right-4 -top-4 rotate-12 transform text-primary/10">
-              <span className="material-icons text-9xl">fitness_center</span>
-            </div>
-            <div>
-              <span className="rounded bg-primary/20 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-                Today&apos;s Goal
-              </span>
-              <h3 className="mt-3 text-2xl font-extrabold italic">{goalTitle}</h3>
-              <p className="mt-2 text-slate-400">{goalSubtitle}</p>
-              <div className="mt-4 flex items-center space-x-4 text-sm font-medium">
-                {todayWorkout ? (
-                  <>
-                    {todayWorkout.durationMinutes ? (
-                      <span className="inline-flex items-center space-x-1 text-primary">
-                        <span className="material-icons text-base">schedule</span>
-                        <span>{todayWorkout.durationMinutes} min</span>
-                      </span>
-                    ) : null}
-                    <span className="inline-flex items-center space-x-1 text-slate-300">
-                      <span className="material-icons text-base">event</span>
-                      <span>{workouts.length} scheduled</span>
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-slate-500">
-                    {isLoading ? "Syncing workouts..." : `${workouts.length} scheduled`}
-                  </span>
-                )}
-              </div>
-            </div>
-            <Link
-              href="/workouts"
-              className="mt-4 flex w-full items-center justify-center space-x-2 rounded-lg bg-primary py-2.5 font-bold text-background transition-all hover:bg-primary/90"
-            >
-              <span>{todayWorkout ? "OPEN WORKOUT" : "PLAN WORKOUT"}</span>
-            </Link>
           </div>
         </div>
 
@@ -376,63 +315,7 @@ export default function DashboardPage() {
           ) : null}
         </section>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
-                Weekly Training Volume
-              </h3>
-              <span className="material-icons cursor-pointer text-primary">bar_chart</span>
-            </div>
-            <div className="h-40">
-              <ChartContainer
-                className="h-40 w-full"
-                config={{ minutes: { label: "Minutes", color: "#0df259" } }}
-              >
-                <BarChart data={weeklyDurationData}>
-                  <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.2)" />
-                  <XAxis dataKey="day" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} width={28} />
-                  <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                  <Bar dataKey="minutes" fill="var(--color-minutes)" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-xl border border-primary/10 bg-background-light p-4 dark:bg-white/5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
-                Weekly Calories
-              </h3>
-              <div className="flex space-x-4">
-                <span className="text-xs font-bold text-primary">
-                  {weeklyNutritionData.reduce((sum, day) => sum + day.calories, 0)} kcal
-                </span>
-              </div>
-            </div>
-            <div className="h-40">
-              <ChartContainer
-                className="h-40 w-full"
-                config={{ calories: { label: "Calories", color: "#0df259" } }}
-              >
-                <LineChart data={weeklyNutritionData}>
-                  <CartesianGrid vertical={false} stroke="rgba(148,163,184,0.2)" />
-                  <XAxis dataKey="day" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} width={28} />
-                  <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-                  <Line
-                    type="monotone"
-                    dataKey="calories"
-                    stroke="var(--color-calories)"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "var(--color-calories)" }}
-                  />
-                </LineChart>
-              </ChartContainer>
-            </div>
-          </div>
-        </div>
+        <DashboardCharts weeklyDurationData={weeklyDurationData} weeklyNutritionData={weeklyNutritionData} />
       </div>
     </AppPageShell>
   );
